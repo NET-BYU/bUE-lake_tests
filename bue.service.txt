@@ -1,0 +1,11 @@
+[Unit]
+Description=Service to activate bUE python script upon runtime.
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/path/to/uw_env/lake_tests
+ExecStart=/path/to/uw_env/.venv/bin/python3 /path/to/uw_env/lake_tests/bue_main.py
+
+[Install]
+WantedBy=multi-user.target

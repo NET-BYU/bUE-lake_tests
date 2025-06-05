@@ -1,0 +1,14 @@
+[Unit]
+Description=LoRa protcol for bUE to communicate with base station
+After=network.target
+
+[Service]
+ExecStart=/home/admin/uwenv/bin/python /home/admin/lake_tests/bue_main.py
+WorkingDirectory=/home/admin/lake_tests
+Restart=always
+User=root
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

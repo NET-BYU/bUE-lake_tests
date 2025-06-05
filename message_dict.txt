@@ -1,0 +1,99 @@
+A helpful dictionary of messages that can be sent or received during a bUE mission time.
+
+When sending a message, you should pass this to the AT command terminal:
+    AT+SEND=<recv address>,<payload length>,<MESSAGE TYPE><:BODY (optional)>
+On the receiver side, you will see the incoming message as
+    +RCV=<sndr address>,<payload length>,<MESSAGE TYPE><:BODY (optional)>,<RSSI>,<SNR>
+
+In python, these are done in the following way:
+    Sending a message:      self.ota.send_ota_message(<recv address>, "<MESSAGE TYPE><:BODY (optional)>")
+    Receiving a message:    new_messages = self.ota.get_new_messages()
+                            ^ becomes a list of messages of form "+RCV=<sndr address>,<payload length>,<MESSAGE TYPE><:BODY (optional)>,<RSSI>,<SNR>"
+
+In the example for each of the messages, assume the bUE has an OTA id of 5, and the base station has an OTA id of 10.
+
+REQ:
+    Direction: bUE -> base
+    Meaning: The bUE is requesting that it join the OTA network. It is broadcast over the ota, so it sends to address 0
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(0, "REQ")
+    Response: The base station will respond with a CON message
+
+CON:
+    Direction: base -> bUE
+    Meaning: The base station is confirming that the bUE has joined the OTA network while transmitting its own .
+    Body: base station id
+    Example: (base_station_main.py) self.ota.send_ota_message(5, "CON:10")
+    Response: The bUE will respond with a ACK message
+
+ACK:
+    Direction: bUE -> base
+    Meaning: The bUE lets the base station know that it has received the connect message
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(10, "ACK")
+    Response: None
+
+PING:
+    Direction: bUE -> base
+    Meaning: The bUE periodically pings the base station
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(10, "PING")
+    Response: The base station will respond with a PINGR. If too much time passes between PINGR's, the bUE knows it has become disconnected from the network.
+
+PINGR:
+    Direction: base -> bUE
+    Meaning: The base station is responding to the PING. If both PING and PINGR occur regularly, the bUE is connected to the base station.
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(5, "PINGR")
+    Response: None
+TEST:
+    Direction: base -> bUE
+    Meaning: The base station sends a UTW test configuration, a role, and a start time in unix epoch time (all ints).
+    Body: <configuration>.<role>.<starttime>
+    Example: (bue_main.py) self.ota.send_ota_message(5, "TESTC:0.1.1745004290")
+    Response: The bUE will respond with a TESTR, confirming that it has received the test 
+
+FAIL: 
+    Direction: bUE -> base
+    Meaning: The bUE receieved a TEST from the base station, but there was something wrong with it, and the test will not run
+    Body: TBH (possibly the reason why there was a failure)
+    Example: (bue_main.py) self.ota.send_ota_message(10, "FAIL:BAD_CONFIG")
+    Response: None
+
+CANC:
+    Direction: base -> bUE
+    Meaning: If the user needs to terminate a test for any reason, they can send this while the bUE is in the test state.
+             If the bUE is in any other state it should have no effect
+    Body: None
+    Example: (base_station_main.py) self.send_ota_message(5, "CANC")
+    Response: None (bUE should start sending PINGs again)
+
+
+PREPR:
+    Direction: bUE -> base
+    Meaning: The bUE lets the base station know that it has received the UTW test message and confirms the start time
+    Body: <starttime>
+    Example: (bue_main.py) self.ota.send_ota_message(10, "TESTR:1745004290")
+    Response: None
+
+BEGIN:
+    Direction: bUE -> base
+    Meaning: The bUE lets the base station know that it has begun its UTW test
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(10, "BEGIN")
+    Response: None
+
+UPD:
+    Direction: bUE -> base
+    Meaning: The bUE sends an update on the UTW test; TBD (could be any time a UTW message is received, or just a periodic update)
+    Body: TBD
+    Example: (bue_main.py) self.ota.send_ota_message(10, "UPD:<body>")
+    Response: None
+
+DONE:
+    Direction: bUE -> base
+    Meaning: The bUE lets the base station know that it has finished its UTW test; it will now enter the idle state and send pings again.
+    Body: None
+    Example: (bue_main.py) self.ota.send_ota_message(10, "DONE")
+    Response: None
+

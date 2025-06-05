@@ -1,0 +1,1170 @@
+2025-05-23 12:42:56.388 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_12-42-56
+2025-05-23 12:42:56.389 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 12:42:56.389 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 12:42:56.389 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 12:42:56.389 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 12:42:56.393 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 12:42:56.408 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 12:43:05.903 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 13:52:33.223 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-52-33
+2025-05-23 13:52:33.223 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:52:33.223 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 13:52:33.224 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:52:33.224 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:53:14.037 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-53-14
+2025-05-23 13:53:14.037 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:53:14.038 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 13:53:14.038 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:53:14.038 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:53:14.043 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 13:53:14.059 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 13:53:17.562 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 13:53:17.562 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 13:53:29.334 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 13:53:29.385 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:53:39.410 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:53:40.387 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:53:49.360 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:53:51.630 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:53:59.354 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 13:53:59.380 | INFO     | __main__:test_handler:217 - helloworld.py completed successfully.
+2025-05-23 13:53:59.401 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 13:54:10.496 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:54:17.728 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 13:54:20.565 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-54-20
+2025-05-23 13:54:20.566 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:54:20.566 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 13:54:20.566 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:54:20.566 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:54:20.570 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 13:54:20.591 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 13:54:28.046 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 13:54:28.057 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 13:54:39.255 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 13:54:39.296 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:54:49.291 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:54:50.561 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:54:59.300 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:55:01.942 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:55:09.487 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 13:55:09.503 | INFO     | __main__:test_handler:217 - helloworld.py completed successfully.
+2025-05-23 13:55:09.527 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 13:55:20.704 | ERROR    | __main__:ota_idle_ping:168 - Unknown message type: 002:+ERR=10
+2025-05-23 13:55:32.105 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 13:55:43.432 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 13:55:43.479 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 13:55:45.308 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-55-45
+2025-05-23 13:55:45.309 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:55:45.309 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 13:55:45.309 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:55:45.309 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:55:45.313 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 13:55:45.329 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 13:56:40.001 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 13:56:41.964 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-56-41
+2025-05-23 13:56:41.965 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:56:41.965 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 13:56:41.965 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:56:41.965 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:56:48.273 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_13-56-48
+2025-05-23 13:56:48.273 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 13:56:48.274 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 13:56:48.274 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 13:56:48.274 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 13:56:48.279 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 13:56:48.290 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 13:57:01.016 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 13:57:01.026 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 13:57:23.754 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:57:35.021 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:57:46.071 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:57:57.252 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:57:57.289 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 13:57:57.326 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:58:07.326 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:58:08.421 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:58:17.347 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 13:58:19.760 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 13:58:27.314 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 13:58:27.325 | INFO     | __main__:test_handler:217 - helloworld.py completed successfully.
+2025-05-23 13:58:27.351 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 13:58:38.931 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:58:50.166 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:01.023 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:12.616 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:23.830 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:35.134 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:46.127 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 13:59:57.604 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:00:02.862 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 14:00:04.098 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_14-00-04
+2025-05-23 14:00:04.098 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:00:04.098 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:00:04.099 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:00:04.099 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:00:04.102 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:00:04.118 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:00:06.508 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:00:06.513 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:00:18.002 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:00:18.054 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:00:28.047 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:00:29.318 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:00:38.042 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:00:40.450 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:00:48.102 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 14:00:48.123 | INFO     | __main__:test_handler:217 - helloworld.py completed successfully.
+2025-05-23 14:00:48.159 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:00:59.473 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:01:10.300 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:01:21.422 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:01:32.236 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:01:37.742 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 14:01:44.900 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_14-01-44
+2025-05-23 14:01:44.901 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:01:44.901 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:01:44.901 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:01:44.901 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:01:44.905 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:01:44.915 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:01:47.240 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:01:47.246 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:02:10.298 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:02:10.329 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:02:10.381 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:02:20.368 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:02:21.505 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:02:21.744 | DEBUG    | __main__:check_for_cancel:254 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:02:30.417 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:02:32.362 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:02:32.444 | DEBUG    | __main__:check_for_cancel:254 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:02:40.374 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 14:02:40.385 | INFO     | __main__:test_handler:217 - helloworld.py completed successfully.
+2025-05-23 14:02:40.426 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:02:52.186 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:03:02.835 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:03:14.128 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:03:25.029 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:03:35.685 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 14:03:36.801 | INFO     | __main__:<module>:401 - This marks the start of the bUE service at 2025-05-23_14-03-36
+2025-05-23 14:03:36.802 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:03:36.802 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:03:36.802 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:03:36.803 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:03:36.806 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:03:36.817 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:03:39.123 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:03:39.123 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:03:50.097 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:03:50.133 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:04:00.109 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:04:01.496 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:04:01.532 | DEBUG    | __main__:check_for_cancel:254 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:04:10.360 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:04:12.621 | INFO     | __main__:ota_send_upd:237 - Sent UPD to 1
+2025-05-23 14:04:12.703 | DEBUG    | __main__:check_for_cancel:254 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:04:20.118 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 3
+2025-05-23 14:04:20.128 | INFO     | __main__:test_handler:229 - TEST could not be run: Popen.__exit__() missing 3 required positional arguments: 'exc_type', 'value', and 'traceback'
+2025-05-23 14:04:20.149 | INFO     | __main__:state_change_logger:265 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:04:31.229 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:04:42.897 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:04:54.146 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:05:05.255 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:05:16.300 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:05:27.434 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:05:38.662 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:05:49.841 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:06:01.529 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:06:12.454 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:06:23.921 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:06:35.217 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:06:40.557 | INFO     | __main__:<module>:415 - Exiting the bUE service
+2025-05-23 14:06:46.233 | INFO     | __main__:<module>:405 - This marks the start of the bUE service at 2025-05-23_14-06-46
+2025-05-23 14:06:46.234 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:06:46.234 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:06:46.234 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:06:46.234 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:06:46.238 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:06:46.254 | INFO     | __main__:state_change_logger:269 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:06:48.567 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:06:48.577 | INFO     | __main__:state_change_logger:269 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:07:11.146 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:07:22.334 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:07:22.344 | INFO     | __main__:state_change_logger:269 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:07:22.432 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:07:32.453 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:07:33.064 | INFO     | __main__:ota_send_upd:241 - Sent UPD to 1
+2025-05-23 14:07:33.110 | DEBUG    | __main__:check_for_cancel:258 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:07:42.398 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:07:44.017 | INFO     | __main__:ota_send_upd:241 - Sent UPD to 1
+2025-05-23 14:07:44.038 | DEBUG    | __main__:check_for_cancel:258 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:07:52.413 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:07:54.930 | INFO     | __main__:ota_send_upd:241 - Sent UPD to 1
+2025-05-23 14:07:54.971 | DEBUG    | __main__:check_for_cancel:258 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:08:02.432 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:08:06.230 | INFO     | __main__:ota_send_upd:241 - Sent UPD to 1
+2025-05-23 14:08:06.444 | DEBUG    | __main__:check_for_cancel:258 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:08:12.393 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 5
+2025-05-23 14:08:12.418 | INFO     | __main__:test_handler:221 - helloworld.py completed successfully.
+2025-05-23 14:08:12.441 | INFO     | __main__:state_change_logger:269 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:08:24.002 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:08:35.031 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:08:46.290 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:08:57.419 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:09:08.754 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:09:19.617 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:09:22.457 | INFO     | __main__:<module>:419 - Exiting the bUE service
+2025-05-23 14:09:24.066 | INFO     | __main__:<module>:406 - This marks the start of the bUE service at 2025-05-23_14-09-24
+2025-05-23 14:09:24.066 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:09:24.066 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:09:24.067 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:09:24.067 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:09:24.071 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:09:24.097 | INFO     | __main__:state_change_logger:270 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:09:28.680 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:09:28.681 | INFO     | __main__:state_change_logger:270 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:09:50.909 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:09:50.910 | INFO     | __main__:state_change_logger:270 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:09:51.038 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:10:01.045 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:10:02.323 | INFO     | __main__:ota_send_upd:242 - Sent UPD to 1
+2025-05-23 14:10:02.506 | DEBUG    | __main__:check_for_cancel:259 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:10:11.015 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:10:13.601 | INFO     | __main__:ota_send_upd:242 - Sent UPD to 1
+2025-05-23 14:10:13.617 | DEBUG    | __main__:check_for_cancel:259 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:10:21.059 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:10:24.606 | INFO     | __main__:ota_send_upd:242 - Sent UPD to 1
+2025-05-23 14:10:24.683 | DEBUG    | __main__:check_for_cancel:259 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:10:31.034 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:10:35.870 | INFO     | __main__:ota_send_upd:242 - Sent UPD to 1
+2025-05-23 14:10:35.901 | DEBUG    | __main__:check_for_cancel:259 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:10:41.030 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 5
+2025-05-23 14:10:41.040 | INFO     | __main__:test_handler:222 - helloworld.py completed successfully.
+2025-05-23 14:10:41.054 | INFO     | __main__:state_change_logger:270 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:10:52.264 | ERROR    | __main__:ota_idle_ping:168 - Unknown message type: 05:+ERR=10
+2025-05-23 14:11:15.027 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:11:26.293 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:11:37.683 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:11:48.811 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:11:48.816 | INFO     | __main__:ota_idle_ping:176 - We have not heard from 1 in too long. Disconnecting...
+2025-05-23 14:11:48.832 | INFO     | __main__:state_change_logger:270 - state_change_logger: State changed from IDLE to CONNECT_OTA
+2025-05-23 14:13:35.092 | INFO     | __main__:<module>:420 - Exiting the bUE service
+2025-05-23 14:13:36.429 | INFO     | __main__:<module>:407 - This marks the start of the bUE service at 2025-05-23_14-13-36
+2025-05-23 14:13:36.429 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:13:36.430 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:13:36.430 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:13:36.430 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:13:36.433 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:13:36.449 | INFO     | __main__:state_change_logger:271 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:14:08.291 | INFO     | __main__:<module>:421 - Exiting the bUE service
+2025-05-23 14:14:14.741 | INFO     | __main__:<module>:407 - This marks the start of the bUE service at 2025-05-23_14-14-14
+2025-05-23 14:14:14.742 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:14:14.742 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB1
+2025-05-23 14:14:14.742 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:14:14.742 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:14:20.320 | INFO     | __main__:<module>:407 - This marks the start of the bUE service at 2025-05-23_14-14-20
+2025-05-23 14:14:20.320 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:14:20.320 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:14:20.320 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:14:20.321 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:14:20.322 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:14:20.332 | INFO     | __main__:state_change_logger:271 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:14:41.258 | INFO     | __main__:<module>:421 - Exiting the bUE service
+2025-05-23 14:15:30.983 | INFO     | __main__:<module>:407 - This marks the start of the bUE service at 2025-05-23_14-15-30
+2025-05-23 14:15:30.984 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:15:30.984 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 14:15:30.984 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:15:30.984 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:15:30.989 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:15:31.000 | INFO     | __main__:state_change_logger:271 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:15:33.726 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:15:33.726 | INFO     | __main__:state_change_logger:271 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:15:56.415 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:15:56.442 | INFO     | __main__:state_change_logger:271 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:15:56.463 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:06.492 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:07.472 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:16:07.498 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:16:16.510 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:18.811 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:16:18.898 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:16:26.460 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:29.958 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:16:29.983 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:16:36.458 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:41.359 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:16:41.395 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:16:46.460 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:16:52.330 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:16:52.416 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:16:56.672 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:17:03.296 | INFO     | __main__:ota_send_upd:243 - Sent UPD to 1
+2025-05-23 14:17:03.510 | DEBUG    | __main__:check_for_cancel:260 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:17:06.623 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:17:11.627 | INFO     | __main__:<module>:421 - Exiting the bUE service
+2025-05-23 14:17:11.643 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 10
+2025-05-23 14:17:11.667 | INFO     | __main__:test_handler:223 - helloworld.py completed successfully.
+2025-05-23 14:17:19.447 | INFO     | __main__:<module>:409 - This marks the start of the bUE service at 2025-05-23_14-17-19
+2025-05-23 14:17:19.448 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:17:19.448 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 14:17:19.448 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:17:19.448 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:17:19.452 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:17:19.468 | INFO     | __main__:state_change_logger:273 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:17:21.811 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:17:21.817 | INFO     | __main__:state_change_logger:273 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:17:43.837 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:17:55.070 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:17:55.091 | INFO     | __main__:state_change_logger:273 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:17:55.107 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:18:05.208 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:18:05.898 | INFO     | __main__:ota_send_upd:245 - Sent UPD to 1
+2025-05-23 14:18:05.929 | DEBUG    | __main__:check_for_cancel:262 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:18:15.136 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:18:17.229 | INFO     | __main__:ota_send_upd:245 - Sent UPD to 1
+2025-05-23 14:18:17.255 | DEBUG    | __main__:check_for_cancel:262 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:18:25.128 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:18:28.442 | INFO     | __main__:ota_send_upd:245 - Sent UPD to 1
+2025-05-23 14:18:28.509 | DEBUG    | __main__:check_for_cancel:262 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:18:30.876 | INFO     | __main__:<module>:423 - Exiting the bUE service
+2025-05-23 14:18:30.881 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 10
+2025-05-23 14:18:30.891 | INFO     | __main__:test_handler:225 - helloworld.py completed successfully.
+2025-05-23 14:18:32.095 | INFO     | __main__:<module>:419 - This marks the start of the bUE service at 2025-05-23_14-18-32
+2025-05-23 14:18:32.095 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:18:32.096 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 14:18:32.096 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:18:32.096 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:18:32.099 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:18:32.110 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:19:01.034 | INFO     | __main__:<module>:433 - Exiting the bUE service
+2025-05-23 14:19:02.339 | INFO     | __main__:<module>:419 - This marks the start of the bUE service at 2025-05-23_14-19-02
+2025-05-23 14:19:02.340 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:19:02.340 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB0
+2025-05-23 14:19:02.340 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:19:02.340 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:19:02.343 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:19:02.354 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:21:45.907 | INFO     | __main__:<module>:433 - Exiting the bUE service
+2025-05-23 14:21:57.289 | INFO     | __main__:<module>:419 - This marks the start of the bUE service at 2025-05-23_14-21-57
+2025-05-23 14:21:57.290 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:21:57.290 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:21:57.290 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:21:57.290 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:21:57.295 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:21:57.306 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:21:59.858 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:21:59.873 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:22:22.087 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:22:33.599 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:22:33.620 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:22:33.662 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:22:43.659 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:22:44.975 | INFO     | __main__:ota_send_upd:255 - Sent UPD to 1
+2025-05-23 14:22:45.026 | DEBUG    | __main__:check_for_cancel:272 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:22:53.932 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:22:56.298 | INFO     | __main__:ota_send_upd:255 - Sent UPD to 1
+2025-05-23 14:22:56.344 | DEBUG    | __main__:check_for_cancel:272 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:23:03.667 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:23:07.374 | INFO     | __main__:ota_send_upd:255 - Sent UPD to 1
+2025-05-23 14:23:07.552 | DEBUG    | __main__:check_for_cancel:272 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:23:13.658 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:23:18.085 | INFO     | __main__:ota_send_upd:255 - Sent UPD to 1
+2025-05-23 14:23:18.228 | DEBUG    | __main__:check_for_cancel:272 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:23:23.665 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 5
+2025-05-23 14:23:23.727 | INFO     | __main__:test_handler:235 - helloworld.py completed successfully.
+2025-05-23 14:23:23.747 | INFO     | __main__:state_change_logger:283 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:23:34.973 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:23:45.890 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:23:57.022 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:24:08.089 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:24:19.167 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:24:30.598 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:24:41.723 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:24:52.884 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:25:04.744 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:25:15.381 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:25:21.633 | INFO     | __main__:<module>:433 - Exiting the bUE service
+2025-05-23 14:25:27.930 | INFO     | __main__:<module>:411 - This marks the start of the bUE service at 2025-05-23_14-25-27
+2025-05-23 14:25:27.930 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:25:27.930 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:25:27.930 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:25:27.931 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:25:27.934 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:25:27.950 | INFO     | __main__:state_change_logger:275 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:25:30.289 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:25:30.295 | INFO     | __main__:state_change_logger:275 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:25:52.812 | INFO     | __main__:state_change_logger:275 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:25:52.823 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:26:02.834 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:26:04.052 | INFO     | __main__:ota_send_upd:247 - Sent UPD to 1
+2025-05-23 14:26:04.067 | DEBUG    | __main__:check_for_cancel:264 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:26:12.831 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:26:15.352 | INFO     | __main__:ota_send_upd:247 - Sent UPD to 1
+2025-05-23 14:26:15.499 | DEBUG    | __main__:check_for_cancel:264 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:26:22.878 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:26:26.543 | INFO     | __main__:ota_send_upd:247 - Sent UPD to 1
+2025-05-23 14:26:26.609 | DEBUG    | __main__:check_for_cancel:264 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:26:32.829 | INFO     | __main__:test_handler:207 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:26:37.904 | INFO     | __main__:ota_send_upd:247 - Sent UPD to 1
+2025-05-23 14:26:37.981 | DEBUG    | __main__:check_for_cancel:264 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:26:42.907 | INFO     | __main__:test_handler:209 - Started test script: helloworld.py with config 5
+2025-05-23 14:26:42.918 | INFO     | __main__:test_handler:227 - helloworld.py completed successfully.
+2025-05-23 14:26:42.953 | INFO     | __main__:state_change_logger:275 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:26:42.954 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:26:54.137 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:27:05.708 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:27:16.572 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:27:27.130 | INFO     | __main__:<module>:425 - Exiting the bUE service
+2025-05-23 14:27:28.869 | INFO     | __main__:<module>:408 - This marks the start of the bUE service at 2025-05-23_14-27-28
+2025-05-23 14:27:28.870 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:27:28.870 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:27:28.870 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:27:28.870 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:27:28.874 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:27:28.885 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:27:35.816 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:27:35.822 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:27:58.224 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:27:58.297 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:27:58.323 | INFO     | __main__:test_handler:206 - Started test script: helloworld.py with config 5
+2025-05-23 14:27:58.339 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:27:58.559 | DEBUG    | __main__:test_handler:217 - cancel test is currently set as False
+2025-05-23 14:28:08.338 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:28:08.359 | DEBUG    | __main__:test_handler:217 - cancel test is currently set as False
+2025-05-23 14:28:09.618 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:28:09.842 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:28:18.433 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:28:18.439 | DEBUG    | __main__:test_handler:217 - cancel test is currently set as False
+2025-05-23 14:28:20.471 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:28:20.558 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:28:28.480 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:28:28.480 | INFO     | __main__:test_handler:214 - Cancelling test: helloworld.py
+2025-05-23 14:28:28.485 | INFO     | __main__:test_handler:224 - helloworld.py completed successfully.
+2025-05-23 14:28:28.529 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:28:39.888 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:28:51.090 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:29:02.245 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:29:13.480 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:29:25.056 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:29:25.062 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:29:25.078 | INFO     | __main__:test_handler:206 - Started test script: helloworld.py with config 10
+2025-05-23 14:29:25.083 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:29:25.124 | DEBUG    | __main__:test_handler:217 - cancel test is currently set as False
+2025-05-23 14:29:28.216 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:29:28.491 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:29:35.076 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:29:35.112 | DEBUG    | __main__:test_handler:217 - cancel test is currently set as False
+2025-05-23 14:29:39.384 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:29:39.450 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:29:45.349 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:29:45.354 | INFO     | __main__:test_handler:214 - Cancelling test: helloworld.py
+2025-05-23 14:29:45.360 | INFO     | __main__:test_handler:224 - helloworld.py completed successfully.
+2025-05-23 14:29:45.376 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:29:56.402 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:30:07.965 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:30:18.569 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:30:29.691 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:30:40.817 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:30:51.761 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:31:03.274 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:31:11.197 | INFO     | __main__:<module>:422 - Exiting the bUE service
+2025-05-23 14:31:51.232 | INFO     | __main__:<module>:408 - This marks the start of the bUE service at 2025-05-23_14-31-51
+2025-05-23 14:31:51.232 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:31:51.232 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:31:51.233 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:31:51.233 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:31:51.236 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:31:51.247 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:31:53.888 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:31:53.892 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:32:16.996 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:32:51.996 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:33:03.909 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:33:15.924 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:33:27.471 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:33:27.471 | INFO     | __main__:ota_idle_ping:176 - We have not heard from 1 in too long. Disconnecting...
+2025-05-23 14:33:27.490 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to CONNECT_OTA
+2025-05-23 14:34:18.359 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:34:18.364 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:34:40.778 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:34:40.803 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 14:34:40.850 | INFO     | __main__:test_handler:206 - Started test script: helloworld.py with config 10
+2025-05-23 14:34:40.865 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:34:50.879 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:34:52.127 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:34:52.259 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 0 messages
+2025-05-23 14:35:00.870 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:35:03.020 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 14:35:03.111 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 1 messages
+2025-05-23 14:35:10.854 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 14:35:10.874 | INFO     | __main__:test_handler:214 - Cancelling test: helloworld.py
+2025-05-23 14:35:10.947 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 14:35:22.166 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:35:33.815 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:35:44.936 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:35:56.171 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:36:07.069 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:36:18.812 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:36:30.126 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:36:41.577 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:36:52.597 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:37:03.816 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:37:15.740 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:37:26.882 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:37:37.983 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:37:49.207 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:00.726 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:11.847 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:23.077 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:34.177 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:45.356 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:38:56.456 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:39:07.753 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:39:19.208 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:39:30.525 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:40:05.160 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:40:16.242 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:40:27.727 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:40:38.892 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:40:38.903 | INFO     | __main__:ota_idle_ping:176 - We have not heard from 1 in too long. Disconnecting...
+2025-05-23 14:40:38.918 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to CONNECT_OTA
+2025-05-23 14:40:41.377 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:40:41.387 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:41:03.789 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:41:14.936 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:41:26.378 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:41:37.451 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:41:48.817 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:41:59.849 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:42:11.022 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:42:22.410 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:42:33.927 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:42:45.369 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:42:57.088 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:43:08.036 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:43:19.335 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:43:30.389 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:43:41.338 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:43:52.425 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:03.746 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:14.792 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:25.970 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:37.118 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:48.186 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:44:59.269 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:45:10.583 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:45:21.652 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:45:32.863 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:45:44.188 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:45:55.637 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:46:06.784 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:46:18.247 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:46:29.134 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:46:40.465 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:46:51.912 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:02.925 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:14.176 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:25.364 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:36.471 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:47.686 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:47:59.491 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:48:10.941 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:48:22.369 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:48:33.422 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:48:44.993 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:48:56.609 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:49:07.550 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:49:18.677 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:49:29.684 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:49:40.554 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:49:51.828 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:02.303 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:13.503 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:24.927 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:35.725 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:46.961 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:50:58.306 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:51:09.757 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:51:20.943 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:51:55.198 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:52:06.463 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:52:17.663 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:52:28.957 | INFO     | __main__:ota_idle_ping:174 - We haven't heard from 1 in a while....
+2025-05-23 14:52:28.973 | INFO     | __main__:ota_idle_ping:176 - We have not heard from 1 in too long. Disconnecting...
+2025-05-23 14:52:28.978 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to CONNECT_OTA
+2025-05-23 14:52:32.486 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:52:32.486 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:52:54.584 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:53:06.134 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:53:17.181 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 14:53:17.774 | INFO     | __main__:<module>:422 - Exiting the bUE service
+2025-05-23 14:54:11.300 | INFO     | __main__:<module>:408 - This marks the start of the bUE service at 2025-05-23_14-54-11
+2025-05-23 14:54:11.300 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 14:54:11.300 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 14:54:11.300 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 14:54:11.301 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 14:54:11.304 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 14:54:11.320 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 14:54:15.062 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 14:54:15.068 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 14:54:27.213 | INFO     | __main__:<module>:422 - Exiting the bUE service
+2025-05-23 15:13:12.134 | INFO     | __main__:<module>:408 - This marks the start of the bUE service at 2025-05-23_15-13-12
+2025-05-23 15:13:12.134 | INFO     | __main__:__init__:42 - __init__: Loading config.yaml; items are:
+2025-05-23 15:13:12.135 | INFO     | __main__:__init__:44 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 15:13:12.135 | INFO     | __main__:__init__:44 -   OTA_ID: 4
+2025-05-23 15:13:12.135 | INFO     | __main__:__init__:44 -   OTA_BAUDRATE: 9600
+2025-05-23 15:13:12.138 | INFO     | __main__:__init__:55 - __init__: Initializing current state to INIT
+2025-05-23 15:13:12.149 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 15:13:18.955 | INFO     | __main__:ota_connect_req:117 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 15:13:18.966 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 15:13:41.112 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:13:41.137 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 15:13:41.174 | INFO     | __main__:test_handler:206 - Started test script: helloworld.py with config 10
+2025-05-23 15:13:41.185 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 15:13:51.270 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 15:13:52.281 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 15:13:52.379 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 0 messages
+2025-05-23 15:14:01.152 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 15:14:03.598 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 15:14:03.690 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 1 messages
+2025-05-23 15:14:11.151 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 15:14:11.156 | INFO     | __main__:test_handler:214 - Cancelling test: helloworld.py
+2025-05-23 15:14:11.177 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 15:14:22.387 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:14:33.193 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:14:44.318 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:14:55.474 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:15:06.738 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:15:18.154 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:15:29.443 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:15:40.838 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:15:52.159 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:03.626 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:14.394 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:25.428 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:37.149 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:48.273 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:16:59.851 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:17:11.326 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:17:22.089 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:17:33.252 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:17:44.879 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:17:56.102 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:18:07.293 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:18:18.301 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:18:29.492 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:18:40.729 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:18:51.993 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:19:03.474 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:19:14.617 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:19:26.464 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:19:37.672 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:19:49.416 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:00.324 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:11.235 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:22.664 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:33.797 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:45.046 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:20:56.159 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:21:07.484 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:21:18.920 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:21:29.876 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:21:41.502 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:21:52.676 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:03.725 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:14.862 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:25.766 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:37.483 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:47.689 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:22:58.871 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:23:09.791 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:23:21.556 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:23:33.163 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:23:44.168 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:23:55.480 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:24:06.826 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:24:18.076 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:24:29.643 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:24:40.609 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:24:51.553 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:02.692 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:13.367 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:24.902 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:36.506 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:47.612 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:25:59.169 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:26:10.228 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:26:21.503 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:26:32.865 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:26:43.761 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:26:55.492 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:27:06.939 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:27:18.206 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:27:29.354 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:27:41.196 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:27:51.958 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:28:03.184 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:28:14.870 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:28:25.859 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:28:37.459 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:28:48.714 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:00.030 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:11.393 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:22.700 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:34.225 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:45.130 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:29:56.483 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:30:08.209 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:30:19.056 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:30:30.160 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:30:41.540 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:30:53.142 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:31:04.892 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:31:15.603 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:31:26.961 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:31:37.968 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:31:49.025 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:00.044 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:11.305 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:22.220 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:32.817 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:44.150 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:32:55.332 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:33:06.702 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:33:17.835 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:33:29.113 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:33:40.467 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:33:51.797 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:03.666 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:15.261 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:25.729 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:37.004 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:48.695 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:34:59.535 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:35:10.298 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:35:21.698 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:35:32.487 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:35:44.177 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:35:55.482 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:36:06.505 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:36:18.132 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:36:29.318 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:36:40.753 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:36:51.936 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:03.133 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:14.085 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:25.164 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:36.579 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:47.740 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:37:58.971 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:38:10.572 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:38:21.764 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:38:33.479 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:38:44.540 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:38:55.823 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:39:07.036 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:39:18.478 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:39:29.757 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:39:40.827 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:39:51.919 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:03.166 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:14.523 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:25.587 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:36.945 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:47.830 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:40:59.169 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:41:10.382 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:41:21.902 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:41:32.540 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:41:43.803 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:41:55.137 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:42:06.288 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:42:17.304 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:42:28.661 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:42:39.670 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:42:51.082 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:02.559 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:13.914 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:25.257 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:36.265 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:47.648 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:43:58.613 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:44:09.631 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:44:21.161 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:44:32.207 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:44:43.140 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:44:54.385 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:45:05.655 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:45:16.942 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:45:28.605 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:45:39.801 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:45:51.361 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:02.772 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:14.223 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:25.605 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:36.749 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:48.032 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:46:59.148 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:47:10.870 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:47:21.513 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:47:32.843 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:47:43.963 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:47:54.991 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:48:06.311 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:48:17.679 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:48:28.770 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:48:40.046 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:48:50.843 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:01.938 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:13.999 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:25.024 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:36.525 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:47.533 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:49:58.496 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:50:10.102 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:50:21.277 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:50:32.777 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:50:43.836 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:50:54.659 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:51:05.735 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:51:16.687 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:51:27.633 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:51:39.006 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:51:50.119 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:01.244 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:12.842 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:24.244 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:35.038 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:45.914 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:52:57.500 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:53:08.840 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:53:20.528 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:53:31.560 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:53:43.261 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:53:54.139 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:54:05.741 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:54:17.057 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:54:27.895 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:54:39.169 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:54:50.793 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:02.179 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:13.179 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:25.009 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:36.447 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:47.509 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:55:58.618 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:56:09.838 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:56:21.057 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:56:32.105 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:56:44.062 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:56:55.477 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:57:06.850 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:57:18.144 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:57:29.360 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:57:40.036 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:57:51.349 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:02.601 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:13.512 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:25.283 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:36.601 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:47.698 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:58:58.898 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:59:10.668 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:59:21.953 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:59:33.214 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:59:44.207 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 15:59:55.704 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 16:00:06.291 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 16:00:17.304 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 16:00:28.446 | INFO     | __main__:ota_idle_ping:158 - Got a PINGR from 1
+2025-05-23 16:00:28.493 | INFO     | __main__:state_change_logger:272 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 16:00:28.545 | INFO     | __main__:test_handler:206 - Started test script: helloworld.py with config 20
+2025-05-23 16:00:28.576 | INFO     | __main__:test_handler:211 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:00:32.292 | INFO     | __main__:ota_send_upd:244 - Sent UPD to 1
+2025-05-23 16:00:32.394 | DEBUG    | __main__:check_for_cancel:261 - Checking for canceled messages. We received 0 messages
+2025-05-23 16:00:37.291 | INFO     | __main__:<module>:422 - Exiting the bUE service
+2025-05-23 16:00:40.302 | ERROR    | __main__:test_handler:229 - helloworld.py exited with code -2
+2025-05-23 16:00:40.302 | ERROR    | __main__:test_handler:231 - [helloworld.py STDERR] Traceback (most recent call last):
+2025-05-23 16:00:40.302 | ERROR    | __main__:test_handler:231 - [helloworld.py STDERR] File "/home/ty22117/rayex/uw_env/lake_tests/helloworld.py", line 8, in <module>
+2025-05-23 16:00:40.302 | ERROR    | __main__:test_handler:231 - [helloworld.py STDERR] time.sleep(10)
+2025-05-23 16:00:40.303 | ERROR    | __main__:test_handler:231 - [helloworld.py STDERR] KeyboardInterrupt
+2025-05-23 16:00:52.881 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-23_16-00-52
+2025-05-23 16:00:52.882 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-23 16:00:52.882 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 16:00:52.882 | INFO     | __main__:__init__:48 -   OTA_ID: 4
+2025-05-23 16:00:52.882 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-23 16:00:52.886 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-23 16:00:52.896 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 16:00:55.206 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 16:00:55.212 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 16:01:07.007 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 16:01:07.058 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 10
+2025-05-23 16:01:07.059 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:01:17.087 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:01:18.278 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:01:27.064 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:01:29.417 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:01:37.071 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:01:40.674 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:01:47.057 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:01:52.150 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:01:57.138 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:02:02.946 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:02:07.076 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:02:14.063 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:02:17.132 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:02:25.277 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:02:27.069 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:02:36.536 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:02:37.060 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:02:47.463 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:02:50.213 | INFO     | __main__:test_handler:238 - helloworld.py completed successfully.
+2025-05-23 16:02:50.222 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 16:03:01.424 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:12.901 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:24.283 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:35.235 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:46.517 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:58.328 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:03:58.416 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 16:03:58.463 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 10
+2025-05-23 16:03:58.463 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:07.395 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:04:08.477 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:18.471 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:18.574 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:04:28.456 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:29.920 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:04:38.654 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:40.941 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:04:48.456 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:04:52.407 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:04:58.475 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:05:03.934 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:05:08.460 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:05:14.873 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:05:18.491 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:05:25.838 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:05:28.512 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:05:37.222 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:05:41.466 | INFO     | __main__:test_handler:238 - helloworld.py completed successfully.
+2025-05-23 16:05:41.518 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 16:05:53.179 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:06:04.307 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:06:15.352 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:06:50.259 | INFO     | __main__:ota_idle_ping:183 - We haven't heard from 1 in a while....
+2025-05-23 16:07:01.168 | INFO     | __main__:ota_idle_ping:183 - We haven't heard from 1 in a while....
+2025-05-23 16:07:12.536 | INFO     | __main__:ota_idle_ping:183 - We haven't heard from 1 in a while....
+2025-05-23 16:07:23.919 | INFO     | __main__:ota_idle_ping:183 - We haven't heard from 1 in a while....
+2025-05-23 16:07:23.925 | INFO     | __main__:ota_idle_ping:185 - We have not heard from 1 in too long. Disconnecting...
+2025-05-23 16:07:23.930 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to CONNECT_OTA
+2025-05-23 16:07:26.182 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 16:07:26.188 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 16:07:49.012 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:08:00.550 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:08:12.013 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:08:24.298 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:08:28.762 | INFO     | __main__:<module>:444 - Exiting the bUE service
+2025-05-23 16:18:16.637 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-23_16-18-16
+2025-05-23 16:18:16.637 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-23 16:18:16.638 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB2
+2025-05-23 16:18:16.638 | INFO     | __main__:__init__:48 -   OTA_ID: 4
+2025-05-23 16:18:16.638 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-23 16:18:16.642 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-23 16:18:16.652 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-23 16:18:19.430 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-23 16:18:19.430 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-23 16:18:42.367 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:18:42.388 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-23 16:18:42.491 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 10
+2025-05-23 16:18:42.507 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:18:52.458 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:18:53.540 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:02.493 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:19:04.384 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:12.427 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:19:15.497 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:22.664 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:19:26.548 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:32.459 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:19:37.705 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:42.429 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:19:48.972 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:19:52.454 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:20:00.069 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:20:02.458 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:20:11.143 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:20:12.853 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-23 16:20:22.319 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-23 16:20:25.596 | INFO     | __main__:test_handler:238 - helloworld.py completed successfully.
+2025-05-23 16:20:25.617 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-23 16:20:37.303 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:20:47.948 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:20:59.648 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:21:11.752 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:21:22.263 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:21:33.056 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:21:45.072 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:21:56.177 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:22:07.708 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:22:19.423 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:22:29.476 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:22:40.735 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:22:52.086 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:03.503 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:14.943 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:26.131 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:37.479 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:48.557 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:23:59.709 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:24:11.526 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:24:22.314 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:24:33.460 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:24:44.111 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:24:55.416 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:25:06.399 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:25:17.665 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:25:28.791 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:25:39.668 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:25:51.324 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:02.094 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:13.402 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:24.105 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:34.866 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:46.388 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:26:57.491 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:27:08.809 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:27:19.440 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:27:30.507 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:27:42.016 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:27:52.893 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:28:03.932 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:28:15.605 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:28:26.668 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:28:38.157 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:28:49.468 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:00.573 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:11.639 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:22.679 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:33.854 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:45.292 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:29:56.348 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:30:07.591 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:30:19.211 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:30:30.096 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:30:41.184 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:30:52.286 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:03.097 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:14.371 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:25.292 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:36.148 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:47.405 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:31:58.436 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:32:09.555 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:32:21.314 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:32:31.995 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:32:43.217 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:32:54.437 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:33:05.498 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:33:16.802 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:33:27.525 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:33:38.565 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:33:49.796 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:00.951 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:12.032 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:23.428 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:34.903 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:46.364 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:34:57.902 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:35:09.077 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:35:20.169 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:35:31.263 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:35:41.764 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:35:52.797 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:03.190 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:14.201 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:25.221 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:36.517 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:47.402 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-23 16:36:57.177 | INFO     | __main__:<module>:444 - Exiting the bUE service
+2025-05-27 10:06:36.819 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-27_10-06-36
+2025-05-27 10:06:36.819 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-27 10:06:36.819 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB1
+2025-05-27 10:06:36.820 | INFO     | __main__:__init__:48 -   OTA_ID: 30
+2025-05-27 10:06:36.820 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-27 10:06:36.825 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-27 10:06:36.841 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-27 10:06:41.687 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-27 10:06:41.703 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-27 10:06:53.098 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-27 10:06:53.175 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 5
+2025-05-27 10:06:53.186 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:07:03.144 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:07:04.730 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-27 10:07:13.154 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:07:15.668 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-27 10:07:23.332 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:07:23.343 | INFO     | __main__:test_handler:227 - Cancelling test: helloworld.py
+2025-05-27 10:07:23.379 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-27 10:07:32.114 | INFO     | __main__:<module>:444 - Exiting the bUE service
+2025-05-27 10:16:26.014 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-27_10-16-26
+2025-05-27 10:16:26.015 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-27 10:16:26.015 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB1
+2025-05-27 10:16:26.015 | INFO     | __main__:__init__:48 -   OTA_ID: 40
+2025-05-27 10:16:26.015 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-27 10:16:33.806 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-27_10-16-33
+2025-05-27 10:16:33.806 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-27 10:16:33.806 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB1
+2025-05-27 10:16:33.807 | INFO     | __main__:__init__:48 -   OTA_ID: 40
+2025-05-27 10:16:33.807 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-27 10:16:33.812 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-27 10:16:33.822 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-27 10:16:37.841 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-27 10:16:37.847 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-27 10:17:00.701 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-27 10:17:00.718 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 5
+2025-05-27 10:17:00.733 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:17:10.730 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:17:12.039 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-27 10:17:20.738 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:17:20.764 | INFO     | __main__:test_handler:227 - Cancelling test: helloworld.py
+2025-05-27 10:17:20.775 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-27 10:17:20.775 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-27 10:17:29.609 | INFO     | __main__:<module>:444 - Exiting the bUE service
+2025-05-27 10:21:55.434 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-27_10-21-55
+2025-05-27 10:21:55.435 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-27 10:21:55.435 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB1
+2025-05-27 10:21:55.435 | INFO     | __main__:__init__:48 -   OTA_ID: 50
+2025-05-27 10:21:55.435 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-27 10:21:55.441 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-27 10:21:55.452 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-27 10:22:01.217 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-27 10:22:01.217 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-27 10:22:12.845 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-27 10:22:12.933 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 5
+2025-05-27 10:22:12.944 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:22:22.937 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:22:23.957 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-27 10:22:33.280 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:22:33.281 | INFO     | __main__:test_handler:227 - Cancelling test: helloworld.py
+2025-05-27 10:22:33.317 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-27 10:22:35.509 | INFO     | __main__:<module>:444 - Exiting the bUE service
+2025-05-27 10:27:17.127 | INFO     | __main__:<module>:430 - This marks the start of the bUE service at 2025-05-27_10-27-17
+2025-05-27 10:27:17.127 | INFO     | __main__:__init__:46 - __init__: Loading config.yaml; items are:
+2025-05-27 10:27:17.127 | INFO     | __main__:__init__:48 -   OTA_PORT: /dev/ttyUSB1
+2025-05-27 10:27:17.128 | INFO     | __main__:__init__:48 -   OTA_ID: 60
+2025-05-27 10:27:17.128 | INFO     | __main__:__init__:48 -   OTA_BAUDRATE: 9600
+2025-05-27 10:27:17.133 | INFO     | __main__:__init__:59 - __init__: Initializing current state to INIT
+2025-05-27 10:27:17.148 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from INIT to CONNECT_OTA
+2025-05-27 10:27:19.647 | INFO     | __main__:ota_connect_req:123 - ota_connect_req: OTA device connected to base station 1
+2025-05-27 10:27:19.653 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from CONNECT_OTA to IDLE
+2025-05-27 10:27:30.739 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from IDLE to UTW_TEST
+2025-05-27 10:27:30.765 | INFO     | __main__:test_handler:217 - Started test script: helloworld.py with config 5
+2025-05-27 10:27:30.791 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:27:40.760 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:27:41.807 | INFO     | __main__:ota_send_upd:273 - Sent UPD to 1
+2025-05-27 10:27:50.748 | INFO     | __main__:test_handler:224 - [helloworld.py STDOUT] Hello World!
+2025-05-27 10:27:50.763 | INFO     | __main__:test_handler:227 - Cancelling test: helloworld.py
+2025-05-27 10:27:50.779 | INFO     | __main__:state_change_logger:291 - state_change_logger: State changed from UTW_TEST to IDLE
+2025-05-27 10:28:02.261 | INFO     | __main__:ota_idle_ping:167 - Got a PINGR from 1
+2025-05-27 10:28:04.178 | INFO     | __main__:<module>:444 - Exiting the bUE service
