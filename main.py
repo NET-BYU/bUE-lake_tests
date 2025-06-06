@@ -21,7 +21,7 @@ def user_input_handler(base_station):
 
     COMMANDS = ("TEST", "DISTANCE", "DISCONNECT", "CANCEL", "LIST", "EXIT")
 
-    FILES = ("RX", "TX", "helloworld")
+    FILES = ("RX", "TX", "helloworld", "gpstest", "gpstest2")
 
     while not base_station.EXIT: ## TODO: Make sure that connected_bues_tests are taken out
         try:

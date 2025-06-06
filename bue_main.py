@@ -199,7 +199,7 @@ class bUE_Main:
         self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
 
     def gps_handler(self):
-        # with Serial('/dev/ttyACM0', 9600, timeout=3) as stream:
+        # with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
         #     line = stream.readline().decode('ascii', errors='replace')
         #     if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
         #         try:
@@ -212,8 +212,8 @@ class bUE_Main:
         #         except Exception as e:
         #             logger.error(f"An error occured when gathering GPS data: {e}")
 
-        # logger.error("Cannot find current coordinates")
-        logger.info("Coordinate finder currently turned off")
+        logger.error("Cannot find current coordinates")
+        # logger.info("Coordinate finder currently turned off")
         return None, None
 
 
