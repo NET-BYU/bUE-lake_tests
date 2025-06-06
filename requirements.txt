@@ -1,4 +1,5 @@
 loguru
-yaml
+pyyaml
 geopy
 survey
+pyserial
