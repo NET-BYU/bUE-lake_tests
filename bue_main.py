@@ -18,7 +18,7 @@ from enum import Enum, auto
 from yaml import load, Loader
 
 # For gps 
-from serial import Serial
+from serial import Serial, SerialException
 from pynmeagps import NMEAReader
 
 logger.add("file_bue.log", rotation="10 MB") # Example: Add a file sink for all logs
@@ -206,10 +206,14 @@ class bUE_Main:
                     msg = NMEAReader.parse(line)
                     logger.info(f"Currently positioned at Latitude: {msg.lat}, Longitude: {msg.lon} ")
                     return msg.lat, msg.lon
+                except SerialException as e:
+                    print(f"Serial error: {e}")
+                    return None, None
                 except Exception as e:
                     logger.error(f"An error occured when gathering GPS data: {e}")
 
-        return 0, 0
+        logger.error("Cannot find current coordinates")
+        return None, None
 
 
     # This function handles operations that happen while a bUE is in the TESTING state
@@ -466,4 +470,3 @@ if __name__ == "__main__":
             time.sleep(0.5)
             bue.__del__()
             sys.exit(0)
-
