@@ -3,3 +3,4 @@ pyyaml
 geopy
 survey
 pyserial
+pynmeagps
