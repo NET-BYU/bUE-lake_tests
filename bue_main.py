@@ -21,7 +21,7 @@ from yaml import load, Loader
 from serial import Serial, SerialException
 from pynmeagps import NMEAReader
 
-logger.add("file_bue.log", rotation="10 MB") # Example: Add a file sink for all logs
+logger.add("logs/bue.log", rotation="10 MB") # Example: Add a file sink for all logs
 
 # Internal imports
 from ota import Ota
