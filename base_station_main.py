@@ -22,9 +22,6 @@ from yaml import load, Loader
 # For getting the distance between two bUE coordinates
 from geopy import distance
 
-import survey
-
-
 logger.remove()
 logger.add("logs/base_station.log", rotation="10 MB") # Example: Add a file sink for all logs
 
