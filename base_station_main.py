@@ -17,15 +17,16 @@ import threading
 import time
 from datetime import datetime
 from loguru import logger
-from enum import Enum, auto
 from yaml import load, Loader
 
 # For getting the distance between two bUE coordinates
 from geopy import distance
 
+import survey
+
 
 logger.remove()
-logger.add("file.log", rotation="10 MB") # Example: Add a file sink for all logs
+logger.add("logs/base_station.log", rotation="10 MB") # Example: Add a file sink for all logs
 
 # This variable defines how long it will take for a connected bUE to be thought of as "disconnected"
 # Unlike the TIMEOUT in bue_main.py, once this variable expires, it will not automatically disconnect the base
@@ -97,7 +98,7 @@ class Base_Station_Main:
                 task()
                 self.ping_bue_queue.task_done()
             except queue.Empty:
-                pass
+                time.sleep(0.01)
     
     def ping_bue(self, bue_id, lat, long):
         if(bue_id in self.connected_bues):
@@ -138,7 +139,7 @@ class Base_Station_Main:
                 task()
                 self.message_queue.task_done()
             except queue.Empty:
-                pass
+                time.sleep(0.01)
     
     # Listens for any incoming message from a bUE. Never called by itself. Runs if put in message_queue.
     def message_listener(self):
@@ -186,6 +187,7 @@ class Base_Station_Main:
                     logger.info(f"Received PREPR from {bue_id}")
                 elif "CANCD" in message:
                     logger.info(f"Received CANCD from {bue_id}")
+                    self.testing_bues.remove(bue_id)
                 else:
                     logger.info(f"Received undefined message {message}")
 
@@ -195,38 +197,38 @@ class Base_Station_Main:
 
 
     def base_station_tick(self, loop_dur=0.01):
+
+        # The base station will read incoming messages roughly every LISTEN_FOR_MESSAGE_INTERVAL seconds
+        LISTEN_FOR_MESSAGE_INTERVAL = 1
+        listen_for_message_counter = 0
+        listen_for_message = round(LISTEN_FOR_MESSAGE_INTERVAL / loop_dur)
+
+        # The base station will check to see if a bUE has timed out every CHECK_FOR_TIMEOUTS_INTERVAL seconds
+        CHECK_FOR_TIMEOUTS_INTERVAL = 10
+        check_for_timeouts_counter = 0
+        check_for_timeouts = round(CHECK_FOR_TIMEOUTS_INTERVAL / loop_dur)
+
+
         while not self.EXIT:
+
+            if not self.tick_enabled:
+                time.sleep(0.1)
+                continue
+
             loop_start = time.time()
 
-            # The base station will read incoming messages roughly every LISTEN_FOR_MESSAGE_INTERVAL seconds
-            LISTEN_FOR_MESSAGE_INTERVAL = 1
-            listen_for_message_counter = 0
-            listen_for_message = round(LISTEN_FOR_MESSAGE_INTERVAL / loop_dur)
+            if listen_for_message_counter % listen_for_message == 0:
+                self.message_queue.put(self.message_listener)
+            
+            if check_for_timeouts_counter % check_for_timeouts == 0:
+                self.message_queue.put(self.check_bue_timeout)
+            
+            listen_for_message_counter += 1
+            check_for_timeouts_counter += 1
 
-            # The base station will check to see if a bUE has timed out every CHECK_FOR_TIMEOUTS_INTERVAL seconds
-            CHECK_FOR_TIMEOUTS_INTERVAL = 10
-            check_for_timeouts_counter = 0
-            check_for_timeouts = round(CHECK_FOR_TIMEOUTS_INTERVAL / loop_dur)
-
-
-            while not self.EXIT:
-
-                if not self.tick_enabled:
-                    continue
-
-                loop_start = time.time()
-
-                if listen_for_message_counter % listen_for_message == 0:
-                    self.message_queue.put(self.message_listener)
-                
-                if check_for_timeouts_counter % check_for_timeouts == 0:
-                    self.message_queue.put(self.check_bue_timeout)
-                
-                listen_for_message_counter += 1
-                check_for_timeouts_counter += 1
-
-                while time.time() - loop_start < loop_dur:
-                    pass
+            elapsed = time.time() - loop_start
+            if elapsed < loop_dur:
+                time.sleep(loop_dur - elapsed)
 
     def __del__(self):
         try:
@@ -242,116 +244,3 @@ class Base_Station_Main:
                 self.connected_bues.clear()
         except Exception as e:
             logger.warning(f"__del__: Exception during cleanup: {e}")
-
-
-# This function handles the console input for sending commands to bUEs      
-def user_input_handler(base_station):
-    
-    ## TODO: GPS timing needs to be included
-
-    while not base_station.EXIT:
-        try:
-            user_input = input(">> ").strip()
-            if not user_input:
-                continue
-            
-            if user_input == "LIST": #Temporary TODO Implment this
-                connected_bues = " ".join(str(bue) for bue in base_station.connected_bues)
-                logger.info(f"Currently connected to {connected_bues}")
-                continue
-                
-            parts = user_input.split(".")
-
-            bue_id = int(parts[0])
-
-            if(bue_id not in base_station.connected_bues):
-                logger.error(f"Not currently connected to bUE {bue_id}")
-                continue
-
-            # At any time, a bUE can be disconnected from the base station. 
-            # This will likely only happen it they bUE has not been heard from in a while
-            if(parts[1] == "DISC"): # Format: <bue_id>.DISC
-                logger.info(f"Disconnecting from bUE {bue_id}")
-                base_station.connected_bues.remove(bue_id)
-                if bue_id in base_station.bue_coordinates.keys():
-                    del base_station.bue_coordinates[bue_id]
-                    
-            # If the base station ever wants to prematurely terminate a test in a specific bUE, this
-            # command allows them to do so
-            elif(parts[1] == "CANC"): # Format: <bue_id>.CANC
-                if bue_id in base_station.testing_bues: ##TODO: bUE needs to take this request and actually terminate the process
-                    logger.info(f"Sending a CANC to {bue_id}")
-                    base_station.testing_bues.remove(bue_id) ## TODO. Uncomment this line. Maybe? It can be handled automatically
-                    base_station.ota.send_ota_message(bue_id, "CANC")
-                else:
-                    logger.error(f"{bue_id} is not currently running any tests")
-                
-            # For sending tests to a specific bUE
-            elif parts[1] == "TEST": # Format: <bue_id>.TEST.<file>.<configuration>.<role>.<starttime>
-                if ";" not in parts[2]: ## TODO: What other checks need to be done here?
-                    logger.info(f"Sending {bue_id} TEST with config {parts[2]}. Will start at {parts[4]}")
-                    base_station.testing_bues.append(bue_id)
-                    base_station.ota.send_ota_message(bue_id, f"TEST.{parts[2]}.{parts[3]}.{parts[4]}.{parts[5]}")
-                else:
-                    logger.error(f"This TEST does not match the required format")
-
-            elif parts[1] == "DIST": # Format: <bue_id>.DIST.<bue_2>
-                bue_2 = int(parts[2])
-
-                if bue_2 not in base_station.connected_bues:
-                    logger.error(f"Not currently connected to bUE {bue_2}")
-                    continue
-
-                if bue_id not in base_station.bue_coordinates or bue_2 not in base_station.bue_coordinates:
-                    missing = [b for b in (bue_id, bue_2) if b not in base_station.bue_coordinates]
-                    logger.error(f"Missing coordinates for: {', '.join(missing)}")
-                    continue
-
-                
-
-                point1 = base_station.bue_coordinates[bue_id]
-                point2 = base_station.bue_coordinates[bue_2]
-
-                if "None" in point1 or "None" in point2:
-                    logger.error(f"Missing coordinates from {bue_id} or {bue_2}")
-                    continue
-
-                dist = distance.distance(point1, point2)
-
-                logger.info(f"{bue_id} and {bue_2} are currently {dist} apart")
-
-            else:
-                logger.error(f"Unknown command: {user_input}")
-
-
-        except Exception as e:
-            logger.error(f"[User Input] Error {e}")
-
-
-if __name__ == "__main__":
-    start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-
-    logger.info(f"This marks the start of the base station service at {start_time}")
-
-    try:
-        base_station = Base_Station_Main(yaml_str="config_base.yaml")
-
-        user_input_thread = threading.Thread(target=user_input_handler, args=(base_station,))
-        user_input_thread.start()
-
-        base_station.tick_enabled = True
-
-
-        while not base_station.EXIT:
-            time.sleep(0.2)
-
-    except KeyboardInterrupt:
-        logger.info("Exiting the Base Station service")
-        if base_station is not None:
-            base_station.EXIT = True
-            time.sleep(0.5)
-            base_station.__del__()
-        if 'user_input_thread' in locals() and user_input_thread.is_alive():
-            user_input_thread.join(timeout=2.0)
-        sys.exit(0)
-

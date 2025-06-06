@@ -1,2 +1,4 @@
 *.yaml
-bue_logs/*.log
+logs/*.log
+uw_env/
+__pycache__/

@@ -15,20 +15,22 @@ class Ota:
     def __init__(self, port, baudrate, id):
 
         # Serial port configuration
-        self.ser = serial.Serial(port, baudrate)
+        self.ser = serial.Serial(port, baudrate, timeout = 0.1)
         self.id = id
 
         # Flags
-        self.receiving = True
-        self.in_rec_process = False
-        self.EXIT = False
+        self.receiving_event = threading.Event()
+        self.exit_event = threading.Event()
 
-        # Received messages
+        # Received messages buffer
         self.recv_msgs = []
+        self.recv_lock = threading.Lock()
 
         # Reading thread
-        self.thread = threading.Thread(target=self.read_from_port)
-        self.thread.start()
+        self.receiving_event.set()
+        self.thread = threading.Thread(target=self.read_from_port, daemon = True) # dameon true keeps this thread from 
+        self.thread.start()                                                       # keeping the program from exiting
+        
 
     def read_from_port(self):
         """
@@ -36,20 +38,24 @@ class Ota:
 
         Read from serial port; this function is executed in a separate thread.
 
-        Flag reads: receiving - to enable/disable reading from serial port; EXIT - to stop the thread
+        Runs continuously until the program is shut down as set by the exit_event flag
 
-        Flag writes: in_rec_process - to indicate that the thread is processing a message
+        Allows reading from port is receiving_event is set (meaning is True)
         """
-        while True:
-            if self.receiving:
-                self.in_rec_process = True
-                if self.ser.in_waiting > 0:
-                    message = self.ser.readline().decode("utf-8", errors="ignore").strip()
-                    if message != "" and message != "OK":
-                        self.recv_msgs.append(message)
-                self.in_rec_process = False
-            if self.EXIT:
-                break
+        while not self.exit_event.is_set():
+            if self.receiving_event.is_set():
+                if self.ser.in_waiting > 0: #Checks to see if there is any data in the serial buffer
+                    try: 
+                        message = self.ser.readline().decode("utf-8", errors="ignore").strip()
+                        if message != "" and message != "OK":
+                            with self.recv_lock: # Mutex to prevent data race conditions between threads
+                                self.recv_msgs.append(message)
+                    except Exception as e:
+                        print(f"OTA encountered some error: {e}")
+                else:
+                    time.sleep(0.05)
+            else:
+                time.sleep(0.1)
 
 
     def send_ota_message(self, dest: int, message: str):
@@ -60,33 +66,31 @@ class Ota:
         """
         Get all new messages received by the device
 
-        Flag reads: in_rec_process - to wait until the current message is processed
-
-        Flag writes: receiving - to disable the receiver from starting up again
+        Temporarily pauses the read_from_port thread, retrieves messages, and then starts read_from_port again
         """
 
         # Start by disabling the receiver from starting up again
-        self.receiving = False
+        self.receiving_event.clear()
+        time.sleep(0.05)
 
-        # Wait until the receiver is done processing the current message (prevent data races)
-        while self.in_rec_process:
-            pass
+        # Mutex to prevent data race
+        with self.recv_lock:
+            messages = self.recv_msgs[:]
+            self.recv_msgs.clear()
 
-        # Copy and erase the messages
-        messages = self.recv_msgs
-        self.recv_msgs = []
+        self.receiving_event.set()
 
-        # Enable the receiver
-        self.receiving = True
         return messages
 
     def __del__(self):
         try:
-            self.receiving = False
-            self.EXIT = True
-            if hasattr(self, "thread"):
+            self.receiving_event.clear()
+            self.exit_event.set()
+
+            if self.thread.is_alive():
                 self.thread.join()
-            self.ser.close()
+            if self.ser.is_open:
+                self.ser.close()
         except Exception as e:
             pass
 

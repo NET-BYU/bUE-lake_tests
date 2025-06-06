@@ -199,45 +199,50 @@ class bUE_Main:
         self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
 
     def gps_handler(self):
-        with Serial('/dev/ttyACM0', 9600, timeout=3) as stream:
-            line = stream.readline().decode('ascii', errors='replace')
-            if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
-                try:
-                    msg = NMEAReader.parse(line)
-                    logger.info(f"Currently positioned at Latitude: {msg.lat}, Longitude: {msg.lon} ")
-                    return msg.lat, msg.lon
-                except SerialException as e:
-                    print(f"Serial error: {e}")
-                    return None, None
-                except Exception as e:
-                    logger.error(f"An error occured when gathering GPS data: {e}")
+        # with Serial('/dev/ttyACM0', 9600, timeout=3) as stream:
+        #     line = stream.readline().decode('ascii', errors='replace')
+        #     if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
+        #         try:
+        #             msg = NMEAReader.parse(line)
+        #             logger.info(f"Currently positioned at Latitude: {msg.lat}, Longitude: {msg.lon} ")
+        #             return msg.lat, msg.lon
+        #         except SerialException as e:
+        #             print(f"Serial error: {e}")
+        #             return None, None
+        #         except Exception as e:
+        #             logger.error(f"An error occured when gathering GPS data: {e}")
 
-        logger.error("Cannot find current coordinates")
+        # logger.error("Cannot find current coordinates")
+        logger.info("Coordinate finder currently turned off")
         return None, None
 
 
     # This function handles operations that happen while a bUE is in the TESTING state
-    def test_handler(self, input): # Input Format: TEST.<file>.<configuration>.<role>.<starttime>
+    def test_handler(self, input): # Input Format: TEST-<file>-<start_time>-<parameters>
         if not ";" in input: ## TODO: Perform other checks
             try:
                 self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
 
-                parts = input.split(".")
+                print(input)
+
+                parts = input.split("-")
                 file = parts[1]
-                config = parts[2]
+                start_time = parts[2]
+                print(start_time)
+                parameters = parts[3].split(" ")
 
                 self.is_testing = True
 
                 ## TODO: Wait to run the task until given time it reached
 
                 process = subprocess.Popen(
-                    ["python3", f"{file}.py", config],
+                    ["python3", f"{file}.py"] + [p for p in parameters],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True  # decode bytes to str
                 )
 
-                logger.info(f"Started test script: {file}.py with config {config}")
+                logger.info(f"Started test script: {file}.py with parameters {parameters}")
 
                 # Process will go to completion unless unless the system receives a CANC message from the base station.
                 # The CANC message is received and processed by the utw thread
