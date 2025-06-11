@@ -64,22 +64,6 @@ class lora_td_ru(gr.top_block):
         self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 30000, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-30000), 5, 0, 0)
 
-        # Wav file recording
-        recording_dir = 'lake_test_recording_td_ru'
-        os.makedirs(recording_dir, exist_ok=True)
-        existing = [f for f in os.listdir(recording_dir) if f.startswith('audio_recording_') and f.endswith('.wav')]
-        nums = [int(f.split('_')[-1].split('.')[0]) for f in existing if f.split('_')[-1].split('.')[0].isdigit()]
-        next_num = max(nums) + 1 if nums else 1
-        wav_filename = os.path.join(recording_dir, f'audio_recording_{next_num}.wav')
-        self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
-            wav_filename,
-            1,
-            int(self.samp_rate),
-            1,  # PCM
-            2   # PCM_16
-        )
-        self.connect((self.audio_source_0, 0), (self.blocks_wavfile_sink_0, 0))
-
         ##################################################
         # Connections
         ##################################################
@@ -106,6 +90,8 @@ class lora_td_ru(gr.top_block):
 
 def main(top_block_cls=lora_td_ru, options=None):
     tb = top_block_cls()
+
+    message_count = [0]
 
     def rx_handler(msg):
         message_count[0] += 1
