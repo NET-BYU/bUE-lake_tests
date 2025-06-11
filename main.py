@@ -60,6 +60,13 @@ def user_input_handler(base_station):
                 
                 ## TODO: Need to implement the rest of this once I fixed the coordinates 
 
+                bues = []
+                for i in indexes:
+                    bues.append(base_station.connected_bues[i])
+
+                print(base_station.bue_coordinates)
+                print(base_station.get_distance(bues[0], bues[1]))
+
             if index == 2: # DISCONNECT
                 connected_bues = tuple(str(x) for x in base_station.connected_bues)
                 if(len(connected_bues) == 0):

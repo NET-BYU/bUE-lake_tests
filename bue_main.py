@@ -218,14 +218,28 @@ class bUE_Main:
         #self.ota.send_ota_message(self.ota_base_station_id, f"PING:{gps_data}")
         # self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
 
-    def gps_handler(self):
+    def gps_handler(self, max_attempts=20):
         try:
-            with Serial('/dev/...', 9600, timeout=3) as stream:
-                line = stream.readline().decode('ascii', errors='replace')
-                if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
-                    msg = NMEAReader.parse(line)
-                    logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
-                    return msg.lat, msg.lon
+            with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
+                nmr = NMEAReader(stream)
+
+                for _ in range(max_attempts):
+                    try:
+                        line = stream.readline().decode('ascii', errors='replace').strip()
+                        if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
+                            msg = nmr.parse(line)
+
+                            if hasattr(msg, "lat") and hasattr(msg, "lon"):
+                                logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
+                                print(f"Lat: {msg.lat}")
+                                print(f"Long: {msg.lon}")
+                                return msg.lat, msg.lon
+                            else:
+                                logger.debug("NMEA message missing lat/lon")
+                    except Exception as parse_error:
+                        logger.debug(f"Parse error: {parse_error}")
+
+                    time.sleep(0.5)  # Give GPS time to provide valid data
         except SerialException as se:
             logger.error(f"GPS SerialException: {se}")
         except Exception as e:

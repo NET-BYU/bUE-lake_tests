@@ -194,6 +194,12 @@ class Base_Station_Main:
 
             except ValueError:
                 logger.error("message_listener: Error listening for messages")
+        
+    def get_distance(self, bue_1, bue_2):
+        c1 = self.bue_coordinates[bue_1]
+        c2 = self.bue_coordinates[bue_2]
+
+        return distance.geodesic(c1,  c2).meters
 
 
 
