@@ -157,6 +157,7 @@ class Base_Station_Main:
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
                         logger.info(f"Received a request signal from {bue_id}")
+                        self.connected_bues.append(bue_id)
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
                 elif "ACK" in message:

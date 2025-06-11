@@ -163,6 +163,11 @@ class bUE_Main:
             logger.warning("ota_idle_ping: OTA device is not connected to base station")
             return
         
+        print("Getting GPS Data")
+        lat, long = self.gps_handler()
+        print("Sending PING")
+        self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
+        
         # See if there are any new messages from the OTA device
         try:
             new_messages = self.ota.get_new_messages()
@@ -207,11 +212,11 @@ class bUE_Main:
         ## TODO: Get the most recent GPS string
         # gps data...
 
-        lat, long = self.gps_handler()
+        # lat, long = self.gps_handler()
         
         # Send a PING message through the OTA device
         #self.ota.send_ota_message(self.ota_base_station_id, f"PING:{gps_data}")
-        self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
+        # self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
 
     def gps_handler(self):
         try:
