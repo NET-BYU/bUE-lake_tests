@@ -91,26 +91,9 @@ class lora_td_ru(gr.top_block):
 def main(top_block_cls=lora_td_ru, options=None):
     tb = top_block_cls()
 
-    message_count = [0]
-
-    def rx_handler(msg):
-        message_count[0] += 1
-        print(f"Received message #{message_count[0]}")
-        # Optionally, print the message content:
-        # print(pmt.to_python(msg))
-        if message_count[0] >= 30:
-            print("Received 30 messages, stopping...")
-            tb.stop()
-            tb.wait()
-            sys.exit(0)
-
-    # Connect the handler to the LoRa RX block's output
-    tb.lora_rx_0.set_msg_handler(rx_handler)
-
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
-        sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
