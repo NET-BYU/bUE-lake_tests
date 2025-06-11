@@ -55,8 +55,14 @@ class bUE_Main:
             sys.exit(1)
 
         # Initialize the OTA and UTW objects
-        self.ota = Ota(self.yaml_data['OTA_PORT'], self.yaml_data['OTA_BAUDRATE'], self.yaml_data['OTA_ID'])
-        # self.utw = Utw...
+        while True:
+            try:
+                self.ota = Ota(self.yaml_data['OTA_PORT'], self.yaml_data['OTA_BAUDRATE'], self.yaml_data['OTA_ID'])
+                break
+            except Exception as e:
+                logger.error(f"Failed to initialize OTA module: {e}")
+                time.sleep(2)
+
 
         # Build the state machine - states
         self.cur_st, self.nxt_st = State.INIT, State.INIT
@@ -111,7 +117,11 @@ class bUE_Main:
         # See if there are any new messages from the OTA device
         #  Note: using get_new_messages will destroy any other incoming messages,
         #   but these are unwanted until the device is connected
-        new_messages = self.ota.get_new_messages()
+        try:
+            new_messages = self.ota.get_new_messages()
+        except Exception as e:
+            logger.error(f"Failed to get OTA messages: {e}")
+            return
 
         for message in new_messages:
             try:
@@ -141,8 +151,9 @@ class bUE_Main:
 
         # Send a REQ (request) message through the OTA device
         # Next cycle we will hopefully have a CON (connected) response
-        self.ota.send_ota_message(self.ota_base_station_id, "REQ") # TY bUE sends a message back to the base station asking to 
+        self.ota.send_ota_message(self.ota_base_station_id, "REQ") # bUE sends a message back to the base station asking to 
                                                                    # be connected as well
+        print("Sending a REQ")
     
     # This function looks for all messages it might receive while in the IDLE state.
     # It keeps track of whether or not it received a PING in a given rotation (timing defined by IDLE_PING_OTA_INTERVAL in bue_tick())
@@ -153,7 +164,11 @@ class bUE_Main:
             return
         
         # See if there are any new messages from the OTA device
-        new_messages = self.ota.get_new_messages()
+        try:
+            new_messages = self.ota.get_new_messages()
+        except Exception as e:
+            logger.error(f"Failed to get OTA messages: {e}")
+            return
         got_pingr = False
 
         for message in new_messages:
@@ -199,21 +214,19 @@ class bUE_Main:
         self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
 
     def gps_handler(self):
-        # with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
-        #     line = stream.readline().decode('ascii', errors='replace')
-        #     if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
-        #         try:
-        #             msg = NMEAReader.parse(line)
-        #             logger.info(f"Currently positioned at Latitude: {msg.lat}, Longitude: {msg.lon} ")
-        #             return msg.lat, msg.lon
-        #         except SerialException as e:
-        #             print(f"Serial error: {e}")
-        #             return None, None
-        #         except Exception as e:
-        #             logger.error(f"An error occured when gathering GPS data: {e}")
+        try:
+            with Serial('/dev/...', 9600, timeout=3) as stream:
+                line = stream.readline().decode('ascii', errors='replace')
+                if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
+                    msg = NMEAReader.parse(line)
+                    logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
+                    return msg.lat, msg.lon
+        except SerialException as se:
+            logger.error(f"GPS SerialException: {se}")
+        except Exception as e:
+            logger.error(f"GPS error: {e}")
 
-        logger.error("Cannot find current coordinates")
-        # logger.info("Coordinate finder currently turned off")
+        logger.info("Coordinate finder currently turned off")
         return None, None
 
 
@@ -257,7 +270,11 @@ class bUE_Main:
                         break
                     time.sleep(3)
 
-                exit_code = process.wait()
+                try:
+                    exit_code = process.wait()
+                except Exception as e:
+                    logger.error(f"Error waiting for subprocess {file}.py: {e}")
+                    exit_code = -1
 
                 # If a test is canceled, a CANCD message is sent in responses letting the base station know we have successfully termianted the test
                 if self.cancel_test:
@@ -269,10 +286,11 @@ class bUE_Main:
 
                 else:
                     logger.error(f"{file}.py exited with code {exit_code}")
-                    for err_line in process.stderr:
-                        logger.error(f"[{file}.py STDERR] {err_line.strip()}")
-                    
-                    self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
+                    try:
+                        for err_line in process.stderr:
+                            logger.error(f"[{file}.py STDERR] {err_line.strip()}")
+                    except Exception as e:
+                        logger.error(f"Error reading STDERR: {e}")
 
             except Exception as e:
                 logger.info(f"TEST could not be run: {e}")
@@ -304,7 +322,11 @@ class bUE_Main:
     # This function checks for incoming messages while in the system is the UTW_TEST state.
     # The messages received in this state should only be CANC. 
     def check_for_cancel(self):
-        new_messages = self.ota.get_new_messages()
+        try:
+            new_messages = self.ota.get_new_messages()
+        except Exception as e:
+            logger.error(f"Failed to get OTA messages: {e}")
+            return
         for message in new_messages:
             if "CANC" in message:
                 self.cancel_test = True
@@ -466,7 +488,7 @@ if __name__ == "__main__":
         bue.tick_enabled = True
 
         while True:
-            pass
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
         if bue is not None:
@@ -475,4 +497,11 @@ if __name__ == "__main__":
             time.sleep(0.5)
             bue.__del__()
             sys.exit(0)
+    except Exception as e:
+        logger.error(f"Unhandled exception in main: {e}")
+        if bue is not None:
+            bue.EXIT = True
+            time.sleep(0.5)
+            bue.__del__()
+        sys.exit(1)
 

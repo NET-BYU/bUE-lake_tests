@@ -15,7 +15,14 @@ class Ota:
     def __init__(self, port, baudrate, id):
 
         # Serial port configuration
-        self.ser = serial.Serial(port, baudrate, timeout = 0.1)
+        while True:
+            try:
+                self.ser = serial.Serial(port, baudrate, timeout=0.1)
+                break
+            except serial.SerialException as e:
+                print(f"Failed to open serial port: {e}")
+                time.sleep(2)
+
         self.id = id
 
         # Flags
@@ -59,8 +66,11 @@ class Ota:
 
 
     def send_ota_message(self, dest: int, message: str):
-        full_message = f"AT+SEND={dest},{len(message)},{message}\r\n"
-        self.ser.write(full_message.encode("utf-8"))
+        try:
+            full_message = f"AT+SEND={dest},{len(message)},{message}\r\n"
+            self.ser.write(full_message.encode("utf-8"))
+        except Exception as e:
+            print(f"Failed to send OTA message: {e}")
 
     def get_new_messages(self):
         """

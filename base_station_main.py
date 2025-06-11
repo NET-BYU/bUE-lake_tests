@@ -99,17 +99,17 @@ class Base_Station_Main:
     
     def ping_bue(self, bue_id, lat, long):
         if(bue_id in self.connected_bues):
-            logger.info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
-            self.ota.send_ota_message(bue_id, "PINGR")
-            logger.info(f"Sent a PINGR to {bue_id}")
+            try:
+                logger.info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
+                self.ota.send_ota_message(bue_id, "PINGR")
+                logger.info(f"Sent a PINGR to {bue_id}")
 
-            if lat not in (None, "None") and long not in (None, "None"):
-                self.bue_coordinates[bue_id] = [lat, long]
-
-
-            # TIMEOUT + 1 is a signal to the rest of the program that a PING has been received
-            ## ERROR? Was not in if statement but I moved it into it 
-            self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+                if lat not in (None, "None") and long not in (None, "None"):
+                    self.bue_coordinates[bue_id] = [lat, long]
+                    
+                self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+            except Exception as e:
+                logger.error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
     
 
     # This function will cycle through each bUE the base station should be connected to and make sure that
@@ -145,15 +145,18 @@ class Base_Station_Main:
 
         for message in new_messages:
             try: # Receive messages should look like "+RCV={origin},{len(message)},{message}"
-                message = message[5:] # remove +RCV= from beginning of the message 
-                parts = message.split(",")
-                bue_id = int(parts[0])
+                try:
+                    message = message[5:]
+                    parts = message.split(",")
+                    bue_id = int(parts[0])
+                except Exception as e:
+                    logger.error(f"message_listener: Failed to parse message '{message}': {e}")
+                    continue  # Skip to the next message
                 if "REQ" in message:
+                    self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
+                    self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
                         logger.info(f"Received a request signal from {bue_id}")
-                        self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
-                        self.connected_bues.append(bue_id)
-                        self.bue_timeout_tracker[bue_id] = TIMEOUT
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
                 elif "ACK" in message:

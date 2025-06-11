@@ -73,6 +73,7 @@ def user_input_handler(base_station):
                     bue = base_station.connected_bues[i]
                     print(f"Disconnected from {base_station.connected_bues[i]}")
                     base_station.connected_bues.remove(bue)
+                    print(f"Connected bUES: {base_station.connected_bues}")
                     if bue in base_station.bue_coordinates.keys():
                         del base_station.bue_coordinates[bue]
                 print("\n")
