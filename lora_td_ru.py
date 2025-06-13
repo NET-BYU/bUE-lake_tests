@@ -63,6 +63,7 @@ class lora_td_ru(gr.top_block):
         self.audio_sink_1_0 = audio.sink(samp_rate, 'hw:3,0', True)
         self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 30000, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-30000), 5, 0, 0)
+        self.blocks_multiply_const_tx = blocks.multiply_const_cc(1.0)
 
         ##################################################
         # Connections
@@ -78,7 +79,8 @@ class lora_td_ru(gr.top_block):
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.lora_rx_0, 0))
         self.connect((self.blocks_multiply_xx_0_0, 0), (self.blocks_complex_to_float_0, 0))
-        self.connect((self.lora_tx_0, 0), (self.blocks_conjugate_cc_0, 0))
+        self.connect((self.lora_tx_0, 0), (self.blocks_multiply_const_tx, 0))
+        self.connect((self.blocks_multiply_const_tx, 0), (self.blocks_conjugate_cc_0, 0))
 
     def get_samp_rate(self):
         return self.samp_rate

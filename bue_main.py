@@ -233,7 +233,11 @@ class bUE_Main:
                                 logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
                                 print(f"Lat: {msg.lat}")
                                 print(f"Long: {msg.lon}")
-                                return msg.lat, msg.lon
+                                
+                                if(msg.lat != "" and msg.lon != ""):
+                                    return msg.lat, msg.lon
+                                else:
+                                    break
                             else:
                                 logger.debug("NMEA message missing lat/lon")
                     except Exception as parse_error:
@@ -245,7 +249,7 @@ class bUE_Main:
         except Exception as e:
             logger.error(f"GPS error: {e}")
 
-        logger.info("Coordinate finder currently turned off")
+        logger.debug("Could not find coordinates. Are they off?")
         return None, None
 
 
