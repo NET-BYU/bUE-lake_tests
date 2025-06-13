@@ -302,8 +302,12 @@ class bUE_Main:
                             self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
 
                     if self.cancel_test:
-                        logger.info(f"Cancelling test: {file}.py")
-                        process.terminate() 
+                        logger.info(f"Sending termination keystroke to: {file}.py")
+                        try:
+                            process.stdin.write('\n') # Hits enter to end the process
+                            process.stdin.flush()
+                        except Exception as e:
+                            logger.error(f"Failed to send termination keystroke: {e}")
                         break
                     time.sleep(0.1)
 
