@@ -282,7 +282,10 @@ class bUE_Main:
                     ["python3", f"{file}.py"] + [p for p in parameters],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True  # decode bytes to str
+                    stdin=subprocess.PIPE,  # Needed to send keystrokes
+                    bufsize=1,              # Line-buffered
+                    universal_newlines=True, # Text mode, also enables line buffering
+                    # text=True  # decode bytes to str
                 )
 
                 logger.info(f"Started test script: {file}.py with parameters {parameters}")
