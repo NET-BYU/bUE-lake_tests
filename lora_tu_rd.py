@@ -49,9 +49,12 @@ class lora_tu_rd(gr.top_block):
             impl_head=False,
             samp_rate=samp_rate,
             sf=7,
-         ldro_mode=2,frame_zero_padd=1280,sync_word=[0x12] )
+            ldro_mode=2, frame_zero_padd=1280, sync_word=[0x12])
         self.lora_sdr_payload_id_inc_0 = lora_sdr.payload_id_inc(':')
-        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=8000, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=7, sync_word=[0x12], soft_decoding=True, ldro_mode=2, print_rx=[True,True])
+        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx(
+            bw=8000, cr=1, has_crc=True, impl_head=False, pay_len=255,
+            samp_rate=samp_rate, sf=7, sync_word=[0x12], soft_decoding=True,
+            ldro_mode=2, print_rx=[True, True])
         self.blocks_multiply_xx_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("NETLab: 0"), 1000)
@@ -62,16 +65,6 @@ class lora_tu_rd(gr.top_block):
         self.audio_sink_1_0 = audio.sink(samp_rate, 'hw:3,0', True)
         self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 30000, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-30000), 5, 0, 0)
-
-        # Wav file recording
-        recording_dir = 'lake_test_recording_tu_rd'
-        os.makedirs(recording_dir, exist_ok=True)
-        existing = [f for f in os.listdir(recording_dir) if f.startswith('audio_recording_') and f.endswith('.wav')]
-        nums = [int(f.split('_')[-1].split('.')[0]) for f in existing if f.split('_')[-1].split('.')[0].isdigit()]
-        next_num = max(nums) + 1 if nums else 1
-        wav_filename = os.path.join(recording_dir, f'audio_recording_{next_num}.wav')
-        self.blocks_wavfile_sink_0 = blocks.wavfile_sink(wav_filename, 1, int(self.samp_rate), 16)
-        self.connect((self.audio_source_0, 0), (self.blocks_wavfile_sink_0, 0))
 
         ##################################################
         # Connections
@@ -98,17 +91,12 @@ class lora_tu_rd(gr.top_block):
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
 
-
-
-
 def main(top_block_cls=lora_tu_rd, options=None):
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
-
-        sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
