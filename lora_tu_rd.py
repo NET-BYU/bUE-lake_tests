@@ -104,8 +104,10 @@ def main(top_block_cls=lora_tu_rd, options=None):
     tb.start()
 
     try:
-        input('Press Enter to quit: ')
-    except EOFError:
+        print('Press Enter to quit: ')
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
         pass
     tb.stop()
     tb.wait()
