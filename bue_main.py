@@ -78,6 +78,10 @@ class bUE_Main:
         self.is_testing = False
         self.cancel_test = False
 
+        # Buffer to hold outputs from the UTW script (like helloworld)
+        self.test_output_buffer = []
+        self.test_output_lock = threading.RLock()
+
         # Network information
         self.ota_base_station_id = None
         
@@ -233,6 +237,7 @@ class bUE_Main:
                                 logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
                                 print(f"Lat: {msg.lat}")
                                 print(f"Long: {msg.lon}")
+
                                 
                                 if(msg.lat != "" and msg.lon != ""):
                                     return msg.lat, msg.lon
@@ -250,6 +255,8 @@ class bUE_Main:
             logger.error(f"GPS error: {e}")
 
         logger.debug("Could not find coordinates. Are they off?")
+        return "", ""
+        logger.debug("Could not find coordinates. Are they off?")
         return None, None
 
 
@@ -259,39 +266,68 @@ class bUE_Main:
             try:
                 self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
 
-                print(input)
-
                 parts = input.split("-")
+                if len(parts) < 4:
+                    raise ValueError(f"Invalid input format: {input}")
                 file = parts[1]
                 start_time = parts[2]
-                print(start_time)
                 parameters = parts[3].split(" ")
 
                 self.is_testing = True
+                self.cancel_test = False
 
                 ## TODO: Wait to run the task until given time it reached
+
+                with self.test_output_lock:
+                    self.test_output_buffer.clear()
 
                 process = subprocess.Popen(
                     ["python3", f"{file}.py"] + [p for p in parameters],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True  # decode bytes to str
+                    stdin=subprocess.PIPE,  # Needed to send keystrokes
+                    bufsize=1,              # Line-buffered
+                    universal_newlines=True, # Text mode, also enables line buffering
+                    # text=True  # decode bytes to str
                 )
 
                 logger.info(f"Started test script: {file}.py with parameters {parameters}")
 
-                # Process will go to completion unless unless the system receives a CANC message from the base station.
-                # The CANC message is received and processed by the utw thread
+                """
+                Process will go to completion unless unless the system receives a CANC message from the base station.
+                The CANC message is received and processed by the utw thread
+
+                We also collect all the terminal outputs from the script so we can send them back to the base station
+                """
                 while process.poll() is None: # poll() returns None if process hasn't terminated
-                    line = process.stdout.readline()
-                    if line:
-                        logger.info(f"[{file}.py STDOUT] {line.strip()}")
+                    stdout_line = process.stdout.readline()
+                    if stdout_line:
+                        clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
+                        logger.info(clean_line)
+                        with self.test_output_lock:
+                            self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
 
                     if self.cancel_test:
-                        logger.info(f"Cancelling test: {file}.py")
-                        process.terminate()  # Or process.kill() for a stronger termination
+                        logger.info(f"Sending termination keystroke to: {file}.py")
+                        try:
+                            process.stdin.write('\n') # Hits enter to end the process
+                            process.stdin.flush()
+                        except Exception as e:
+                            logger.error(f"Failed to send termination keystroke: {e}")
                         break
-                    time.sleep(3)
+                    time.sleep(0.1)
+
+                for remaining_line in process.stdout:
+                    clean_line = f"[{file}.py STDOUT] {remaining_line.strip()}"
+                    logger.info(clean_line)
+                    with self.test_output_lock:
+                        self.test_output_buffer.append(f"STDOUT:{clean_line}")
+
+                for err_line in process.stderr:
+                    clean_line = f"[{file}.py STDERR] {err_line.strip()}"
+                    logger.error(clean_line)
+                    with self.test_output_lock:
+                        self.test_output_buffer.append(f"STDERR:{clean_line}")
 
                 try:
                     exit_code = process.wait()
@@ -309,11 +345,6 @@ class bUE_Main:
 
                 else:
                     logger.error(f"{file}.py exited with code {exit_code}")
-                    try:
-                        for err_line in process.stderr:
-                            logger.error(f"[{file}.py STDERR] {err_line.strip()}")
-                    except Exception as e:
-                        logger.error(f"Error reading STDERR: {e}")
 
             except Exception as e:
                 logger.info(f"TEST could not be run: {e}")
@@ -321,6 +352,10 @@ class bUE_Main:
             finally:
                 self.is_testing = False
                 self.cancel_test = False
+
+                # Any extra messages that have not already been sent to the base station are sent
+                with self.test_output_lock:
+                    self.ota_send_upd()
 
     
 
@@ -339,8 +374,19 @@ class bUE_Main:
     # Instead of PINGs, bUEs send UPDs while in UTW_TEST state so the base still knows there is a connection
     def ota_send_upd(self):
         lat, long = self.gps_handler()
-        self.ota.send_ota_message(self.ota_base_station_id, f"UPD:{lat},{long}")
+        # self.ota.send_ota_message(self.ota_base_station_id, f"UPD:{lat},{long}")
         logger.info(f"Sent UPD to {self.ota_base_station_id}")
+
+        with self.test_output_lock:
+            if self.test_output_buffer:
+                for line in self.test_output_buffer:
+                    self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
+                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}") 
+                self.test_output_buffer.clear()
+                
+            else: # If there is no message send it blank
+                self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
+                logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output") 
 
     # This function checks for incoming messages while in the system is the UTW_TEST state.
     # The messages received in this state should only be CANC. 
