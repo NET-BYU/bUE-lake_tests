@@ -12,6 +12,7 @@ defined in bue_main.py
 
 # Standard library imports
 import queue
+import os
 import sys
 import threading
 import time
@@ -22,9 +23,21 @@ from yaml import load, Loader
 # For getting the distance between two bUE coordinates
 from geopy import distance
 
-logger.remove()
-logger.add("logs/base_station.log", rotation="10 MB") # Example: Add a file sink for all logs
+logger.remove()  # Remove default sink
 
+# Main log for everything
+logger.add("logs/base_station.log", rotation="10 MB")
+
+# Individual files for 6 bUEs
+for bue_id in range(10, 61, 10):
+    path = f"logs/bue_{bue_id}.log"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    logger.add(
+        path,
+        rotation="5 MB",
+        filter=lambda record, bue_id=bue_id: record["extra"].get("bue_id") == bue_id
+    )
+"""
 # This variable defines how long it will take for a connected bUE to be thought of as "disconnected"
 # Unlike the TIMEOUT in bue_main.py, once this variable expires, it will not automatically disconnect the base
 # station from the bUE. Instead, it will prompt the user that they might want to. This will allow the bUE to be able
@@ -32,6 +45,7 @@ logger.add("logs/base_station.log", rotation="10 MB") # Example: Add a file sink
 
 # The system will recommend disconnecting after missing TIMEOUT * 2 PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
+"""
 TIMEOUT = 3
 
 
@@ -60,11 +74,13 @@ class Base_Station_Main:
         # A list of the bUEs currently connected to the base station
         self.connected_bues = []
 
+        """
         # A dictionary that will track how often a bUE is getting ticks
         # A bUE's id is the key. 
         # If the bUE has a value of TIMEOUT or TIMEOUT + 1, it has received a PING recently
         # If a bUE has missed a PING, this value will be decremented by one
         # until too many PINGs have been missed
+        """
         self.bue_timeout_tracker = {}
 
         #Dictionary holds what each bUE's currently location is depending on last PING/UPD
@@ -97,26 +113,28 @@ class Base_Station_Main:
             except queue.Empty:
                 time.sleep(0.01)
     
-    def ping_bue(self, bue_id, lat, long):
+    def ping_bue(self, bue_id, lat="", long=""):
         if(bue_id in self.connected_bues):
             try:
                 logger.info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
                 self.ota.send_ota_message(bue_id, "PINGR")
-                logger.info(f"Sent a PINGR to {bue_id}")
 
-                if lat not in (None, "None") and long not in (None, "None"):
+                # print(f"Lat:{lat}Long{long}")
+
+                if lat != "" and long != "":
                     self.bue_coordinates[bue_id] = [lat, long]
                     
                 self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
             except Exception as e:
                 logger.error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
     
-
+    """
     # This function will cycle through each bUE the base station should be connected to and make sure that
     # it has been receiving some sort of message from it.
     # The messages it checks for our PINGs and UPDs
     #
     # If we went a rotation without receiving a message, we might have lost connection with the bUE 
+    """
     def check_bue_timeout(self):
         for bue_id in self.connected_bues:
             if self.bue_timeout_tracker[bue_id] == TIMEOUT + 1:
@@ -149,9 +167,11 @@ class Base_Station_Main:
                     message = message[5:]
                     parts = message.split(",")
                     bue_id = int(parts[0])
+
                 except Exception as e:
                     logger.error(f"message_listener: Failed to parse message '{message}': {e}")
                     continue  # Skip to the next message
+
                 if "REQ" in message:
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
@@ -160,35 +180,45 @@ class Base_Station_Main:
                         self.connected_bues.append(bue_id)
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
+
                 elif "ACK" in message:
                     logger.info(f"Received ACK from {bue_id}")
+
                 elif "PING" in message: # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
+                    # print(f"Length: {len(parts)}")
                     if len(parts) >= 5:
                         lat = parts[3]
                         long = parts[4]
-                    else: 
-                        lat = "None"
-                        long = "None"
                     self.ping_bue(bue_id, lat, long)
-                elif "UPD" in message:
+
+                elif "UPD" in message: #40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     lat = parts[3]
                     long = parts[4]
-                    logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
-                    if lat is not None and long is not None:
+                    stdout = parts[5]
+                    # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
+                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
+                    if lat != "" and long != "":
                         self.bue_coordinates[bue_id] = [lat, long]
+                    else:
+                        logger.info("Lat and/or Long was empty")
                     # Reset the timeout for getting UPDs. If we haven't recieved an update in a while there is a problem
                     self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+
                 elif "FAIL" in message:
-                    logger.error(f"Received FAIL from {bue_id}")
+                    logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
                     self.testing_bues.remove(bue_id)
+
                 elif "DONE" in message:
-                    logger.info(f"Received DONE from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received DONE from {bue_id}")
                     self.testing_bues.remove(bue_id)
+
                 elif "PREPR" in message:
-                    logger.info(f"Received PREPR from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
+
                 elif "CANCD" in message:
                     logger.info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
+
                 else:
                     logger.info(f"Received undefined message {message}")
 
