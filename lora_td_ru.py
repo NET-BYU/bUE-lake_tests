@@ -63,22 +63,7 @@ class lora_td_ru(gr.top_block):
         self.audio_sink_1_0 = audio.sink(samp_rate, 'hw:3,0', True)
         self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 30000, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-30000), 5, 0, 0)
-
-        # Wav file recording
-        recording_dir = 'lake_test_recording_td_ru'
-        os.makedirs(recording_dir, exist_ok=True)
-        existing = [f for f in os.listdir(recording_dir) if f.startswith('audio_recording_') and f.endswith('.wav')]
-        nums = [int(f.split('_')[-1].split('.')[0]) for f in existing if f.split('_')[-1].split('.')[0].isdigit()]
-        next_num = max(nums) + 1 if nums else 1
-        wav_filename = os.path.join(recording_dir, f'audio_recording_{next_num}.wav')
-        self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
-            wav_filename,
-            1,
-            int(self.samp_rate),
-            1,  # PCM
-            2   # PCM_16
-        )
-        self.connect((self.audio_source_0, 0), (self.blocks_wavfile_sink_0, 0))
+        self.blocks_multiply_const_tx = blocks.multiply_const_cc(1.0)
 
         ##################################################
         # Connections
@@ -94,7 +79,8 @@ class lora_td_ru(gr.top_block):
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.lora_rx_0, 0))
         self.connect((self.blocks_multiply_xx_0_0, 0), (self.blocks_complex_to_float_0, 0))
-        self.connect((self.lora_tx_0, 0), (self.blocks_conjugate_cc_0, 0))
+        self.connect((self.lora_tx_0, 0), (self.blocks_multiply_const_tx, 0))
+        self.connect((self.blocks_multiply_const_tx, 0), (self.blocks_conjugate_cc_0, 0))
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -107,24 +93,9 @@ class lora_td_ru(gr.top_block):
 def main(top_block_cls=lora_td_ru, options=None):
     tb = top_block_cls()
 
-    def rx_handler(msg):
-        message_count[0] += 1
-        print(f"Received message #{message_count[0]}")
-        # Optionally, print the message content:
-        # print(pmt.to_python(msg))
-        if message_count[0] >= 30:
-            print("Received 30 messages, stopping...")
-            tb.stop()
-            tb.wait()
-            sys.exit(0)
-
-    # Connect the handler to the LoRa RX block's output
-    tb.lora_rx_0.set_msg_handler(rx_handler)
-
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
-        sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
