@@ -97,6 +97,7 @@ def main(top_block_cls=lora_tu_rd, options=None):
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+        raise KeyboardInterrupt
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)

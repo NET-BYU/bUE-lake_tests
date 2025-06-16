@@ -9,6 +9,7 @@ Documentation can be found in the NET Lab Notion at the page "bUE Python Code Gu
 # Standard library imports
 import queue
 import sys
+import signal
 import subprocess
 import threading
 import time
@@ -169,7 +170,6 @@ class bUE_Main:
         
         print("Getting GPS Data")
         lat, long = self.gps_handler()
-        print("Sending PING")
         self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
         
         # See if there are any new messages from the OTA device
@@ -235,9 +235,6 @@ class bUE_Main:
 
                             if hasattr(msg, "lat") and hasattr(msg, "lon"):
                                 logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
-                                print(f"Lat: {msg.lat}")
-                                print(f"Long: {msg.lon}")
-
                                 
                                 if(msg.lat != "" and msg.lon != ""):
                                     return msg.lat, msg.lon
@@ -282,52 +279,78 @@ class bUE_Main:
                     self.test_output_buffer.clear()
 
                 process = subprocess.Popen(
-                    ["python3", f"{file}.py"] + [p for p in parameters],
+                    ["python3", f"{file}.py"] + parameters,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     stdin=subprocess.PIPE,  # Needed to send keystrokes
                     bufsize=1,              # Line-buffered
                     universal_newlines=True, # Text mode, also enables line buffering
-                    # text=True  # decode bytes to str
+                    text=True  # decode bytes to str
                 )
 
                 logger.info(f"Started test script: {file}.py with parameters {parameters}")
 
-                """
-                Process will go to completion unless unless the system receives a CANC message from the base station.
-                The CANC message is received and processed by the utw thread
+                def reader_thread(pipe, output_queue):
+                    for line in iter(pipe.readline, ''):
+                        output_queue.put(line)
+                    pipe.close()
 
-                We also collect all the terminal outputs from the script so we can send them back to the base station
+                stdout_queue = queue.Queue()
+                stderr_queue = queue.Queue()
+
+                # Threads that will be looking in the stdout and stderr termainals for messages while 
+                # the TEST process runs
+                threading.Thread(target=reader_thread, args=(process.stdout, stdout_queue), daemon=True).start()
+                threading.Thread(target=reader_thread, args=(process.stderr, stderr_queue), daemon=True).start()
+
+                """
+                # Process will go to completion unless unless the system receives a CANC message from the base station.
+                # The CANC message is received and processed by the utw thread
+
+                # We also collect all the terminal outputs from the script so we can send them back to the base station
                 """
                 while process.poll() is None: # poll() returns None if process hasn't terminated
-                    stdout_line = process.stdout.readline()
-                    if stdout_line:
+                    # Get all normal terminal outputs
+                    try:
+                        stdout_line = stdout_queue.get_nowait()
                         clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
                         logger.info(clean_line)
                         with self.test_output_lock:
                             self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
+                    except queue.Empty:
+                        pass
+
+                    try:
+                        stderr_line = stderr_queue.get_nowait()
+                        clean_line = f"[{file}.py STDERR] {stderr_line.strip()}"
+                        logger.error(clean_line)
+                        with self.test_output_lock:
+                            self.test_output_buffer.append(f"STDERR: {clean_line}")
+                    except queue.Empty:
+                        pass
 
                     if self.cancel_test:
-                        logger.info(f"Sending termination keystroke to: {file}.py")
+                        logger.info(f"Sending termination to: {file}.py")
                         try:
-                            process.stdin.write('\n') # Hits enter to end the process
-                            process.stdin.flush()
+                            process.send_signal(signal.SIGINT)
                         except Exception as e:
-                            logger.error(f"Failed to send termination keystroke: {e}")
+                            logger.error(f"Failed to terminate: {e}")
                         break
                     time.sleep(0.1)
 
-                for remaining_line in process.stdout:
-                    clean_line = f"[{file}.py STDOUT] {remaining_line.strip()}"
+                while not stdout_queue.empty():
+                    line = stdout_queue.get()
+                    clean_line = f"[{file}.py STDOUT] {line.strip()}"
                     logger.info(clean_line)
                     with self.test_output_lock:
-                        self.test_output_buffer.append(f"STDOUT:{clean_line}")
+                        self.test_output_buffer.append(f"STDOUT: {clean_line}")
 
-                for err_line in process.stderr:
-                    clean_line = f"[{file}.py STDERR] {err_line.strip()}"
+                while not stderr_queue.empty():
+                    line = stderr_queue.get()
+                    clean_line = f"[{file}.py STDERR] {line.strip()}"
                     logger.error(clean_line)
                     with self.test_output_lock:
-                        self.test_output_buffer.append(f"STDERR:{clean_line}")
+                        self.test_output_buffer.append(f"STDERR: {clean_line}")
 
                 try:
                     exit_code = process.wait()
@@ -341,8 +364,6 @@ class bUE_Main:
                 elif exit_code == 0:
                     logger.info(f"{file}.py completed successfully.")
                     self.ota.send_ota_message(self.ota_base_station_id, "DONE")
-
-
                 else:
                     logger.error(f"{file}.py exited with code {exit_code}")
 
@@ -388,8 +409,10 @@ class bUE_Main:
                 self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
                 logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output") 
 
+    """
     # This function checks for incoming messages while in the system is the UTW_TEST state.
     # The messages received in this state should only be CANC. 
+    """
     def check_for_cancel(self):
         try:
             new_messages = self.ota.get_new_messages()
@@ -398,6 +421,7 @@ class bUE_Main:
             return
         for message in new_messages:
             if "CANC" in message:
+                logger.info(f"Received a CANC message")
                 self.cancel_test = True
             else:
                 logger.error(f"Received unexpected message while in UTW_TEST state: {message}")

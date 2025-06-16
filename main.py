@@ -69,7 +69,7 @@ def user_input_handler(base_station):
                 if(len(connected_bues) == 0):
                     print("Currently not connected to any bUEs")
                 
-                bues_indexes = survey.routines.basket('What bUEs will be running tests?', options = connected_bues)
+                bues_indexes = survey.routines.basket('What bUEs will be running tests? ', options = connected_bues)
                 ## TODO: Should there be a check to see if a bUE is currently being tested or trust the user to handle this themselves?
 
                 file_index = survey.routines.select('What file would you like to run? ', options = FILES)
@@ -88,7 +88,7 @@ def user_input_handler(base_station):
                 if(len(connected_bues) == 0):
                     print("Currently not connected to any bUEs")
 
-                indexes = survey.routines.basket('Select two bUEs',
+                indexes = survey.routines.basket('Select two bUEs: ',
                                                 options = connected_bues)
                 
                 ## TODO: Need to implement the rest of this once I fixed the coordinates 
@@ -105,7 +105,7 @@ def user_input_handler(base_station):
                 if(len(connected_bues) == 0):
                     print("Currently not connected to any bUEs")
 
-                indexes = survey.routines.basket('What bUEs do you want to disconnect from?',
+                indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
                                                 options = connected_bues)
                 
                 print("\n")
@@ -123,7 +123,7 @@ def user_input_handler(base_station):
                 if(len(testing_bues) == 0):
                     print("No bUEs are currently running any tests")
 
-                indexes = survey.routines.basket('What bUE tests do you want to cancel?',
+                indexes = survey.routines.basket('What bUE tests do you want to cancel? ',
                                                 options = testing_bues)
                 
                 print("\n")
@@ -132,6 +132,7 @@ def user_input_handler(base_station):
                     bue = base_station.testing_bues[i]
                     print(f"Ending test for {base_station.testing_bues[i]}")
                     base_station.ota.send_ota_message(bue, "CANC")
+                    logger.info(f"Sending CANC to {bue}")
                 print("\n")
 
             elif index == 4: # LIST
