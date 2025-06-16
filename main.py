@@ -20,6 +20,7 @@ def generate_table(base_station) -> Table:
         table.add_row(
             f"{bue}"
         )
+        
     return table
 
 def bue_coordinates_table(base_station) -> Table:
