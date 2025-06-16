@@ -402,7 +402,8 @@ class bUE_Main:
             if self.test_output_buffer:
                 for line in self.test_output_buffer:
                     self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
-                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}") 
+                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
+                    time.sleep(0.2) # Sleep so UART does not get overwhelmed 
                 self.test_output_buffer.clear()
                 
             else: # If there is no message send it blank
