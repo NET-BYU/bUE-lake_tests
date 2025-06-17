@@ -349,34 +349,6 @@ blocks:
     coordinate: [1072, 892.0]
     rotation: 0
     state: disabled
-- name: xmlrpc_server_0
-  id: xmlrpc_server
-  parameters:
-    addr: localhost
-    alias: ''
-    comment: ''
-    port: '8080'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [544, 408.0]
-    rotation: 0
-    state: true
-- name: xmlrpc_server_1
-  id: xmlrpc_server
-  parameters:
-    addr: localhost
-    alias: ''
-    comment: ''
-    port: '8080'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [432, 148.0]
-    rotation: 0
-    state: disabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
