@@ -216,12 +216,17 @@ class bUE_Main:
                 self.ota_connected = False
 
 
-    def gps_handler(self, max_attempts=20):
+    def gps_handler(self, max_attempts=20, max_runtime = 5):
+        start_time = time.time()
         try:
             with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
                 nmr = NMEAReader(stream)
 
                 for _ in range(max_attempts):
+                    if time.time() - start_time > max_runtime:
+                        logger.warning("GPS handler timed out.")
+                        break
+
                     try:
                         line = stream.readline().decode('ascii', errors='replace').strip()
                         print(line)
