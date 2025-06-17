@@ -255,7 +255,7 @@ class bUE_Main:
     #     return "", ""
 
     def gps_handler(self, max_attempts=20, max_runtime=5):
-        
+        start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
             for _ in range(max_attempts):
