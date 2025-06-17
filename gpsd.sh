@@ -26,7 +26,7 @@ sudo systemctl start gpsd.socket
 
 # Test GPS signal (optional step)
 echo "Testing GPS signal..."
-gpsmon /dev/ttyUSB0  # or use `cgps` to see a simpler GPS readout
+gpsmon /dev/ttyACM0  # or use `cgps` to see a simpler GPS readout
 
 # Configure chrony to use GPS for time sync
 sudo tee -a /etc/chrony/chrony.conf > /dev/null <<EOT
