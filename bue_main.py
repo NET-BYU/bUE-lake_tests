@@ -269,6 +269,8 @@ class bUE_Main:
                         if lat != "" and lon != "":
                             logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
                             return lat, lon
+                
+                time.sleep(0.1)
         except Exception as e:
             logger.error(f"GPSD error: {e}")
 
@@ -350,6 +352,26 @@ class bUE_Main:
                         pass
 
                     if self.cancel_test:
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
                         logger.info(f"Sending termination to: {file}.py")
                         try:
                             process.send_signal(signal.SIGINT)
