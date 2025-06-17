@@ -171,6 +171,7 @@ class bUE_Main:
         
         print("Getting GPS Data")
         lat, long = self.gps_handler()
+        print("trying to send a ping")
         self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}") # test ping for now
         
         # See if there are any new messages from the OTA device
@@ -223,6 +224,7 @@ class bUE_Main:
                 for _ in range(max_attempts):
                     try:
                         line = stream.readline().decode('ascii', errors='replace').strip()
+                        print(line)
                         if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
                             msg = nmr.parse(line)
 
