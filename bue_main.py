@@ -21,7 +21,7 @@ from yaml import load, Loader
 # For gps 
 from serial import Serial, SerialException
 from pynmeagps import NMEAReader
-import gps
+# import gps
 
 logger.add("logs/bue.log", rotation="10 MB") # Example: Add a file sink for all logs
 
