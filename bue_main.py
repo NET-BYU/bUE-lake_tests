@@ -338,7 +338,8 @@ class bUE_Main:
                         clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
                         logger.info(clean_line)
                         with self.test_output_lock:
-                            self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
+                            if "rx msg:" in clean_line:
+                                self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
                     except queue.Empty:
                         pass
 
@@ -385,7 +386,8 @@ class bUE_Main:
                     clean_line = f"[{file}.py STDOUT] {line.strip()}"
                     logger.info(clean_line)
                     with self.test_output_lock:
-                        self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                        if "rx msg:" in clean_line:
+                            self.test_output_buffer.append(f"STDOUT: {clean_line}")
 
                 while not stderr_queue.empty():
                     line = stderr_queue.get()
