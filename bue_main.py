@@ -247,22 +247,22 @@ class bUE_Main:
         logger.debug("Could not find coordinates. Are they off?")
         return "", ""
 
-    def gps_handler(self, max_attempts=20):
-        try:
-            session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-            for _ in range(max_attempts):
-                report = session.next()
-                if report['class'] == 'TPV':
-                    if hasattr(report, 'lat') and hasattr(report, 'lon'):
-                        lat, lon = report.lat, report.lon
-                        if lat != "" and lon != "":
-                            logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
-                            return lat, lon
-        except Exception as e:
-            logger.error(f"GPSD error: {e}")
+    # def gps_handler(self, max_attempts=20):
+    #     try:
+    #         session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+    #         for _ in range(max_attempts):
+    #             report = session.next()
+    #             if report['class'] == 'TPV':
+    #                 if hasattr(report, 'lat') and hasattr(report, 'lon'):
+    #                     lat, lon = report.lat, report.lon
+    #                     if lat != "" and lon != "":
+    #                         logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
+    #                         return lat, lon
+    #     except Exception as e:
+    #         logger.error(f"GPSD error: {e}")
 
-        logger.debug("Could not find coordinates from GPSD.")
-        return "", ""
+    #     logger.debug("Could not find coordinates from GPSD.")
+    #     return "", ""
 
 
 
