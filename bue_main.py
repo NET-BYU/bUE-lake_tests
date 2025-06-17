@@ -245,7 +245,7 @@ class bUE_Main:
                     except Exception as parse_error:
                         logger.debug(f"Parse error: {parse_error}")
 
-                    time.sleep(0.5)  # Give GPS time to provide valid data
+                    time.sleep(0.1)  # Give GPS time to provide valid data
         except SerialException as se:
             logger.error(f"GPS SerialException: {se}")
         except Exception as e:
