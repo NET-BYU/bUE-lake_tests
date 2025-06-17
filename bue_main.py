@@ -381,13 +381,13 @@ class bUE_Main:
                         break
                     time.sleep(0.1)
 
-                while not stdout_queue.empty():
-                    line = stdout_queue.get()
-                    clean_line = f"[{file}.py STDOUT] {line.strip()}"
-                    logger.info(clean_line)
-                    with self.test_output_lock:
-                        if "rx msg:" in clean_line:
-                            self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                # while not stdout_queue.empty():
+                #     line = stdout_queue.get()
+                #     clean_line = f"[{file}.py STDOUT] {line.strip()}"
+                #     logger.info(clean_line)
+                #     with self.test_output_lock:
+                #         if "rx msg:" in clean_line:
+                #             self.test_output_buffer.append(f"STDOUT: {clean_line}")
 
                 while not stderr_queue.empty():
                     line = stderr_queue.get()
