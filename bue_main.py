@@ -254,28 +254,45 @@ class bUE_Main:
     #     logger.debug("Could not find coordinates. Are they off?")
     #     return "", ""
 
-    def gps_handler(self, max_attempts=20, max_runtime=5):
-        # start_time = time.time()
-        try:
-            session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-            for _ in range(max_attempts):
-                # if time.time() - start_time > max_runtime:
-                #         logger.warning("GPS handler timed out.")
-                #         break
-                report = session.next()
-                if report['class'] == 'TPV':
-                    if hasattr(report, 'lat') and hasattr(report, 'lon'):
-                        lat, lon = report.lat, report.lon
-                        if lat != "" and lon != "":
-                            logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
-                            return lat, lon
-                
-                time.sleep(0.1)
-        except Exception as e:
-            logger.error(f"GPSD error: {e}")
+def gps_handler(self, max_attempts=20, min_fixes=3, hdop_threshold=1.5):
+    try:
+        session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+        good_fixes = []
 
-        logger.debug("Could not find coordinates from GPSD.")
-        return "", ""
+        for _ in range(max_attempts):
+            report = session.next()
+
+            if report['class'] == 'TPV':
+                # Check if GPS has a fix: 2 = 2D, 3 = 3D
+                if getattr(report, 'mode', 0) >= 2:
+                    lat = getattr(report, 'lat', None)
+                    lon = getattr(report, 'lon', None)
+                    eph = getattr(report, 'eph', None)  # Horizontal Position Error (HDOP estimate)
+
+                    if lat is not None and lon is not None:
+                        if eph is not None and eph <= hdop_threshold:
+                            logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
+                            good_fixes.append((lat, lon))
+
+                            if len(good_fixes) >= min_fixes:
+                                # Return average of lat/lon
+                                avg_lat = sum([f[0] for f in good_fixes]) / len(good_fixes)
+                                avg_lon = sum([f[1] for f in good_fixes]) / len(good_fixes)
+                                logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
+                                return avg_lat, avg_lon
+                        else:
+                            logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
+                    else:
+                        logger.debug("GPS fix missing lat/lon fields")
+
+            time.sleep(0.2)
+
+    except Exception as e:
+        logger.error(f"GPSD error: {e}")
+
+    logger.debug("Could not obtain reliable GPS fix.")
+    return "", ""
+
 
 
 
