@@ -116,17 +116,15 @@ class Base_Station_Main:
     def ping_bue(self, bue_id, lat="", long=""):
         if(bue_id in self.connected_bues):
             try:
-                logger.info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
+                logger.bind(bue_id=bue_id).info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
                 self.ota.send_ota_message(bue_id, "PINGR")
-
-                # print(f"Lat:{lat}Long{long}")
 
                 if lat != "" and long != "":
                     self.bue_coordinates[bue_id] = [lat, long]
                     
                 self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
             except Exception as e:
-                logger.error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
+                logger.bind(bue_id=bue_id).error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
     
     """
     # This function will cycle through each bUE the base station should be connected to and make sure that
@@ -142,7 +140,7 @@ class Base_Station_Main:
                 self.bue_timeout_tracker[bue_id] = TIMEOUT
                 return
             if self.bue_timeout_tracker[bue_id] > -TIMEOUT:
-                logger.error(f"We missed a PING from {bue_id}")
+                logger.bind(bue_id=bue_id).error(f"We missed a PING from {bue_id}")
                 self.bue_timeout_tracker[bue_id] -= 1
             else:
                 logger.error(f"We haven't heard from {bue_id} in awhile. Maybe disconnected?")
@@ -176,13 +174,13 @@ class Base_Station_Main:
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
-                        logger.info(f"Received a request signal from {bue_id}")
+                        logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}")
                         self.connected_bues.append(bue_id)
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
 
                 elif "ACK" in message:
-                    logger.info(f"Received ACK from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
                 elif "PING" in message: # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
                     # print(f"Length: {len(parts)}")
@@ -216,7 +214,7 @@ class Base_Station_Main:
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
 
                 elif "CANCD" in message:
-                    logger.info(f"Received CANCD from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
                 else:

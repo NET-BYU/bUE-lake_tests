@@ -11,43 +11,12 @@ import survey # type:ignore
 
 from base_station_main import Base_Station_Main
 
-def generate_table(base_station) -> Table:
-    """Make a new table."""
-    table = Table()
-    table.add_column("bUEs")
-
-    for bue in base_station.connected_bues:
-        table.add_row(
-            f"{bue}"
-        )
-        
-    return table
-
-def bue_coordinates_table(base_station) -> Table:
-    """Make a new table."""
-    table = Table()
-    table.add_column("bUEs")
-    table.add_column("Coordinates")
-
-    for bue in base_station.connected_bues:
-        if bue in base_station.bue_coordinates:
-            table.add_row(
-                f"{bue}", f"{base_station.bue_coordinates[bue]}"
-            )
-    return table
 
 def send_test(base_station, bue_indexes, file_name, start_time, parameters):
     bues = [base_station.connected_bues[index] for index in bue_indexes]
     for bue in bues:
         base_station.testing_bues.append(bue)
         base_station.ota.send_ota_message(bue, f"TEST-{file_name}-{start_time}-{parameters}")
-
-# def live_display_loop(base_station):
-#     with Live(Group(generate_table(base_station), bue_coordinates_table(base_station)),refresh_per_second=4, screen=False) as live:
-#         while not base_station.EXIT:
-#             time.sleep(0.4)
-#             live.update(Group(generate_table(base_station), bue_coordinates_table(base_station))) 
-
 
 def user_input_handler(base_station):
     
@@ -59,7 +28,8 @@ def user_input_handler(base_station):
 
     while not base_station.EXIT: ## TODO: Make sure that connected_bues_tests are taken out
         try:
-            index = survey.routines.select('Pick a command: ', options = COMMANDS)
+
+            index = survey.routines.select('Pick a command: ', options = COMMANDS, )
 
             if(index != 5 and len(base_station.connected_bues) == 0):
                 print("Currently not connected to any bUEs")
@@ -153,7 +123,6 @@ def user_input_handler(base_station):
             print("\n[Escape] Cancelled input. Returning to command prompt.\n")
             continue 
 
-
         except Exception as e:
             logger.error(f"[User Input] Error {e}")
             print(e)
@@ -167,13 +136,6 @@ if __name__ == "__main__":
     try:
         base_station = Base_Station_Main(yaml_str="config_base.yaml")
         base_station.tick_enabled = True
-
-        # user_input_thread = threading.Thread(target=user_input_handler, args=(base_station,))
-        # user_input_thread.daemon = True
-        # user_input_thread.start()
-
-        # live_thread = threading.Thread(target=live_display_loop, args=(base_station,), daemon=True)
-        # live_thread.start()
 
         user_input_handler(base_station)
 
