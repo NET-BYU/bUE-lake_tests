@@ -22,6 +22,7 @@ from yaml import load, Loader
 
 # For getting the distance between two bUE coordinates
 from geopy import distance
+from collections import deque
 
 logger.remove()  # Remove default sink
 
@@ -46,7 +47,7 @@ for bue_id in range(10, 61, 10):
 # The system will recommend disconnecting after missing TIMEOUT * 2 PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
 """
-TIMEOUT = 3
+TIMEOUT = 6
 
 
 # Internal imports
@@ -83,8 +84,11 @@ class Base_Station_Main:
         """
         self.bue_timeout_tracker = {}
 
-        #Dictionary holds what each bUE's currently location is depending on last PING/UPD
+        # Dictionary holds what each bUE's currently location is depending on last PING/UPD
         self.bue_coordinates = {}
+
+        # Hold the last 10 UPD messages so they can be displayed in the UI 
+        self.stdout_history = deque(maxlen=10)
 
         # A list that tracks what bUEs are currently in the TEST state
         self.testing_bues = []
@@ -139,7 +143,7 @@ class Base_Station_Main:
                 # If this is true we know we are getting PINGs from this bue. No need to fear
                 self.bue_timeout_tracker[bue_id] = TIMEOUT
                 return
-            if self.bue_timeout_tracker[bue_id] > -TIMEOUT:
+            if self.bue_timeout_tracker[bue_id] > 0:
                 logger.bind(bue_id=bue_id).error(f"We missed a PING from {bue_id}")
                 self.bue_timeout_tracker[bue_id] -= 1
             else:
@@ -194,13 +198,16 @@ class Base_Station_Main:
                     long = parts[4]
                     stdout = parts[5]
                     # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
-                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
+                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
                     if lat != "" and long != "":
                         self.bue_coordinates[bue_id] = [lat, long]
                     else:
-                        logger.info("Lat and/or Long was empty")
+                        logger.bind(bue_id=bue_id).info("Lat and/or Long was empty")
                     # Reset the timeout for getting UPDs. If we haven't recieved an update in a while there is a problem
                     self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+
+                    if stdout != "":
+                        self.stdout_history.append(stdout)
 
                 elif "FAIL" in message:
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
