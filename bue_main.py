@@ -266,7 +266,7 @@ class bUE_Main:
                     logger.warning("GPS handler timed out.")
                     break
 
-                if select.select([session], [], [], 0.1)[0]:
+                if select.select([session.sock], [], [], 0.1)[0]:
                     report = session.next()
 
                     if report['class'] == 'TPV':
