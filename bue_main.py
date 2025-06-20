@@ -9,6 +9,7 @@ Documentation can be found in the NET Lab Notion at the page "bUE Python Code Gu
 # Standard library imports
 import queue
 import sys
+import select
 import signal
 import subprocess
 import threading
@@ -264,30 +265,34 @@ class bUE_Main:
                 if time.time() - start_time > max_runtime:
                     logger.warning("GPS handler timed out.")
                     break
-                report = session.next()
 
-                if report['class'] == 'TPV':
-                    # Check if GPS has a fix: 2 = 2D, 3 = 3D
-                    if getattr(report, 'mode', 0) >= 2:
-                        lat = getattr(report, 'lat', None)
-                        lon = getattr(report, 'lon', None)
-                        eph = getattr(report, 'eph', None)  # Horizontal Position Error (HDOP estimate)
+                if select.select([session], [], [], 0.1)[0]:
+                    report = session.next()
 
-                        if lat is not None and lon is not None:
-                            if eph is not None and eph <= hdop_threshold:
-                                logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
-                                good_fixes.append((lat, lon))
+                    if report['class'] == 'TPV':
+                        # Check if GPS has a fix: 2 = 2D, 3 = 3D
+                        if getattr(report, 'mode', 0) >= 2:
+                            lat = getattr(report, 'lat', None)
+                            lon = getattr(report, 'lon', None)
+                            eph = getattr(report, 'eph', None)  # Horizontal Position Error (HDOP estimate)
 
-                                if len(good_fixes) >= min_fixes:
-                                    # Return average of lat/lon
-                                    avg_lat = sum([f[0] for f in good_fixes]) / len(good_fixes)
-                                    avg_lon = sum([f[1] for f in good_fixes]) / len(good_fixes)
-                                    logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
-                                    return avg_lat, avg_lon
+                            if lat is not None and lon is not None:
+                                if eph is not None and eph <= hdop_threshold:
+                                    logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
+                                    good_fixes.append((lat, lon))
+
+                                    if len(good_fixes) >= min_fixes:
+                                        # Return average of lat/lon
+                                        avg_lat = sum([f[0] for f in good_fixes]) / len(good_fixes)
+                                        avg_lon = sum([f[1] for f in good_fixes]) / len(good_fixes)
+                                        logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
+                                        return avg_lat, avg_lon
+                                else:
+                                    logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
                             else:
-                                logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
-                        else:
-                            logger.debug("GPS fix missing lat/lon fields")
+                                logger.debug("GPS fix missing lat/lon fields")
+                else: 
+                    logger.debug("No GPS data available yet")
 
                 time.sleep(0.2)
 
@@ -296,7 +301,6 @@ class bUE_Main:
 
         logger.debug("Could not obtain reliable GPS fix.")
         return "", ""
-
 
 
 
