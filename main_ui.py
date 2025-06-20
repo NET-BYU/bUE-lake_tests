@@ -239,9 +239,9 @@ def open_new_terminal():
     sys.exit(0)
 
 if __name__ == "__main__":
-    if not os.environ.get('DASHBOARD_TERMINAL'):
-        os.environ['DASHBOARD_TERMINAL'] = '1'
-        open_new_terminal()
+    # if not os.environ.get('DASHBOARD_TERMINAL'):
+    #     os.environ['DASHBOARD_TERMINAL'] = '1'
+    #     open_new_terminal()
         
     start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logger.info(f"This marks the start of the base station service at {start_time}")

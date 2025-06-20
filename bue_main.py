@@ -216,66 +216,66 @@ class bUE_Main:
                 self.ota_connected = False
 
 
-    # def gps_handler(self, max_attempts=20, max_runtime = 5):
-    #     start_time = time.time()
-    #     try:
-    #         with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
-    #             nmr = NMEAReader(stream)
-
-    #             for _ in range(max_attempts):
-    #                 if time.time() - start_time > max_runtime:
-    #                     logger.warning("GPS handler timed out.")
-    #                     break
-
-    #                 try:
-    #                     line = stream.readline().decode('ascii', errors='replace').strip()
-    #                     print(line)
-    #                     if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
-    #                         msg = nmr.parse(line)
-
-    #                         if hasattr(msg, "lat") and hasattr(msg, "lon"):
-    #                             logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
-                                
-    #                             if(msg.lat != "" and msg.lon != ""):
-    #                                 return msg.lat, msg.lon
-    #                             else:
-    #                                 break
-    #                         else:
-    #                             logger.debug("NMEA message missing lat/lon")
-    #                 except Exception as parse_error:
-    #                     logger.debug(f"Parse error: {parse_error}")
-
-    #                 time.sleep(0.1)  # Give GPS time to provide valid data
-    #     except SerialException as se:
-    #         logger.error(f"GPS SerialException: {se}")
-    #     except Exception as e:
-    #         logger.error(f"GPS error: {e}")
-
-    #     logger.debug("Could not find coordinates. Are they off?")
-    #     return "", ""
-
-    def gps_handler(self, max_attempts=20, max_runtime=5):
+    def gps_handler(self, max_attempts=20, max_runtime = 5):
         start_time = time.time()
         try:
-            session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-            for _ in range(max_attempts):
-                if time.time() - start_time > max_runtime:
+            with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
+                nmr = NMEAReader(stream)
+
+                for _ in range(max_attempts):
+                    if time.time() - start_time > max_runtime:
                         logger.warning("GPS handler timed out.")
                         break
-                report = session.next()
-                if report['class'] == 'TPV':
-                    if hasattr(report, 'lat') and hasattr(report, 'lon'):
-                        lat, lon = report.lat, report.lon
-                        if lat != "" and lon != "":
-                            logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
-                            return lat, lon
-                
-                time.sleep(0.1)
-        except Exception as e:
-            logger.error(f"GPSD error: {e}")
 
-        logger.debug("Could not find coordinates from GPSD.")
+                    try:
+                        line = stream.readline().decode('ascii', errors='replace').strip()
+                        print(line)
+                        if line.startswith('$GPGGA') or line.startswith('$GPRMC'):
+                            msg = nmr.parse(line)
+
+                            if hasattr(msg, "lat") and hasattr(msg, "lon"):
+                                logger.info(f"GPS: Latitude: {msg.lat}, Longitude: {msg.lon}")
+                                
+                                if(msg.lat != "" and msg.lon != ""):
+                                    return msg.lat, msg.lon
+                                else:
+                                    break
+                            else:
+                                logger.debug("NMEA message missing lat/lon")
+                    except Exception as parse_error:
+                        logger.debug(f"Parse error: {parse_error}")
+
+                    time.sleep(0.1)  # Give GPS time to provide valid data
+        except SerialException as se:
+            logger.error(f"GPS SerialException: {se}")
+        except Exception as e:
+            logger.error(f"GPS error: {e}")
+
+        logger.debug("Could not find coordinates. Are they off?")
         return "", ""
+
+    # def gps_handler(self, max_attempts=20, max_runtime=5):
+    #     start_time = time.time()
+    #     try:
+    #         session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+    #         for _ in range(max_attempts):
+    #             if time.time() - start_time > max_runtime:
+    #                     logger.warning("GPS handler timed out.")
+    #                     break
+    #             report = session.next()
+    #             if report['class'] == 'TPV':
+    #                 if hasattr(report, 'lat') and hasattr(report, 'lon'):
+    #                     lat, lon = report.lat, report.lon
+    #                     if lat != "" and lon != "":
+    #                         logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
+    #                         return lat, lon
+                
+    #             time.sleep(0.1)
+    #     except Exception as e:
+    #         logger.error(f"GPSD error: {e}")
+
+    #     logger.debug("Could not find coordinates from GPSD.")
+    #     return "", ""
 
 
 
