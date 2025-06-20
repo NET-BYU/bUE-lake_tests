@@ -256,51 +256,51 @@ class bUE_Main:
     #     return "", ""
 
     def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
-    start_time = time.time()
-    try:
-        session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-        good_fixes = []
+        start_time = time.time()
+        try:
+            session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+            good_fixes = []
 
-        while time.time() - start_time < max_runtime and len(good_fixes) < min_fixes:
-            if select.select([session.sock], [], [], 1)[0]:
-                try:
-                    report = session.next()
-                except StopIteration:
-                    logger.warning("GPSD stream ended unexpectedly.")
-                    break
-                except Exception as e:
-                    logger.error(f"Error reading GPS data: {e}")
-                    continue
+            while time.time() - start_time < max_runtime and len(good_fixes) < min_fixes:
+                if select.select([session.sock], [], [], 1)[0]:
+                    try:
+                        report = session.next()
+                    except StopIteration:
+                        logger.warning("GPSD stream ended unexpectedly.")
+                        break
+                    except Exception as e:
+                        logger.error(f"Error reading GPS data: {e}")
+                        continue
 
-                if report['class'] == 'TPV':
-                    if getattr(report, 'mode', 0) >= 2:
-                        lat = getattr(report, 'lat', None)
-                        lon = getattr(report, 'lon', None)
-                        eph = getattr(report, 'eph', None)
+                    if report['class'] == 'TPV':
+                        if getattr(report, 'mode', 0) >= 2:
+                            lat = getattr(report, 'lat', None)
+                            lon = getattr(report, 'lon', None)
+                            eph = getattr(report, 'eph', None)
 
-                        if lat is not None and lon is not None:
-                            if eph is not None and eph <= hdop_threshold:
-                                logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
-                                good_fixes.append((lat, lon))
+                            if lat is not None and lon is not None:
+                                if eph is not None and eph <= hdop_threshold:
+                                    logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
+                                    good_fixes.append((lat, lon))
+                                else:
+                                    logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
                             else:
-                                logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
-                        else:
-                            logger.debug("GPS fix missing lat/lon fields")
+                                logger.debug("GPS fix missing lat/lon fields")
+                else:
+                    logger.debug("No GPS data available yet")
+
+            if good_fixes:
+                avg_lat = sum(f[0] for f in good_fixes) / len(good_fixes)
+                avg_lon = sum(f[1] for f in good_fixes) / len(good_fixes)
+                logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
+                return avg_lat, avg_lon
             else:
-                logger.debug("No GPS data available yet")
+                logger.debug("Could not obtain reliable GPS fix.")
 
-        if good_fixes:
-            avg_lat = sum(f[0] for f in good_fixes) / len(good_fixes)
-            avg_lon = sum(f[1] for f in good_fixes) / len(good_fixes)
-            logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
-            return avg_lat, avg_lon
-        else:
-            logger.debug("Could not obtain reliable GPS fix.")
+        except Exception as e:
+            logger.error(f"GPSD error: {e}")
 
-    except Exception as e:
-        logger.error(f"GPSD error: {e}")
-
-    return "", ""
+        return "", ""
 
 
 
