@@ -223,9 +223,9 @@ class bUE_Main:
                 nmr = NMEAReader(stream)
 
                 for _ in range(max_attempts):
-                    if time.time() - start_time > max_runtime:
-                        logger.warning("GPS handler timed out.")
-                        break
+                    # if time.time() - start_time > max_runtime:
+                    #     logger.warning("GPS handler timed out.")
+                    #     break
 
                     try:
                         line = stream.readline().decode('ascii', errors='replace').strip()
