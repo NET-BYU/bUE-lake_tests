@@ -254,12 +254,16 @@ class bUE_Main:
     #     logger.debug("Could not find coordinates. Are they off?")
     #     return "", ""
 
-    def gps_handler(self, max_attempts=20, min_fixes=3, hdop_threshold=1.5):
+    def gps_handler(self, max_attempts=20, min_fixes=3, hdop_threshold=1.5, max_runtime=5):
+        start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
             good_fixes = []
 
             for _ in range(max_attempts):
+                if time.time() - start_time > max_runtime:
+                    logger.warning("GPS handler timed out.")
+                    break
                 report = session.next()
 
                 if report['class'] == 'TPV':
