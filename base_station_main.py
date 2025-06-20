@@ -227,7 +227,7 @@ class Base_Station_Main:
         c1 = self.bue_coordinates[bue_1]
         c2 = self.bue_coordinates[bue_2]
 
-        return distance.geodesic(c1,  c2).meters
+        return distance.great_circle(c1,  c2).meters
 
 
 

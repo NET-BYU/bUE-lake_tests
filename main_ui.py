@@ -56,6 +56,22 @@ def bue_coordinates_table(base_station) -> Table:
     
     return table
 
+def bue_coordinates_table(base_station) -> Table:
+    """Make a styled coordinates table."""
+    table = Table(title="🗺️  bUE Coordinates", show_header=True, header_style="bold blue")
+    table.add_column("bUE ID", style="cyan", justify="center")
+    table.add_column("Coordinates", style="yellow", justify="left")
+
+    for bue in base_station.connected_bues:
+        if bue in base_station.bue_coordinates:
+            coords = base_station.bue_coordinates[bue]
+            table.add_row(str(bue), str(coords))
+    
+    if not base_station.bue_coordinates:
+        table.add_row("[dim]No coordinates available[/dim]", "[dim]N/A[/dim]")
+    
+    return table
+
 def create_compact_dashboard(base_station):
     """Create a compact dashboard without Layout."""
     # Header
