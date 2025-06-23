@@ -436,6 +436,7 @@ class bUE_Main:
                     self.ota.send_ota_message(self.ota_base_station_id, "DONE")
                 else:
                     logger.error(f"{file}.py exited with code {exit_code}")
+                    self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
 
             except Exception as e:
                 logger.info(f"TEST could not be run: {e}")
