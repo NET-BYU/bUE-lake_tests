@@ -1,192 +1,156 @@
 import sys
 import time
-import threading
+import os
+import subprocess
 from datetime import datetime
 from loguru import logger
 
-from rich.live import Live
-from rich.table import Table
-from rich.console import Group, Console
+from rich.console import Console
 import survey # type:ignore
-from rich.layout import Layout
-from rich.panel import Panel
-from rich.prompt import Prompt, IntPrompt, Confirm
+from enum import Enum, auto
 
 from base_station_main import Base_Station_Main
+from UI import create_compact_dashboard
+from constants import bUEs
+
+class Command(Enum):
+    REFRESH = 0
+    TEST = auto()
+    DISTANCE = auto()
+    DISCONNECT = auto()
+    CANCEL = auto()
+    # LIST = auto()
+    EXIT = auto()
 
 console = Console()
 
-def generate_table(base_station) -> Table:
-    """Make a styled table of connected bUEs."""
-    table = Table(title="📡 Connected bUEs", show_header=True, header_style="bold cyan")
-    table.add_column("bUE ID", style="green", no_wrap=True, justify="center")
-    table.add_column("Status", style="yellow", justify="center")
-
-    for bue in base_station.connected_bues:
-        status = "🧪 Testing" if bue in getattr(base_station, 'testing_bues', []) else "💤 Idle"
-        table.add_row(str(bue), status)
-    
-    if not base_station.connected_bues:
-        table.add_row("[dim]No bUEs connected[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def bue_coordinates_table(base_station) -> Table:
-    """Make a styled coordinates table."""
-    table = Table(title="🗺️  bUE Coordinates", show_header=True, header_style="bold blue")
-    table.add_column("bUE ID", style="cyan", justify="center")
-    table.add_column("Coordinates", style="yellow", justify="left")
-
-    for bue in base_station.connected_bues:
-        if bue in base_station.bue_coordinates:
-            coords = base_station.bue_coordinates[bue]
-            table.add_row(str(bue), str(coords))
-    
-    if not base_station.bue_coordinates:
-        table.add_row("[dim]No coordinates available[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def create_dashboard_layout(base_station) -> Layout:
-    """Create the main dashboard layout."""
-    layout = Layout()
-    
-    # Split into header and main content only
-    layout.split_column(
-        Layout(name="header", size=3),
-        Layout(name="tables", ratio=1)
-    )
-    
-    # Header with timestamp and connection count
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    connected_count = len(base_station.connected_bues)
-    testing_count = len(getattr(base_station, 'testing_bues', []))
-    
-    header_text = f"🏢 Base Station Dashboard - {current_time} | Connected: {connected_count} | Testing: {testing_count}"
-    layout["header"].update(
-        Panel(header_text, style="bold white on blue")
-    )
-    
-    # Tables section - split horizontally
-    layout["tables"].split_row(
-        Layout(generate_table(base_station), name="connected_table"),
-        Layout(bue_coordinates_table(base_station), name="coordinates_table")
-    )
-    
-    return layout
-
-def show_menu():
-    """Display the command menu."""
-    COMMANDS = ["TEST", "DISTANCE", "DISCONNECT", "CANCEL", "LIST", "EXIT"]
-    
-    # Create a styled menu
-    menu_table = Table(title="🎛️  Command Menu", show_header=False, box=None)
-    menu_table.add_column("ID", style="bold cyan", width=4, justify="center")
-    menu_table.add_column("Command", style="bold white", width=15)
-    menu_table.add_column("Description", style="dim", width=30)
-    
-    descriptions = [
-        "Start a test on selected bUEs",
-        "Calculate distance between bUEs", 
-        "Disconnect from selected bUEs",
-        "Cancel running tests",
-        "List all connected bUEs",
-        "Exit the application"
-    ]
-    
-    for i, (cmd, desc) in enumerate(zip(COMMANDS, descriptions)):
-        menu_table.add_row(str(i), cmd, desc)
-    
-    return menu_table
 
 def user_input_handler(base_station):
     """User input handler with OS clear for stable positioning."""
-    
-    FILES = ["lora_td_ru", "lora_tu_rd", "helloworld", "gpstest", "gpstest2"]
 
+    COMMANDS_WITH_DESC = [
+        ("REFRESH", "Update the dashboard display"),
+        ("TEST", "Run a test file on selected bUEs"),
+        ("DISTANCE", "Calculate distance between two bUEs"),
+        ("DISCONNECT", "Disconnect from selected bUEs"),
+        ("CANCEL", "Cancel running tests on selected bUEs"),
+        # ("LIST", "Show all currently connected bUEs"),
+        ("EXIT", "Exit the base station application")
+    ]
+    formatted_options = [f"{cmd:<12} - {desc}" for cmd, desc in COMMANDS_WITH_DESC]
+    
+    FILES = ("lora_td_ru", "lora_tu_rd", "helloworld", "gpstest", "gpstest2")
+
+    console
     while not base_station.EXIT:
         try:
-            # Use OS command to truly clear screen
-            import os
-            os.system('clear')  # Linux/Mac - use 'cls' for Windows
-            
-            # Print dashboard
-            console.print(create_dashboard_layout(base_station))
-            console.print()
-            console.print(show_menu())
-            console.print()
-            
+            console.clear()
+            console.print(create_compact_dashboard(base_station), end="")
+            print()
+
             # Get input with simple prompt
-            index = IntPrompt.ask(
-                "[bold cyan]Select command[/bold cyan]", 
-                choices=[str(i) for i in range(6)],
-                show_choices=False
-            )
-            
-            # Check if bUEs are connected (except for LIST and EXIT)
-            if index not in [4, 5] and len(base_station.connected_bues) == 0:
-                console.print("[red]❌ No bUEs currently connected![/red]")
-                input("Press Enter to continue...")
+            index = survey.routines.select('Pick a command: ', options = formatted_options)
+
+            if(index != (len(COMMANDS_WITH_DESC) - 1) and len(base_station.connected_bues) == 0):
+                print("Currently not connected to any bUEs")
+                continue
+                
+            if index == Command.REFRESH.value:
                 continue
 
-            if index == 0:  # TEST
-                console.print("[green]🧪 Test started successfully![/green]")
-                # Simplified test process for demo
-                if base_station.connected_bues:
-                    send_test(base_station, [0], FILES[0], "00:00:00", "")
-                input("Press Enter to continue...")
-            
-            elif index == 1:  # DISTANCE
-                if len(base_station.connected_bues) >= 2:
-                    bue1 = base_station.connected_bues[0]
-                    bue2 = base_station.connected_bues[1]
-                    distance = base_station.get_distance(bue1, bue2)
-                    console.print(f"[green]📏 Distance: {distance}[/green]")
-                else:
-                    console.print("[red]❌ Need at least 2 bUEs[/red]")
-                input("Press Enter to continue...")
-            
-            elif index == 2:  # DISCONNECT
-                if base_station.connected_bues:
-                    bue = base_station.connected_bues[0]
+            elif index == Command.TEST.value:
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                bues_indexes = []
+
+                while len(bues_indexes) == 0:
+                    bues_indexes = survey.routines.basket('What bUEs will be running tests? ', options = connected_bues)
+                    if(len(bues_indexes) == 0):
+                        print("You must select at least one bUE...")
+                
+                ## TODO: Should there be a check to see if a bUE is currently being tested or trust the user to handle this themselves?
+
+                file_index = survey.routines.select('What file would you like to run? ', options = FILES)
+                file_name = FILES[file_index]
+
+                start_time = survey.routines.datetime('When would you like to run the test? ',  attrs = ('hour', 'minute', 'second')).time()
+
+                parameters = survey.routines.input('Enter parameters separated by a space:\n')
+
+                send_test(base_station, bues_indexes, file_name, start_time, parameters)
+
+
+            elif index == Command.DISTANCE.value: 
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                indexes = survey.routines.basket('Select two bUEs: ',
+                                                options = connected_bues)
+                
+                ## TODO: Need to implement the rest of this once I fixed the coordinates 
+
+                bues = []
+                for i in indexes:
+                    bues.append(base_station.connected_bues[i])
+
+                print(base_station.bue_coordinates)
+                print(base_station.get_distance(bues[0], bues[1]))
+
+            if index == Command.DISCONNECT.value:
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
+                                                options = connected_bues)
+                
+                for i in indexes:
+                    bue = base_station.connected_bues[i]
                     base_station.connected_bues.remove(bue)
-                    if bue in base_station.bue_coordinates:
+                    if bue in base_station.bue_coordinates.keys():
                         del base_station.bue_coordinates[bue]
-                    console.print(f"[yellow]🔌 Disconnected from {bue}[/yellow]")
-                else:
-                    console.print("[red]❌ No bUEs to disconnect[/red]")
-                input("Press Enter to continue...")
+                    if bue in base_station.testing_bues:
+                        base_station.testing_bues.remove(bue)
+                    if bue in base_station.bue_timeout_tracker.keys():
+                        del base_station.bue_timeout_tracker[bue]
+                print("\n")
             
-            elif index == 3:  # CANCEL
-                testing_bues = getattr(base_station, 'testing_bues', [])
-                if testing_bues:
-                    bue = testing_bues[0]
+            elif index == Command.CANCEL.value:
+                testing_bues = tuple(bUEs[str(x)] for x in base_station.testing_bues)
+                if(len(testing_bues) == 0):
+                    print("No bUEs are currently running any tests")
+
+                indexes = survey.routines.basket('What bUE tests do you want to cancel? ',
+                                                options = testing_bues)
+                
+                print("\n")
+                ## TODO: Send a CANC to each of these bUEs
+                for i in indexes:
+                    bue = base_station.testing_bues[i]
+                    print(f"Ending test for {base_station.testing_bues[i]}")
                     base_station.ota.send_ota_message(bue, "CANC")
-                    console.print(f"[red]❌ Cancelled test for {bue}[/red]")
-                else:
-                    console.print("[yellow]ℹ️  No tests running[/yellow]")
-                input("Press Enter to continue...")
+                    logger.info(f"Sending CANC to {bue}")
+                print("\n")
+
+            # elif index == Command.LIST.value:
+            #     print("\n")
+            #     connected_bues = " ".join(bUEs[str(bue)] for bue in base_station.connected_bues)
+            #     print(f"Currently connected to {connected_bues}\n\n")
+            #     logger.info(f"Currently connected to {connected_bues}")
             
-            elif index == 4:  # LIST
-                connected_list = ", ".join(str(bue) for bue in base_station.connected_bues) or "None"
-                console.print(f"[green]📋 Connected: {connected_list}[/green]")
-                logger.info(f"Currently connected to: {connected_list}")
-                input("Press Enter to continue...")
-            
-            elif index == 5:  # EXIT
-                console.print("[red]👋 Shutting down...[/red]")
+            elif index == Command.EXIT.value:
                 base_station.EXIT = True
                 base_station.__del__()
+                # if 'user_input_thread' in locals() and user_input_thread.is_alive():
+                #     user_input_thread.join(timeout=2.0)
                 sys.exit(0)
-                
+            else: # Catch all
+                continue
+
         except KeyboardInterrupt:
-            console.print("\n[yellow]⚠️  Use EXIT command (5) to quit properly.[/yellow]")
-            time.sleep(1)
-            continue
+            print("\n[Escape] Cancelled input. Returning to command prompt.\n")
+            continue 
+
         except Exception as e:
             logger.error(f"[User Input] Error {e}")
-            console.print(f"[red]❌ Error: {e}[/red]")
-            input("Press Enter to continue...")
+            print(e)
 
 # Add the missing send_test function:
 def send_test(base_station, bue_indexes, file_name, start_time, parameters):
@@ -198,9 +162,27 @@ def send_test(base_station, bue_indexes, file_name, start_time, parameters):
         base_station.testing_bues.append(bue)
         base_station.ota.send_ota_message(bue, f"TEST-{file_name}-{start_time}-{parameters}")
 
-# Add this at the very end of your file:
+def open_new_terminal():
+    """Open a new terminal window and run this script in it."""
+    # Get the current script path
+    script_path = os.path.abspath(__file__)
+    
+    # Open new terminal with this script
+    subprocess.Popen([
+        'gnome-terminal', 
+        '--', 
+        'python3', 
+        script_path
+    ])
+    
+    # Exit the current process since we're running in new terminal
+    sys.exit(0)
 
 if __name__ == "__main__":
+    # if not os.environ.get('DASHBOARD_TERMINAL'):
+    #     os.environ['DASHBOARD_TERMINAL'] = '1'
+    #     open_new_terminal()
+        
     start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logger.info(f"This marks the start of the base station service at {start_time}")
 

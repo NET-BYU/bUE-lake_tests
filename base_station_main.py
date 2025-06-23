@@ -22,6 +22,7 @@ from yaml import load, Loader
 
 # For getting the distance between two bUE coordinates
 from geopy import distance
+from collections import deque
 
 logger.remove()  # Remove default sink
 
@@ -43,10 +44,10 @@ for bue_id in range(10, 61, 10):
 # station from the bUE. Instead, it will prompt the user that they might want to. This will allow the bUE to be able
 # to reconnect once it is in range
 
-# The system will recommend disconnecting after missing TIMEOUT * 2 PINGs.
+# The system will recommend disconnecting after missing TIMEOUT PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
 """
-TIMEOUT = 3
+from constants import TIMEOUT
 
 
 # Internal imports
@@ -83,8 +84,11 @@ class Base_Station_Main:
         """
         self.bue_timeout_tracker = {}
 
-        #Dictionary holds what each bUE's currently location is depending on last PING/UPD
+        # Dictionary holds what each bUE's currently location is depending on last PING/UPD
         self.bue_coordinates = {}
+
+        # Hold the last 10 UPD messages so they can be displayed in the UI 
+        self.stdout_history = deque(maxlen=10)
 
         # A list that tracks what bUEs are currently in the TEST state
         self.testing_bues = []
@@ -116,17 +120,15 @@ class Base_Station_Main:
     def ping_bue(self, bue_id, lat="", long=""):
         if(bue_id in self.connected_bues):
             try:
-                logger.info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
+                logger.bind(bue_id=bue_id).info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
                 self.ota.send_ota_message(bue_id, "PINGR")
-
-                # print(f"Lat:{lat}Long{long}")
 
                 if lat != "" and long != "":
                     self.bue_coordinates[bue_id] = [lat, long]
                     
                 self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
             except Exception as e:
-                logger.error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
+                logger.bind(bue_id=bue_id).error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
     
     """
     # This function will cycle through each bUE the base station should be connected to and make sure that
@@ -141,8 +143,8 @@ class Base_Station_Main:
                 # If this is true we know we are getting PINGs from this bue. No need to fear
                 self.bue_timeout_tracker[bue_id] = TIMEOUT
                 return
-            if self.bue_timeout_tracker[bue_id] > -TIMEOUT:
-                logger.error(f"We missed a PING from {bue_id}")
+            if self.bue_timeout_tracker[bue_id] > 0:
+                logger.bind(bue_id=bue_id).error(f"We missed a PING from {bue_id}")
                 self.bue_timeout_tracker[bue_id] -= 1
             else:
                 logger.error(f"We haven't heard from {bue_id} in awhile. Maybe disconnected?")
@@ -176,13 +178,13 @@ class Base_Station_Main:
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
-                        logger.info(f"Received a request signal from {bue_id}")
+                        logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}")
                         self.connected_bues.append(bue_id)
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
 
                 elif "ACK" in message:
-                    logger.info(f"Received ACK from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
                 elif "PING" in message: # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
                     # print(f"Length: {len(parts)}")
@@ -196,13 +198,16 @@ class Base_Station_Main:
                     long = parts[4]
                     stdout = parts[5]
                     # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
-                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
+                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
                     if lat != "" and long != "":
                         self.bue_coordinates[bue_id] = [lat, long]
                     else:
-                        logger.info("Lat and/or Long was empty")
+                        logger.bind(bue_id=bue_id).info("Lat and/or Long was empty")
                     # Reset the timeout for getting UPDs. If we haven't recieved an update in a while there is a problem
                     self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+
+                    if stdout != "":
+                        self.stdout_history.append(stdout)
 
                 elif "FAIL" in message:
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
@@ -216,7 +221,7 @@ class Base_Station_Main:
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
 
                 elif "CANCD" in message:
-                    logger.info(f"Received CANCD from {bue_id}")
+                    logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
                 else:
@@ -229,9 +234,7 @@ class Base_Station_Main:
         c1 = self.bue_coordinates[bue_1]
         c2 = self.bue_coordinates[bue_2]
 
-        return distance.geodesic(c1,  c2).meters
-
-
+        return distance.great_circle(c1,  c2).meters
 
     def base_station_tick(self, loop_dur=0.01):
 
@@ -256,9 +259,11 @@ class Base_Station_Main:
 
             if listen_for_message_counter % listen_for_message == 0:
                 self.message_queue.put(self.message_listener)
+                listen_for_message_counter = 0
             
             if check_for_timeouts_counter % check_for_timeouts == 0:
                 self.message_queue.put(self.check_bue_timeout)
+                check_for_timeouts_counter = 0
             
             listen_for_message_counter += 1
             check_for_timeouts_counter += 1

@@ -9,6 +9,7 @@ Documentation can be found in the NET Lab Notion at the page "bUE Python Code Gu
 # Standard library imports
 import queue
 import sys
+import select
 import signal
 import subprocess
 import threading
@@ -30,9 +31,9 @@ from ota import Ota
 
 # This variable manages how many PINGRs should be missed until the bUE disconnects from the base station
 # and goes back to its CONNECT_OTA state. 
-# TIMEOUT * 2 rotations must pass, then the bUE will disconnect.
+# TIMEOUT rotations must pass, then the bUE will disconnect.
 # The length of the rotations is defined by IDLE_PING_OTA_INTERVAL in bue_tick()
-TIMEOUT = 3
+TIMEOUT = 6
 
 class State(Enum):
     INIT = auto()
@@ -209,9 +210,9 @@ class bUE_Main:
         if not got_pingr:
             self.ota_timeout -= 1
             
-            if(self.ota_timeout <= 0):
+            if(self.ota_timeout <= TIMEOUT / 2):
                 logger.info(f"We haven't heard from {self.ota_base_station_id} in a while....")
-            if(self.ota_timeout <= -TIMEOUT):
+            if(self.ota_timeout <= 0):
                 logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
                 self.ota_connected = False
 
@@ -219,13 +220,13 @@ class bUE_Main:
     # def gps_handler(self, max_attempts=20, max_runtime = 5):
     #     start_time = time.time()
     #     try:
-    #         with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 9600, timeout=3) as stream:
+    #         with Serial('/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00', 38400, timeout=3) as stream:
     #             nmr = NMEAReader(stream)
 
     #             for _ in range(max_attempts):
-    #                 if time.time() - start_time > max_runtime:
-    #                     logger.warning("GPS handler timed out.")
-    #                     break
+    #                 # if time.time() - start_time > max_runtime:
+    #                 #     logger.warning("GPS handler timed out.")
+    #                 #     break
 
     #                 try:
     #                     line = stream.readline().decode('ascii', errors='replace').strip()
@@ -254,28 +255,53 @@ class bUE_Main:
     #     logger.debug("Could not find coordinates. Are they off?")
     #     return "", ""
 
-    def gps_handler(self, max_attempts=20, max_runtime=5):
+    def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
         start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-            for _ in range(max_attempts):
-                if time.time() - start_time > max_runtime:
-                        logger.warning("GPS handler timed out.")
+            good_fixes = []
+
+            while time.time() - start_time < max_runtime and len(good_fixes) < min_fixes:
+                if select.select([session.sock], [], [], 1)[0]:
+                    try:
+                        report = session.next()
+                    except StopIteration:
+                        logger.warning("GPSD stream ended unexpectedly.")
                         break
-                report = session.next()
-                if report['class'] == 'TPV':
-                    if hasattr(report, 'lat') and hasattr(report, 'lon'):
-                        lat, lon = report.lat, report.lon
-                        if lat != "" and lon != "":
-                            logger.info(f"GPS: Latitude: {lat}, Longitude: {lon}")
-                            return lat, lon
-                
-                time.sleep(0.1)
+                    except Exception as e:
+                        logger.error(f"Error reading GPS data: {e}")
+                        continue
+
+                    if report['class'] == 'TPV':
+                        if getattr(report, 'mode', 0) >= 2:
+                            lat = getattr(report, 'lat', None)
+                            lon = getattr(report, 'lon', None)
+                            eph = getattr(report, 'eph', None)
+
+                            if lat is not None and lon is not None:
+                                if eph is not None and eph <= hdop_threshold:
+                                    logger.debug(f"Accepted GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
+                                    good_fixes.append((lat, lon))
+                                else:
+                                    logger.debug(f"Rejected fix due to poor HDOP (eph={eph})")
+                            else:
+                                logger.debug("GPS fix missing lat/lon fields")
+                else:
+                    logger.debug("No GPS data available yet")
+
+            if good_fixes:
+                avg_lat = sum(f[0] for f in good_fixes) / len(good_fixes)
+                avg_lon = sum(f[1] for f in good_fixes) / len(good_fixes)
+                logger.info(f"GPS: Averaged Latitude: {avg_lat}, Longitude: {avg_lon}")
+                return avg_lat, avg_lon
+            else:
+                logger.debug("Could not obtain reliable GPS fix.")
+
         except Exception as e:
             logger.error(f"GPSD error: {e}")
 
-        logger.debug("Could not find coordinates from GPSD.")
         return "", ""
+
 
 
 
