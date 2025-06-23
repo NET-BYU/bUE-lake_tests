@@ -322,7 +322,8 @@ class bUE_Main:
                 self.cancel_test = False
 
                 ## TODO: Wait to run the task until given time it reached
-                time.sleep(wait_time)
+                # logger.debug(f"Waiting {wait_time} seconds to start TEST")
+                # time.sleep(wait_time)
 
                 with self.test_output_lock:
                     self.test_output_buffer.clear()
