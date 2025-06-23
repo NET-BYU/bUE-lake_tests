@@ -44,10 +44,10 @@ for bue_id in range(10, 61, 10):
 # station from the bUE. Instead, it will prompt the user that they might want to. This will allow the bUE to be able
 # to reconnect once it is in range
 
-# The system will recommend disconnecting after missing TIMEOUT * 2 PINGs.
+# The system will recommend disconnecting after missing TIMEOUT PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
 """
-TIMEOUT = 6
+from constants import TIMEOUT
 
 
 # Internal imports
@@ -236,8 +236,6 @@ class Base_Station_Main:
 
         return distance.great_circle(c1,  c2).meters
 
-
-
     def base_station_tick(self, loop_dur=0.01):
 
         # The base station will read incoming messages roughly every LISTEN_FOR_MESSAGE_INTERVAL seconds
@@ -261,9 +259,11 @@ class Base_Station_Main:
 
             if listen_for_message_counter % listen_for_message == 0:
                 self.message_queue.put(self.message_listener)
+                listen_for_message_counter = 0
             
             if check_for_timeouts_counter % check_for_timeouts == 0:
                 self.message_queue.put(self.check_bue_timeout)
+                check_for_timeouts_counter = 0
             
             listen_for_message_counter += 1
             check_for_timeouts_counter += 1

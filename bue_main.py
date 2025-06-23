@@ -31,9 +31,9 @@ from ota import Ota
 
 # This variable manages how many PINGRs should be missed until the bUE disconnects from the base station
 # and goes back to its CONNECT_OTA state. 
-# TIMEOUT * 2 rotations must pass, then the bUE will disconnect.
+# TIMEOUT rotations must pass, then the bUE will disconnect.
 # The length of the rotations is defined by IDLE_PING_OTA_INTERVAL in bue_tick()
-TIMEOUT = 3
+TIMEOUT = 6
 
 class State(Enum):
     INIT = auto()
@@ -210,9 +210,9 @@ class bUE_Main:
         if not got_pingr:
             self.ota_timeout -= 1
             
-            if(self.ota_timeout <= 0):
+            if(self.ota_timeout <= TIMEOUT / 2):
                 logger.info(f"We haven't heard from {self.ota_base_station_id} in a while....")
-            if(self.ota_timeout <= -TIMEOUT):
+            if(self.ota_timeout <= 0):
                 logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
                 self.ota_connected = False
 

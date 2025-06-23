@@ -5,16 +5,13 @@ import subprocess
 from datetime import datetime
 from loguru import logger
 
-
-from rich.table import Table
-from rich.console import Group, Console
+from rich.console import Console
 import survey # type:ignore
-from rich.panel import Panel
 from enum import Enum, auto
 
 from base_station_main import Base_Station_Main
-
-TIMEOUT = 6 # Needs to be the same as base_station_main.py
+from UI import create_compact_dashboard
+from constants import bUEs
 
 class Command(Enum):
     REFRESH = 0
@@ -22,114 +19,10 @@ class Command(Enum):
     DISTANCE = auto()
     DISCONNECT = auto()
     CANCEL = auto()
-    LIST = auto()
+    # LIST = auto()
     EXIT = auto()
 
 console = Console()
-
-def bue_status_table(base_station) -> Table:
-    """Make a styled table of connected bUEs."""
-    table = Table(title="📡 Connected bUEs", show_header=True, header_style="bold cyan")
-    table.add_column("bUE ID", style="green", no_wrap=True, justify="center")
-    table.add_column("Status", style="yellow", justify="center")
-
-    for bue in base_station.connected_bues:
-        status = "🧪 Testing" if bue in getattr(base_station, 'testing_bues', []) else "💤 Idle"
-        table.add_row(str(bue), status)
-    
-    if not base_station.connected_bues:
-        table.add_row("[dim]No bUEs connected[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def bue_ping_table(base_station) -> Table:
-    """Make a styled table of connected bUEs."""
-    table = Table(title="📡 bUE PINGs", show_header=True, header_style="bold cyan")
-    table.add_column("bUE ID", style="green", no_wrap=True, justify="center")
-    table.add_column("Receiving PINGs", style="yellow", justify="center")
-
-    for bue in base_station.connected_bues:
-        if base_station.bue_timeout_tracker[bue] >= TIMEOUT / 2:
-            ping_status = "🟢 Good"
-        elif base_station.bue_timeout_tracker[bue] > 0:
-            ping_status = "🟡 Warning"
-        else:
-            ping_status = "🔴 Lost"
-        
-        table.add_row(str(bue), str(ping_status))
-    
-    if not base_station.connected_bues:
-        table.add_row("[dim]No bUEs connected[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def bue_coordinates_table(base_station) -> Table:
-    """Make a styled coordinates table."""
-    table = Table(title="🗺️  bUE Coordinates", show_header=True, header_style="bold blue")
-    table.add_column("bUE ID", style="cyan", justify="center")
-    table.add_column("Coordinates", style="yellow", justify="left")
-
-    for bue in base_station.connected_bues:
-        if bue in base_station.bue_coordinates:
-            coords = base_station.bue_coordinates[bue]
-            table.add_row(str(bue), str(coords))
-    
-    if not base_station.bue_coordinates:
-        table.add_row("[dim]No coordinates available[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def bue_distance_table(base_station) -> Table:
-    """Make a styled distance table."""
-    table = Table(title="📏 bUE Distances", show_header=True, header_style="bold blue")
-    table.add_column("bUE Pair", style="cyan", justify="center")
-    table.add_column("Distance", style="yellow", justify="left")
-
-    # Use a set to avoid duplicate pairs
-    processed_pairs = set()
-    
-    for bue1 in base_station.connected_bues:
-        for bue2 in base_station.connected_bues:
-            if (bue1 != bue2 and 
-                bue1 in base_station.bue_coordinates and 
-                bue2 in base_station.bue_coordinates and
-                (bue1, bue2) not in processed_pairs and
-                (bue2, bue1) not in processed_pairs):
-                
-                coords1 = base_station.bue_coordinates[bue1]
-                coords2 = base_station.bue_coordinates[bue2]
-                dist = base_station.get_distance(coords1, coords2)
-                table.add_row(f"{bue1} ↔ {bue2}", f"{dist:.2f}m")
-                
-                # Mark this pair as processed
-                processed_pairs.add((bue1, bue2))
-    
-    if not base_station.bue_coordinates or len(processed_pairs) == 0:
-        table.add_row("[dim]No distances available[/dim]", "[dim]N/A[/dim]")
-    
-    return table
-
-def create_compact_dashboard(base_station):
-    """Create a compact dashboard without Layout."""
-    # Header
-    current_time = datetime.now().strftime('%H:%M:%S')
-    connected_count = len(base_station.connected_bues)
-    testing_count = len(getattr(base_station, 'testing_bues', []))
-    
-    header_text = f"🏢 Base Station Dashboard - {current_time} | Connected: {connected_count} | Testing: {testing_count}"
-    header = Panel(header_text, style="bold white on blue", padding=(0,1))
-    
-    # Create tables side by side using Group
-    connected_table = bue_status_table(base_station)
-    coordinates_table = bue_coordinates_table(base_station)
-    distance_table = bue_distance_table(base_station)
-    ping_table = bue_ping_table(base_station)
-    
-    # Use Group to combine everything compactly
-    from rich.columns import Columns
-    tables = Columns([connected_table, ping_table, coordinates_table, distance_table])
-    
-    return Group(header, tables)
 
 
 def user_input_handler(base_station):
@@ -141,12 +34,11 @@ def user_input_handler(base_station):
         ("DISTANCE", "Calculate distance between two bUEs"),
         ("DISCONNECT", "Disconnect from selected bUEs"),
         ("CANCEL", "Cancel running tests on selected bUEs"),
-        ("LIST", "Show all currently connected bUEs"),
+        # ("LIST", "Show all currently connected bUEs"),
         ("EXIT", "Exit the base station application")
     ]
     formatted_options = [f"{cmd:<12} - {desc}" for cmd, desc in COMMANDS_WITH_DESC]
     
-    COMMANDS = ("REFRESH", "TEST", "DISTANCE", "DISCONNECT", "CANCEL", "LIST", "EXIT")
     FILES = ("lora_td_ru", "lora_tu_rd", "helloworld", "gpstest", "gpstest2")
 
     console
@@ -159,7 +51,7 @@ def user_input_handler(base_station):
             # Get input with simple prompt
             index = survey.routines.select('Pick a command: ', options = formatted_options)
 
-            if(index != 6 and len(base_station.connected_bues) == 0):
+            if(index != (len(COMMANDS_WITH_DESC) - 1) and len(base_station.connected_bues) == 0):
                 print("Currently not connected to any bUEs")
                 continue
                 
@@ -167,9 +59,7 @@ def user_input_handler(base_station):
                 continue
 
             elif index == Command.TEST.value:
-                connected_bues = tuple(str(x) for x in base_station.connected_bues)
-                if(len(connected_bues) == 0):
-                    print("Currently not connected to any bUEs")
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 bues_indexes = []
 
@@ -180,12 +70,10 @@ def user_input_handler(base_station):
                 
                 ## TODO: Should there be a check to see if a bUE is currently being tested or trust the user to handle this themselves?
 
-
                 file_index = survey.routines.select('What file would you like to run? ', options = FILES)
                 file_name = FILES[file_index]
 
                 start_time = survey.routines.datetime('When would you like to run the test? ',  attrs = ('hour', 'minute', 'second')).time()
-                ## TODO: It would be nice if these parameters setup to conincide with the script being run
 
                 parameters = survey.routines.input('Enter parameters separated by a space:\n')
 
@@ -193,9 +81,7 @@ def user_input_handler(base_station):
 
 
             elif index == Command.DISTANCE.value: 
-                connected_bues = tuple(str(x) for x in base_station.connected_bues)
-                if(len(connected_bues) == 0):
-                    print("Currently not connected to any bUEs")
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 indexes = survey.routines.basket('Select two bUEs: ',
                                                 options = connected_bues)
@@ -210,25 +96,24 @@ def user_input_handler(base_station):
                 print(base_station.get_distance(bues[0], bues[1]))
 
             if index == Command.DISCONNECT.value:
-                connected_bues = tuple(str(x) for x in base_station.connected_bues)
-                if(len(connected_bues) == 0):
-                    print("Currently not connected to any bUEs")
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
                                                 options = connected_bues)
                 
-                print("\n")
                 for i in indexes:
                     bue = base_station.connected_bues[i]
-                    print(f"Disconnected from {base_station.connected_bues[i]}")
                     base_station.connected_bues.remove(bue)
-                    print(f"Connected bUES: {base_station.connected_bues}")
                     if bue in base_station.bue_coordinates.keys():
                         del base_station.bue_coordinates[bue]
+                    if bue in base_station.testing_bues:
+                        base_station.testing_bues.remove(bue)
+                    if bue in base_station.bue_timeout_tracker.keys():
+                        del base_station.bue_timeout_tracker[bue]
                 print("\n")
             
             elif index == Command.CANCEL.value:
-                testing_bues = tuple(str(x) for x in base_station.testing_bues)
+                testing_bues = tuple(bUEs[str(x)] for x in base_station.testing_bues)
                 if(len(testing_bues) == 0):
                     print("No bUEs are currently running any tests")
 
@@ -244,11 +129,11 @@ def user_input_handler(base_station):
                     logger.info(f"Sending CANC to {bue}")
                 print("\n")
 
-            elif index == Command.LIST.value:
-                print("\n")
-                connected_bues = " ".join(str(bue) for bue in base_station.connected_bues)
-                print(f"Currently connected to {connected_bues}\n\n")
-                logger.info(f"Currently connected to {connected_bues}")
+            # elif index == Command.LIST.value:
+            #     print("\n")
+            #     connected_bues = " ".join(bUEs[str(bue)] for bue in base_station.connected_bues)
+            #     print(f"Currently connected to {connected_bues}\n\n")
+            #     logger.info(f"Currently connected to {connected_bues}")
             
             elif index == Command.EXIT.value:
                 base_station.EXIT = True
