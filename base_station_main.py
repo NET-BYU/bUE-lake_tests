@@ -123,6 +123,11 @@ class Base_Station_Main:
                 logger.bind(bue_id=bue_id).info(f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}")
                 self.ota.send_ota_message(bue_id, "PINGR")
 
+                if bue_id in self.testing_bues:
+                    self.testing_bues.remove(bue_id)
+
+                ## TODO: Look in testing bues if we get a PING
+
                 if lat != "" and long != "":
                     self.bue_coordinates[bue_id] = [lat, long]
                     
@@ -194,6 +199,8 @@ class Base_Station_Main:
                     self.ping_bue(bue_id, lat, long)
 
                 elif "UPD" in message: #40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
+                    if not bue_id in self.testing_bues:
+                        self.testing_bues.append(bue_id)
                     lat = parts[3]
                     long = parts[4]
                     stdout = parts[5]
@@ -219,6 +226,7 @@ class Base_Station_Main:
 
                 elif "PREPR" in message:
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
+                    self.testing_bues.append(bue_id)
 
                 elif "CANCD" in message:
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")

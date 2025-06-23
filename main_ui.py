@@ -196,8 +196,7 @@ def send_test(base_station, bue_test, wait_time, bue_params):
     for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
-        base_station.testing_bues.append(bue)
-        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{wait_time}-{bue_params[bue]}")
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{start_time}-{bue_params[bue]}")
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""
