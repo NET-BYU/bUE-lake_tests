@@ -142,7 +142,7 @@ class Base_Station_Main:
             if self.bue_timeout_tracker[bue_id] == TIMEOUT + 1:
                 # If this is true we know we are getting PINGs from this bue. No need to fear
                 self.bue_timeout_tracker[bue_id] = TIMEOUT
-                return
+                continue
             if self.bue_timeout_tracker[bue_id] > 0:
                 logger.bind(bue_id=bue_id).error(f"We missed a PING from {bue_id}")
                 self.bue_timeout_tracker[bue_id] -= 1

@@ -1,13 +1,16 @@
 import sys
+import signal
 import time
 import os
 import subprocess
+import threading
 from datetime import datetime
-from loguru import logger
+from enum import Enum, auto
 
+from loguru import logger
 from rich.console import Console
 import survey # type:ignore
-from enum import Enum, auto
+import keyboard  # Add this import at the top
 
 from base_station_main import Base_Station_Main
 from UI import create_compact_dashboard
@@ -24,9 +27,39 @@ class Command(Enum):
 
 console = Console()
 
+timer = 0
+keyboard_input_detected = False
+is_user_inputting = False
+
+def on_key_press(event):
+    """Callback function triggered on any key press."""
+    global keyboard_input_detected
+    keyboard_input_detected = True
+
+def keystroke_handler():
+    global timer, keyboard_input_detected
+
+    # Set up keyboard listener
+    keyboard.on_press(on_key_press)
+
+    while True:
+        # Check if keyboard input was detected
+        if keyboard_input_detected:
+            timer = 0
+            keyboard_input_detected = False
+        
+        if not is_user_inputting and timer > 5: # How many seconds before auto refresh
+            os.kill(os.getpid(), signal.SIGINT)
+            timer = 0
+        else:
+            timer += 0.5
+        
+        time.sleep(0.5)
+
 
 def user_input_handler(base_station):
     """User input handler with OS clear for stable positioning."""
+    global is_user_inputting
 
     COMMANDS_WITH_DESC = [
         ("REFRESH", "Update the dashboard display"),
@@ -41,15 +74,16 @@ def user_input_handler(base_station):
     
     FILES = ("lora_td_ru", "lora_tu_rd", "helloworld", "gpstest", "gpstest2")
 
-    console
     while not base_station.EXIT:
         try:
             console.clear()
             console.print(create_compact_dashboard(base_station), end="")
             print()
+            is_user_inputting = False
 
             # Get input with simple prompt
             index = survey.routines.select('Pick a command: ', options = formatted_options)
+            is_user_inputting = True
 
             if(index != (len(COMMANDS_WITH_DESC) - 1) and len(base_station.connected_bues) == 0):
                 print("Currently not connected to any bUEs")
@@ -62,22 +96,25 @@ def user_input_handler(base_station):
                 connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 bues_indexes = []
+                bue_test = {}
+                bue_params = {}
 
                 while len(bues_indexes) == 0:
                     bues_indexes = survey.routines.basket('What bUEs will be running tests? ', options = connected_bues)
                     if(len(bues_indexes) == 0):
                         print("You must select at least one bUE...")
                 
-                ## TODO: Should there be a check to see if a bUE is currently being tested or trust the user to handle this themselves?
+                wait_time = survey.routines.numeric('How long should the bUE(s) wait until they run their test (seconds)?: ')
 
-                file_index = survey.routines.select('What file would you like to run? ', options = FILES)
-                file_name = FILES[file_index]
+                bues = [base_station.connected_bues[index] for index in bues_indexes]
+                for bue in bues:
+                    file_index = survey.routines.select(f'What file would you like to run on {bUEs[str(bue)]}? ', options = FILES)
+                    file_name = FILES[file_index]
+                    bue_test[bue] = file_name
+                    parameters = survey.routines.input(f'Enter parameters for {bUEs[str(bue)]}, {file_name} separated by a space: ')
+                    bue_params[bue] = parameters
 
-                start_time = survey.routines.datetime('When would you like to run the test? ',  attrs = ('hour', 'minute', 'second')).time()
-
-                parameters = survey.routines.input('Enter parameters separated by a space:\n')
-
-                send_test(base_station, bues_indexes, file_name, start_time, parameters)
+                send_test(base_station, bue_test, wait_time, bue_params)
 
 
             elif index == Command.DISTANCE.value: 
@@ -146,6 +183,7 @@ def user_input_handler(base_station):
 
         except KeyboardInterrupt:
             print("\n[Escape] Cancelled input. Returning to command prompt.\n")
+            is_user_inputting = False
             continue 
 
         except Exception as e:
@@ -153,14 +191,13 @@ def user_input_handler(base_station):
             print(e)
 
 # Add the missing send_test function:
-def send_test(base_station, bue_indexes, file_name, start_time, parameters):
+def send_test(base_station, bue_test, wait_time, bue_params):
     """Send test command to selected bUEs."""
-    bues = [base_station.connected_bues[index] for index in bue_indexes]
-    for bue in bues:
+    for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
         base_station.testing_bues.append(bue)
-        base_station.ota.send_ota_message(bue, f"TEST-{file_name}-{start_time}-{parameters}")
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{wait_time}-{bue_params[bue]}")
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""
@@ -185,6 +222,8 @@ if __name__ == "__main__":
         
     start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logger.info(f"This marks the start of the base station service at {start_time}")
+
+    threading.Thread(target=keystroke_handler, daemon=True).start()
 
     try:
         base_station = Base_Station_Main(yaml_str="config_base.yaml")

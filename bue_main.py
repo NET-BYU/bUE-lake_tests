@@ -306,7 +306,7 @@ class bUE_Main:
 
 
     # This function handles operations that happen while a bUE is in the TESTING state
-    def test_handler(self, input): # Input Format: TEST-<file>-<start_time>-<parameters>
+    def test_handler(self, input): # Input Format: TEST-<file>-<wait_time>-<parameters>
         if not ";" in input: ## TODO: Perform other checks
             try:
                 self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
@@ -315,13 +315,14 @@ class bUE_Main:
                 if len(parts) < 4:
                     raise ValueError(f"Invalid input format: {input}")
                 file = parts[1]
-                start_time = parts[2]
+                wait_time = int(parts[2])
                 parameters = parts[3].split(" ")
 
                 self.is_testing = True
                 self.cancel_test = False
 
                 ## TODO: Wait to run the task until given time it reached
+                time.sleep(wait_time)
 
                 with self.test_output_lock:
                     self.test_output_buffer.clear()
@@ -436,6 +437,7 @@ class bUE_Main:
                     self.ota.send_ota_message(self.ota_base_station_id, "DONE")
                 else:
                     logger.error(f"{file}.py exited with code {exit_code}")
+                    self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
 
             except Exception as e:
                 logger.info(f"TEST could not be run: {e}")
