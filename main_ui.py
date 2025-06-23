@@ -104,10 +104,8 @@ def user_input_handler(base_station):
                     if(len(bues_indexes) == 0):
                         print("You must select at least one bUE...")
                 
-                start_time = survey.routines.numeric('How long until the test(s) should run? (default: 10): ')
-                if start_time is None or start_time == "":
-                    start_time = 10
-                
+                wait_time = survey.routines.numeric('How long should the bUE(s) wait until they run their test (seconds)?: ')
+
                 bues = [base_station.connected_bues[index] for index in bues_indexes]
                 for bue in bues:
                     file_index = survey.routines.select(f'What file would you like to run on {bUEs[str(bue)]}? ', options = FILES)
@@ -116,9 +114,7 @@ def user_input_handler(base_station):
                     parameters = survey.routines.input(f'Enter parameters for {bUEs[str(bue)]}, {file_name} separated by a space: ')
                     bue_params[bue] = parameters
 
-
-
-                send_test(base_station, bue_test, start_time, bue_params)
+                send_test(base_station, bue_test, wait_time, bue_params)
 
 
             elif index == Command.DISTANCE.value: 
@@ -195,13 +191,13 @@ def user_input_handler(base_station):
             print(e)
 
 # Add the missing send_test function:
-def send_test(base_station, bue_test, start_time, bue_params):
+def send_test(base_station, bue_test, wait_time, bue_params):
     """Send test command to selected bUEs."""
     for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
         base_station.testing_bues.append(bue)
-        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{start_time}-{bue_params[bue]}")
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{wait_time}-{bue_params[bue]}")
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""
