@@ -103,11 +103,17 @@ def main(top_block_cls=lora_td_ru, options=None):
 
     tb.start()
 
+    timeout = 10  # seconds
+    start_time = time.time()
     try:
-        print('Press Enter to quit: ')
+        print('Running for up to 10 seconds. Press Ctrl+C to quit early.')
         while True:
-            time.sleep(1)
+            if time.time() - start_time > timeout:
+                print('Timeout reached, stopping...')
+                break
+            time.sleep(0.1)
     except KeyboardInterrupt:
+        print('Keyboard interrupt received, stopping...')
         pass
     tb.stop()
     tb.wait()
