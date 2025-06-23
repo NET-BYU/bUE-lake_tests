@@ -92,7 +92,17 @@ class lora_td_ru(gr.top_block):
 
 def main(top_block_cls=lora_td_ru, options=None):
     tb = top_block_cls()
+
+    def sig_handler(sig=None, frame=None):
+        tb.stop()
+        tb.wait()
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, sig_handler)
+    signal.signal(signal.SIGTERM, sig_handler)
+
     tb.start()
+
     timeout = 10  # seconds
     start_time = time.time()
     try:
@@ -104,6 +114,7 @@ def main(top_block_cls=lora_td_ru, options=None):
             time.sleep(0.1)
     except KeyboardInterrupt:
         print('Keyboard interrupt received, stopping...')
+        pass
     tb.stop()
     tb.wait()
 
