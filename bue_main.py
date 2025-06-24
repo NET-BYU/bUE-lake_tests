@@ -310,15 +310,28 @@ class bUE_Main:
                 if len(parts) < 4:
                     raise ValueError(f"Invalid input format: {input}")
                 file = parts[1]
-                wait_time = int(parts[2])
+                start_time = int(parts[2])
                 parameters = parts[3].split(" ")
 
                 self.is_testing = True
                 self.cancel_test = False
 
                 ## TODO: Wait to run the task until given time it reached
-                # logger.debug(f"Waiting {wait_time} seconds to start TEST")
-                # time.sleep(wait_time)
+                current_time = int(time.time())
+                if start_time > current_time:
+                    wait_duration = start_time - current_time
+                    logger.info(f"Waiting {wait_duration} seconds until start time {start_time}")
+                    
+                    # Wait in small increments to allow for cancellation
+                    while int(time.time()) < start_time and not self.cancel_test:
+                        time.sleep(0.1)
+                    
+                    if self.cancel_test:
+                        logger.info("Test cancelled during wait period")
+                        self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
+                        return
+
+                logger.info(f"Starting test at scheduled time: {start_time}")
 
                 with self.test_output_lock:
                     self.test_output_buffer.clear()

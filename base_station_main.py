@@ -126,8 +126,6 @@ class Base_Station_Main:
                 if bue_id in self.testing_bues:
                     self.testing_bues.remove(bue_id)
 
-                ## TODO: Look in testing bues if we get a PING
-
                 if lat != "" and long != "":
                     self.bue_coordinates[bue_id] = [lat, long]
                     
@@ -192,7 +190,6 @@ class Base_Station_Main:
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
                 elif "PING" in message: # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
-                    # print(f"Length: {len(parts)}")
                     if len(parts) >= 5:
                         lat = parts[3]
                         long = parts[4]

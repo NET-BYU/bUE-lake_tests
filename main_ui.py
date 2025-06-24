@@ -104,7 +104,7 @@ def user_input_handler(base_station):
                     if(len(bues_indexes) == 0):
                         print("You must select at least one bUE...")
                 
-                wait_time = survey.routines.numeric('How long should the bUE(s) wait until they run their test (seconds)?: ')
+                start_time = survey.routines.datetime('What time do you want to run the test?: ', attrs = ('hour', 'minute', 'second'))
 
                 bues = [base_station.connected_bues[index] for index in bues_indexes]
                 for bue in bues:
@@ -114,7 +114,7 @@ def user_input_handler(base_station):
                     parameters = survey.routines.input(f'Enter parameters for {bUEs[str(bue)]}, {file_name} separated by a space: ')
                     bue_params[bue] = parameters
 
-                send_test(base_station, bue_test, wait_time, bue_params)
+                send_test(base_station, bue_test, start_time, bue_params)
 
 
             elif index == Command.DISTANCE.value: 
@@ -191,7 +191,7 @@ def user_input_handler(base_station):
             print(e)
 
 # Add the missing send_test function:
-def send_test(base_station, bue_test, wait_time, bue_params):
+def send_test(base_station, bue_test, start_time, bue_params):
     """Send test command to selected bUEs."""
     for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
