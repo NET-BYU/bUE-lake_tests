@@ -190,13 +190,26 @@ def user_input_handler(base_station):
             logger.error(f"[User Input] Error {e}")
             print(e)
 
-# Add the missing send_test function:
 def send_test(base_station, bue_test, start_time, bue_params):
     """Send test command to selected bUEs."""
+    # Convert datetime to Unix timestamp
+    import time as time_module
+    from datetime import datetime, date
+
+    if isinstance(start_time, datetime):
+        time_part = start_time.time()
+    else:
+        time_part = start_time
+    
+    # Combine today's date with the selected time
+    today = date.today()
+    full_datetime = datetime.combine(today, time_part)
+    unix_timestamp = int(full_datetime.timestamp())
+    
     for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
-        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{start_time}-{bue_params[bue]}")
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{unix_timestamp}-{bue_params[bue]}")
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""

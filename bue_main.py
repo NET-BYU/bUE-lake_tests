@@ -324,7 +324,7 @@ class bUE_Main:
                     
                     # Wait in small increments to allow for cancellation
                     while int(time.time()) < start_time and not self.cancel_test:
-                        time.sleep(0.1)
+                        time.sleep(0.001)
                     
                     if self.cancel_test:
                         logger.info("Test cancelled during wait period")
