@@ -10,7 +10,7 @@ from enum import Enum, auto
 from loguru import logger
 from rich.console import Console
 import survey # type:ignore
-import keyboard  # Add this import at the top
+import keyboard  # type:ignore
 
 from base_station_main import Base_Station_Main
 from UI import create_compact_dashboard
@@ -158,7 +158,6 @@ def user_input_handler(base_station):
                                                 options = testing_bues)
                 
                 print("\n")
-                ## TODO: Send a CANC to each of these bUEs
                 for i in indexes:
                     bue = base_station.testing_bues[i]
                     print(f"Ending test for {base_station.testing_bues[i]}")

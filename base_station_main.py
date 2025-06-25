@@ -21,7 +21,7 @@ from loguru import logger
 from yaml import load, Loader
 
 # For getting the distance between two bUE coordinates
-from geopy import distance
+from geopy import distance # type:ignore
 from collections import deque
 
 logger.remove()  # Remove default sink
