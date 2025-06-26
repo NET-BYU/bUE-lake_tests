@@ -236,10 +236,13 @@ class Base_Station_Main:
                 logger.error("message_listener: Error listening for messages")
         
     def get_distance(self, bue_1, bue_2):
-        c1 = self.bue_coordinates[bue_1]
-        c2 = self.bue_coordinates[bue_2]
+        try: 
+            c1 = self.bue_coordinates[bue_1]
+            c2 = self.bue_coordinates[bue_2]
 
-        return distance.great_circle(c1,  c2).meters
+            return distance.great_circle(c1,  c2).meters
+        except Exception as e:
+            logger.error(f"Something wrong with coords: {e}")
 
     def base_station_tick(self, loop_dur=0.01):
 
