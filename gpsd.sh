@@ -15,9 +15,10 @@ sudo systemctl disable gpsd.socket
 sudo tee /etc/default/gpsd > /dev/null <<EOT
 # Default settings for gpsd
 START_DAEMON="true"
-GPSD_OPTIONS="-n"
-DEVICES="/dev/ttyACM0"  # Adjust this if your GPS is on another device port
-USBAUTO="true"
+GPSD_OPTIONS="-n -b"
+DEVICES="/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_R>
+USBAUTO="false"
+GPSD_SOCKET="/var/run/gpsd.sock"
 EOT
 
 # Restart the gpsd service
@@ -42,4 +43,13 @@ sudo systemctl restart chrony
 echo "Chrony status:"
 chronyc sources -v
 
-echo "GPS time synchronization setup complete!"
+sudo systemctl disable gpsd.socket
+sudo systemctl stop gpsd.socket
+
+sudo systemctl enable gpsd
+sudo systemctl start gpsd
+
+sudo usermod -a -G dialout $USER
+sudo udevadm trigger
+
+echo "GPS time synchronization setup complete! Please sudo reboot"

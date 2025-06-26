@@ -1,18 +1,53 @@
 # Lake Tests Branch
 
-Then next major step for our project is to put everything in a lake and test communication. This folder/branch will store the files needed for this task.
+The next major step for our project is to put everything in a lake and test communication. This repository will store the files needed for this task.
 
 Hint: to run any commands listed in this file, be sure that your terminal is active in the `lake_tests` directory.
 
 ## If on the Base Station
 
-Simply run the following command:
+Setup a virtual environment and install all the needed packages.
 
+```
+python3 -m venv <environment_name>
+source /path/to/venv/bin/activate
+pip install -r requirements.txt
+```
+### Running Base Station with UI
+
+Make sure that the keystroke handler thread is commented out in `main_ui.py` and run the following:
 ``` 
-python3 base_station_main.py 
+python3 main_ui.py
+```
+
+### Running Base Station with UI and auto refresh
+
+Make sure that the keystroke handler thread is uncommented in `main_ui.py` and run the following:
+```
+sudo -E /path/to/venv/bin/python main_ui.py
 ```
 
 ## If on a bUE
+
+### Install dependencies
+
+The bUE should come with a venv. If it doesn't, create one. Install dependencies into this venv.
+
+```
+pip install -r requirements_bue.txt
+```
+
+Install `python3-gps`
+
+```
+sudo apt-get install python3-gps
+```
+
+Run `gpsd.sh` to get all the gps files configured. It is good to reboot after this
+
+```
+sudo ./gpsd.sh
+```
 
 ### Creating the `.service` file
 
@@ -22,7 +57,7 @@ If this device is a Raspberry Pi bUE, then make sure that you have pointed syste
 sudo cp bue.service.txt /etc/systemd/system/bue.service
 ```
 
-Before activating the service, be sure to edit lines 7 and 8 in your newly created `/etc/systemd/system/bue.service` by changing the value `/path/to/uw_env/...` to whatever path it takes to get to `/uw_env/`. There are three isntances of this, so be sure to change them all.
+Before activating the service, be sure to edit lines 7 and 8 in your newly created `/etc/systemd/system/bue.service` by changing the value `/path/to/uw_env/...` to whatever path it takes to get to `/uw_env/` and the other paths to your `lake_tests/` folder. There are three isntances of this, so be sure to change them all.
 
 ### Creating the `config.yaml` file
 
@@ -32,13 +67,13 @@ Additionally, you need to make sure that there is a `config.yaml` file that the 
 cp config.example config.yaml
 ```
 
-You can then update the fields as needed for the bUE before running it.
+All the fields should be correct except for `OTA_ID`. Make sure this is set to your Reyex device's address.
 
 ### Testing and running the service
 
 Now that you have both the `bue.service` file and `config.yaml` file, let's make sure that they run smoothly. 
 
-To test this, run the follwoing commands:
+To test this, run the following commands:
 
 ```
 sudo systemctl start bue.service

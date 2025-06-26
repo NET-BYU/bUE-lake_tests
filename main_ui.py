@@ -234,7 +234,7 @@ if __name__ == "__main__":
     start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     logger.info(f"This marks the start of the base station service at {start_time}")
 
-    # threading.Thread(target=keystroke_handler, daemon=True).start()
+    threading.Thread(target=keystroke_handler, daemon=True).start()
 
     try:
         base_station = Base_Station_Main(yaml_str="config_base.yaml")
