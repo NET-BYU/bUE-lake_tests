@@ -21,7 +21,7 @@ from yaml import load, Loader
 
 # For gps 
 from serial import Serial, SerialException
-from pynmeagps import NMEAReader
+from pynmeagps import NMEAReader #type:ignore
 import gps
 
 logger.add("logs/bue.log", rotation="10 MB") # Example: Add a file sink for all logs
@@ -316,7 +316,6 @@ class bUE_Main:
                 self.is_testing = True
                 self.cancel_test = False
 
-                ## TODO: Wait to run the task until given time it reached
                 current_time = int(time.time())
                 if start_time > current_time:
                     wait_duration = start_time - current_time
@@ -375,7 +374,7 @@ class bUE_Main:
                         logger.info(clean_line)
                         with self.test_output_lock:
                             if "rx msg:" in clean_line:
-                                self.test_output_buffer.append(f"STDOUT: {clean_line}") ## TODO: Is this too long?
+                                self.test_output_buffer.append(f"STDOUT: {clean_line}")
                     except queue.Empty:
                         pass
 

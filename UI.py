@@ -23,7 +23,7 @@ def bue_status_table(base_station) -> Table:
 
 def bue_ping_table(base_station) -> Table:
     """Make a styled table of connected bUEs."""
-    table = Table(title="📡 bUE PINGs", show_header=True, header_style="bold cyan")
+    table = Table(title="🏓 bUE PINGs", show_header=True, header_style="bold cyan")
     table.add_column("bUE ID", style="green", no_wrap=True, justify="center")
     table.add_column("Receiving PINGs", style="yellow", justify="center")
 
@@ -44,7 +44,7 @@ def bue_ping_table(base_station) -> Table:
 
 def bue_coordinates_table(base_station) -> Table:
     """Make a styled coordinates table."""
-    table = Table(title="🗺️  bUE Coordinates", show_header=True, header_style="bold blue")
+    table = Table(title="🌍 bUE Coordinates", show_header=True, header_style="bold blue")
     table.add_column("bUE ID", style="cyan", justify="center")
     table.add_column("Coordinates", style="yellow", justify="left")
 
@@ -88,6 +88,20 @@ def bue_distance_table(base_station) -> Table:
     
     return table
 
+def received_messages_table(base_station) -> Table:
+    """Make a styled coordinates table."""
+    table = Table(title="💌  Received Messages", show_header=True, header_style="bold blue")
+    table.add_column("Messages", style="cyan", justify="center")
+
+    for message in base_station.stdout_history:
+            table.add_row(message)
+    
+    if not base_station.stdout_history:
+        table.add_row("[dim]No messages[/dim]")
+    
+    return table
+
+
 def create_compact_dashboard(base_station):
     """Create a compact dashboard without Layout."""
     # Header
@@ -98,14 +112,13 @@ def create_compact_dashboard(base_station):
     header_text = f"🏢 Base Station Dashboard - {current_time} | Connected: {connected_count} | Testing: {testing_count}"
     header = Panel(header_text, style="bold white on blue", padding=(0,1))
     
-    # Create tables side by side using Group
     connected_table = bue_status_table(base_station)
     coordinates_table = bue_coordinates_table(base_station)
     distance_table = bue_distance_table(base_station)
     ping_table = bue_ping_table(base_station)
+    received_messages = received_messages_table(base_station)
     
-    # Use Group to combine everything compactly
     from rich.columns import Columns
-    tables = Columns([connected_table, ping_table, coordinates_table, distance_table])
+    tables = Columns([connected_table, ping_table, coordinates_table, distance_table, received_messages])
     
     return Group(header, tables)
