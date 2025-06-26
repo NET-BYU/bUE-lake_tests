@@ -13,6 +13,12 @@ python3 -m venv <environment_name>
 source /path/to/venv/bin/activate
 pip install -r requirements.txt
 ```
+### Running Base Station without UI
+
+```
+python3 main.py
+```
+
 ### Running Base Station with UI
 
 Make sure that the keystroke handler thread is commented out in `main_ui.py` and run the following:
