@@ -20,7 +20,6 @@ from enum import Enum, auto
 from yaml import load, Loader
 
 # For gps 
-from serial import Serial, SerialException
 from pynmeagps import NMEAReader #type:ignore
 import gps
 

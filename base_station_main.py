@@ -239,10 +239,47 @@ class Base_Station_Main:
         try: 
             c1 = self.bue_coordinates[bue_1]
             c2 = self.bue_coordinates[bue_2]
-
-            return distance.great_circle(c1,  c2).meters
+            
+            # Validate that coordinates are lists/tuples with 2 elements
+            if not isinstance(c1, (list, tuple)) or len(c1) != 2:
+                logger.error(f"Invalid coordinates for bUE {bue_1}: {c1}")
+                return None
+                
+            if not isinstance(c2, (list, tuple)) or len(c2) != 2:
+                logger.error(f"Invalid coordinates for bUE {bue_2}: {c2}")
+                return None
+            
+            # Validate that coordinates are numeric and within valid ranges
+            try:
+                lat1, lon1 = float(c1[0]), float(c1[1])
+                lat2, lon2 = float(c2[0]), float(c2[1])
+            except (ValueError, TypeError):
+                logger.error(f"Non-numeric coordinates: bUE {bue_1}: {c1}, bUE {bue_2}: {c2}")
+                return None
+            
+            # Check if coordinates are within valid ranges
+            if not (-90 <= lat1 <= 90) or not (-180 <= lon1 <= 180):
+                logger.error(f"Invalid latitude/longitude for bUE {bue_1}: lat={lat1}, lon={lon1}")
+                return None
+                
+            if not (-90 <= lat2 <= 90) or not (-180 <= lon2 <= 180):
+                logger.error(f"Invalid latitude/longitude for bUE {bue_2}: lat={lat2}, lon={lon2}")
+                return None
+            
+            # Check if coordinates are not empty/zero (optional - depends on your use case)
+            if (lat1 == 0 and lon1 == 0) or (lat2 == 0 and lon2 == 0):
+                logger.warning(f"Zero coordinates detected: bUE {bue_1}: {c1}, bUE {bue_2}: {c2}")
+            
+            logger.info(f"Calculating distance between bUE {bue_1} at ({lat1}, {lon1}) and bUE {bue_2} at ({lat2}, {lon2})")
+            
+            return distance.great_circle((lat1, lon1), (lat2, lon2)).meters
+            
+        except KeyError as e:
+            logger.error(f"bUE coordinates not found: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Something wrong with coords: {e}")
+            logger.error(f"Error calculating distance: {e}")
+            return None
 
     def base_station_tick(self, loop_dur=0.01):
 
