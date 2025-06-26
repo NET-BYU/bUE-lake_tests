@@ -22,9 +22,7 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 import gnuradio.lora_sdr as lora_sdr
-import RPi.GPIO as GPIO
-import os
-import time
+
 
 
 
@@ -66,7 +64,7 @@ class tdo_rup(gr.top_block):
         self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[True,True])
         self.blocks_multiply_xx_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
-        self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(0.2)
+        self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(mult_amp)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern(f"{message_str}"), 1000)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
         self.blocks_conjugate_cc_0 = blocks.conjugate_cc()
@@ -106,6 +104,7 @@ class tdo_rup(gr.top_block):
 
     def set_mult_amp(self, mult_amp):
         self.mult_amp = mult_amp
+        self.blocks_multiply_const_vxx_0.set_k(self.mult_amp)
 
     def get_rx_mix_freq(self):
         return self.rx_mix_freq
@@ -190,24 +189,17 @@ def main(top_block_cls=tdo_rup, options=None):
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
-        raise KeyboardInterrupt
+
+        sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
 
-    timeout = 10  # seconds
-    start_time = time.time()
     try:
-        print('Running for up to 10 seconds. Press Ctrl+C to quit early.')
-        while True:
-            if time.time() - start_time > timeout:
-                print('Timeout reached, stopping...')
-                break
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        print('Keyboard interrupt received, stopping...')
+        input('Press Enter to quit: ')
+    except EOFError:
         pass
     tb.stop()
     tb.wait()
@@ -215,16 +207,3 @@ def main(top_block_cls=tdo_rup, options=None):
 
 if __name__ == '__main__':
     main()
-        
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    GPIO.setup(26, GPIO.OUT)
-
-    GPIO.output(26, GPIO.HIGH)
-    time.sleep(0.5)
-
-    main()
-
-    GPIO.cleanup()
-    print("Audio device closed, GPIO cleaned up")
-
