@@ -28,7 +28,7 @@ import gnuradio.lora_sdr as lora_sdr
 
 class tdo_rup(gr.top_block):
 
-    def __init__(self, message_str='TEST', mult_amp=0.5, rx_mix_freq=(-1000), tx_cr=1, tx_mix_freq=1000, tx_rx_bw=8000, tx_rx_sf=7, tx_rx_sync_word=[0x12]):
+    def __init__(self, message_str='TEST', mult_amp=0.5, rx_mix_freq=(-1000), tx_cr=1, tx_mix_freq=1000, tx_rx_bw=8000, tx_rx_sf=7, tx_rx_sync_word=[0x12], wav_file=''):
         gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
 
         ##################################################
@@ -42,6 +42,7 @@ class tdo_rup(gr.top_block):
         self.tx_rx_bw = tx_rx_bw
         self.tx_rx_sf = tx_rx_sf
         self.tx_rx_sync_word = tx_rx_sync_word
+        self.wav_file = wav_file
 
         ##################################################
         # Variables
@@ -62,12 +63,21 @@ class tdo_rup(gr.top_block):
          ldro_mode=2,frame_zero_padd=1280,sync_word=tx_rx_sync_word )
         self.lora_sdr_payload_id_inc_0 = lora_sdr.payload_id_inc(':')
         self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[True,True])
+        self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
+            wav_file,
+            1,
+            samp_rate,
+            blocks.FORMAT_WAV,
+            blocks.FORMAT_PCM_16,
+            False
+            )
         self.blocks_multiply_xx_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(mult_amp)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern(f"{message_str}"), 1000)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
         self.blocks_conjugate_cc_0 = blocks.conjugate_cc()
+        self.blocks_complex_to_float_0_0 = blocks.complex_to_float(1)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
         self.audio_source_0 = audio.source(samp_rate, 'hw:3,0', True)
         self.audio_sink_0 = audio.sink(samp_rate, 'hw:3,0', True)
@@ -85,6 +95,8 @@ class tdo_rup(gr.top_block):
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_multiply_xx_0_0, 0))
         self.connect((self.audio_source_0, 0), (self.blocks_float_to_complex_0, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.audio_sink_0, 0))
+        self.connect((self.blocks_complex_to_float_0_0, 0), (self.blocks_wavfile_sink_0, 0))
+        self.connect((self.blocks_conjugate_cc_0, 0), (self.blocks_complex_to_float_0_0, 0))
         self.connect((self.blocks_conjugate_cc_0, 0), (self.lora_rx_0, 0))
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_complex_to_float_0, 0))
@@ -145,6 +157,13 @@ class tdo_rup(gr.top_block):
     def set_tx_rx_sync_word(self, tx_rx_sync_word):
         self.tx_rx_sync_word = tx_rx_sync_word
 
+    def get_wav_file(self):
+        return self.wav_file
+
+    def set_wav_file(self, wav_file):
+        self.wav_file = wav_file
+        self.blocks_wavfile_sink_0.open(self.wav_file)
+
     def get_samp_rate(self):
         return self.samp_rate
 
@@ -178,13 +197,16 @@ def argument_parser():
     parser.add_argument(
         "--tx-rx-sf", dest="tx_rx_sf", type=intx, default=7,
         help="Set tx_rx_sf [default=%(default)r]")
+    parser.add_argument(
+        "--wav-file", dest="wav_file", type=str, default='',
+        help="Set wav_file [default=%(default)r]")
     return parser
 
 
 def main(top_block_cls=tdo_rup, options=None):
     if options is None:
         options = argument_parser().parse_args()
-    tb = top_block_cls(message_str=options.message_str, mult_amp=options.mult_amp, rx_mix_freq=options.rx_mix_freq, tx_cr=options.tx_cr, tx_mix_freq=options.tx_mix_freq, tx_rx_bw=options.tx_rx_bw, tx_rx_sf=options.tx_rx_sf)
+    tb = top_block_cls(message_str=options.message_str, mult_amp=options.mult_amp, rx_mix_freq=options.rx_mix_freq, tx_cr=options.tx_cr, tx_mix_freq=options.tx_mix_freq, tx_rx_bw=options.tx_rx_bw, tx_rx_sf=options.tx_rx_sf, wav_file=options.wav_file)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
