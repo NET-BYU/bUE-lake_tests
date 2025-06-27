@@ -158,7 +158,7 @@ blocks:
     bus_structure: null
     coordinate: [984, 552.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_conjugate_cc_0
   id: blocks_conjugate_cc
   parameters:
@@ -282,7 +282,7 @@ blocks:
     bus_structure: null
     coordinate: [1224, 480.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: lora_rx_0
   id: lora_rx
   parameters:
@@ -501,7 +501,7 @@ blocks:
     bus_structure: null
     coordinate: [1376, 496.0]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
