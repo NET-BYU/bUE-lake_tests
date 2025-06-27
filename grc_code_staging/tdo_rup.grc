@@ -105,7 +105,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1376, 216.0]
+    coordinate: [1360, 288.0]
     rotation: 0
     state: enabled
 - name: audio_source_0
@@ -140,23 +140,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 280.0]
-    rotation: 0
-    state: enabled
-- name: blocks_complex_to_float_0_0
-  id: blocks_complex_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1016, 512.0]
+    coordinate: [1136, 272.0]
     rotation: 0
     state: enabled
 - name: blocks_conjugate_cc_0
@@ -171,7 +155,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [960, 296.0]
+    coordinate: [928, 296.0]
     rotation: 0
     state: enabled
 - name: blocks_float_to_complex_0
@@ -261,28 +245,6 @@ blocks:
     coordinate: [608, 296.0]
     rotation: 0
     state: true
-- name: blocks_wavfile_sink_0
-  id: blocks_wavfile_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    append: 'False'
-    bits_per_sample1: FORMAT_PCM_16
-    bits_per_sample2: FORMAT_PCM_16
-    bits_per_sample3: FORMAT_VORBIS
-    bits_per_sample4: FORMAT_PCM_16
-    comment: ''
-    file: wav_file
-    format: FORMAT_WAV
-    nchan: '1'
-    samp_rate: samp_rate
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1240, 448.0]
-    rotation: 0
-    state: enabled
 - name: lora_rx_0
   id: lora_rx
   parameters:
@@ -306,7 +268,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 700.0]
+    coordinate: [1080, 668.0]
     rotation: 0
     state: true
 - name: lora_sdr_payload_id_inc_0
@@ -485,36 +447,17 @@ blocks:
     coordinate: [424, 8.0]
     rotation: 0
     state: enabled
-- name: wav_file
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: str
-    value: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1280, 576.0]
-    rotation: 0
-    state: enabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '0']
 - [audio_source_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_complex_to_float_0, '0', audio_sink_0, '0']
-- [blocks_complex_to_float_0_0, '0', blocks_wavfile_sink_0, '0']
 - [blocks_conjugate_cc_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_float_to_complex_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_message_strobe_0, strobe, lora_sdr_payload_id_inc_0, msg_in]
 - [blocks_message_strobe_0, strobe, lora_tx_0, in]
 - [blocks_multiply_const_vxx_0, '0', blocks_conjugate_cc_0, '0']
-- [blocks_multiply_xx_0, '0', blocks_complex_to_float_0_0, '0']
 - [blocks_multiply_xx_0, '0', lora_rx_0, '0']
 - [blocks_multiply_xx_0_0, '0', blocks_multiply_const_vxx_0, '0']
 - [lora_sdr_payload_id_inc_0, msg_out, blocks_message_strobe_0, set_msg]

@@ -65,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [552, 752.0]
+    coordinate: [600, 752.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_0_0
@@ -105,7 +105,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 304.0]
+    coordinate: [1224, 288.0]
     rotation: 0
     state: enabled
 - name: audio_source_0
@@ -143,22 +143,6 @@ blocks:
     coordinate: [1016, 256.0]
     rotation: 0
     state: enabled
-- name: blocks_complex_to_float_0_0
-  id: blocks_complex_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1184, 592.0]
-    rotation: 0
-    state: enabled
 - name: blocks_conjugate_cc_0
   id: blocks_conjugate_cc
   parameters:
@@ -171,7 +155,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 672.0]
+    coordinate: [1000, 664.0]
     rotation: 0
     state: enabled
 - name: blocks_float_to_complex_0
@@ -187,7 +171,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 640.0]
+    coordinate: [488, 664.0]
     rotation: 0
     state: enabled
 - name: blocks_message_strobe_0
@@ -240,7 +224,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 656.0]
+    coordinate: [840, 648.0]
     rotation: 0
     state: true
 - name: blocks_multiply_xx_0_0
@@ -261,28 +245,6 @@ blocks:
     coordinate: [640, 296.0]
     rotation: 0
     state: true
-- name: blocks_wavfile_sink_0
-  id: blocks_wavfile_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    append: 'False'
-    bits_per_sample1: FORMAT_PCM_16
-    bits_per_sample2: FORMAT_PCM_16
-    bits_per_sample3: FORMAT_VORBIS
-    bits_per_sample4: FORMAT_PCM_16
-    comment: ''
-    file: wav_file
-    format: FORMAT_WAV
-    nchan: '1'
-    samp_rate: samp_rate
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1408, 528.0]
-    rotation: 0
-    state: enabled
 - name: lora_rx_0
   id: lora_rx
   parameters:
@@ -306,7 +268,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1184, 772.0]
+    coordinate: [1200, 740.0]
     rotation: 0
     state: true
 - name: lora_sdr_payload_id_inc_0
@@ -397,7 +359,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 888.0]
+    coordinate: [632, 888.0]
     rotation: 0
     state: enabled
 - name: tx_cr
@@ -485,31 +447,12 @@ blocks:
     coordinate: [424, 8.0]
     rotation: 0
     state: enabled
-- name: wav_file
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: str
-    value: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1448, 648.0]
-    rotation: 0
-    state: enabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '0']
 - [audio_source_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_complex_to_float_0, '0', audio_sink_0, '0']
-- [blocks_complex_to_float_0_0, '0', blocks_wavfile_sink_0, '0']
-- [blocks_conjugate_cc_0, '0', blocks_complex_to_float_0_0, '0']
 - [blocks_conjugate_cc_0, '0', lora_rx_0, '0']
 - [blocks_float_to_complex_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_message_strobe_0, strobe, lora_sdr_payload_id_inc_0, msg_in]
