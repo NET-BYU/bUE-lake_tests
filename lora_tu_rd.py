@@ -4,6 +4,9 @@ from tup_rdo import tup_rdo
 import RPi.GPIO as GPIO
 import signal
 
+# THIS IS A WRAPPER FOR THE TUP_RDO BLOCK CLASS. FLOWGRAPH EDITS NEED TO BE MADE USING GRC
+# All other scripting for the program should be done in this file.
+
 # Load all parameter sets from YAML
 with open('auto_config.yaml', 'r') as f:
     config = yaml.safe_load(f)
