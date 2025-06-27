@@ -1,4 +1,9 @@
+# Ignore all .yaml files
 *.yaml
+
+# Except this one file - used for universal configuration matching between bUEs
+!auto_config.yaml
+
 logs/*.log
 uw_env/
 __pycache__/
