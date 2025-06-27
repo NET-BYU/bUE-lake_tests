@@ -1,0 +1,27 @@
+parameter_sets:
+  - message_str: "TEST"
+    mult_amp: 0.5
+    rx_mix_freq: -1000
+    tx_mix_freq: 1000
+    tx_rx_bw: 8000
+    tx_cr: 1
+    tx_rx_sf: 7
+    tx_rx_sync_word: [18]
+
+  - message_str: "TEST"
+    mult_amp: 0.1
+    rx_mix_freq: -2000
+    tx_mix_freq: 2000
+    tx_rx_bw: 12500
+    tx_cr: 2
+    tx_rx_sf: 11
+    tx_rx_sync_word: [34]
+
+  - message_str: "TEST"
+    mult_amp: 0.2
+    rx_mix_freq: -500
+    tx_mix_freq: 500
+    tx_rx_bw: 6250
+    tx_cr: 1
+    tx_rx_sf: 9
+    tx_rx_sync_word: [52]
