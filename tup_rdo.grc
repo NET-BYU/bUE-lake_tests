@@ -266,7 +266,7 @@ blocks:
     bus_structure: null
     coordinate: [1240, 88.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: lora_rx_0
   id: lora_rx
   parameters:
@@ -485,7 +485,7 @@ blocks:
     bus_structure: null
     coordinate: [1400, 96.0]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
