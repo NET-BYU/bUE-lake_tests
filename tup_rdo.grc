@@ -9,9 +9,9 @@ options:
     description: ''
     gen_cmake: 'On'
     gen_linking: dynamic
-    generate_options: qt_gui
+    generate_options: no_gui
     hier_block_src_path: '.:'
-    id: td_ru_grc_base
+    id: tup_rdo
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -28,7 +28,7 @@ options:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 8]
+    coordinate: [8, 12.0]
     rotation: 0
     state: enabled
 
@@ -42,7 +42,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 12]
+    coordinate: [176, 8.0]
     rotation: 0
     state: enabled
 - name: analog_sig_source_x_0
@@ -52,19 +52,20 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: '-30000'
+    freq: '-1000'
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
+    showports: 'False'
     type: complex
     waveform: analog.GR_COS_WAVE
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [552, 512.0]
+    coordinate: [600, 752.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_0_0
@@ -74,19 +75,20 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: '1000'
+    freq: tx_mix_freq
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
+    showports: 'False'
     type: complex
     waveform: analog.GR_COS_WAVE
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 888.0]
+    coordinate: [360, 136.0]
     rotation: 0
     state: true
 - name: audio_sink_0
@@ -103,9 +105,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1512, 908.0]
+    coordinate: [1224, 288.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: audio_source_0
   id: audio_source
   parameters:
@@ -122,9 +124,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 376.0]
+    coordinate: [232, 696.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_complex_to_float_0
   id: blocks_complex_to_float
   parameters:
@@ -138,25 +140,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1336, 1040.0]
+    coordinate: [1016, 256.0]
     rotation: 0
-    state: true
-- name: blocks_complex_to_float_1
-  id: blocks_complex_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1232, 216.0]
-    rotation: 0
-    state: true
+    state: enabled
 - name: blocks_conjugate_cc_0
   id: blocks_conjugate_cc
   parameters:
@@ -169,9 +155,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 920.0]
+    coordinate: [1000, 664.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_float_to_complex_0
   id: blocks_float_to_complex
   parameters:
@@ -185,9 +171,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 288.0]
+    coordinate: [488, 664.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -196,15 +182,33 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    msg: pmt.intern("TEST")
+    msg: pmt.intern(f"{message_str}")
     period: '1000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [376, 1160.0]
+    coordinate: [96, 392.0]
     rotation: 0
     state: true
+- name: blocks_multiply_const_vxx_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: mult_amp
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 304.0]
+    rotation: 0
+    state: enabled
 - name: blocks_multiply_xx_0
   id: blocks_multiply_xx
   parameters:
@@ -220,7 +224,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 408.0]
+    coordinate: [840, 648.0]
     rotation: 0
     state: true
 - name: blocks_multiply_xx_0_0
@@ -238,7 +242,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [968, 1032.0]
+    coordinate: [640, 296.0]
     rotation: 0
     state: true
 - name: blocks_wavfile_sink_0
@@ -252,7 +256,7 @@ blocks:
     bits_per_sample3: FORMAT_VORBIS
     bits_per_sample4: FORMAT_PCM_16
     comment: ''
-    file: /home/admin/wav_file_recordings/wav_file_rec_tu_rd1.wav
+    file: wav_file_path
     format: FORMAT_WAV
     nchan: '1'
     samp_rate: samp_rate
@@ -260,15 +264,15 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1448, 144.0]
+    coordinate: [1240, 88.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: lora_rx_0
   id: lora_rx
   parameters:
     affinity: ''
     alias: ''
-    bw: '8000'
+    bw: tx_rx_bw
     comment: ''
     cr: '1'
     has_crc: 'True'
@@ -279,14 +283,14 @@ blocks:
     pay_len: '255'
     print_rx: '[True,True]'
     samp_rate: samp_rate
-    sf: '7'
+    sf: tx_rx_sf
     soft_decoding: 'True'
-    sync_word: '[0x12]'
+    sync_word: tx_rx_sync_word
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1360, 404.0]
+    coordinate: [1200, 740.0]
     rotation: 0
     state: true
 - name: lora_sdr_payload_id_inc_0
@@ -302,7 +306,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [376, 976.0]
+    coordinate: [120, 240.0]
     rotation: 180
     state: true
 - name: lora_tx_0
@@ -310,9 +314,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    bw: '8000'
+    bw: tx_rx_bw
     comment: ''
-    cr: '1'
+    cr: tx_cr
     frame_zero_padd: '1280'
     has_crc: 'True'
     impl_head: 'False'
@@ -320,32 +324,185 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
-    sf: '7'
-    sync_word: '[0x12]'
+    sf: tx_rx_sf
+    sync_word: tx_rx_sync_word
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [640, 1072.0]
+    coordinate: [336, 412.0]
     rotation: 0
     state: true
+- name: message_str
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: TEST
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [112, 464.0]
+    rotation: 0
+    state: enabled
+- name: mult_amp
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: eng_float
+    value: '0.5'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 216.0]
+    rotation: 0
+    state: enabled
+- name: rx_mix_freq
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '-1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 888.0]
+    rotation: 0
+    state: enabled
+- name: tx_cr
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 8.0]
+    rotation: 0
+    state: enabled
+- name: tx_mix_freq
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 272.0]
+    rotation: 0
+    state: enabled
+- name: tx_rx_bw
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '8000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 8.0]
+    rotation: 0
+    state: enabled
+- name: tx_rx_sf
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '7'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 8.0]
+    rotation: 0
+    state: enabled
+- name: tx_rx_sync_word
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: ''
+    value: '[0x12]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 8.0]
+    rotation: 0
+    state: enabled
+- name: wav_file_path
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 96.0]
+    rotation: 0
+    state: enabled
 
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '0']
 - [audio_source_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_complex_to_float_0, '0', audio_sink_0, '0']
-- [blocks_complex_to_float_1, '0', blocks_wavfile_sink_0, '0']
-- [blocks_conjugate_cc_0, '0', blocks_complex_to_float_0, '0']
+- [blocks_complex_to_float_0, '0', blocks_wavfile_sink_0, '0']
+- [blocks_conjugate_cc_0, '0', lora_rx_0, '0']
 - [blocks_float_to_complex_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_message_strobe_0, strobe, lora_sdr_payload_id_inc_0, msg_in]
 - [blocks_message_strobe_0, strobe, lora_tx_0, in]
-- [blocks_multiply_xx_0, '0', blocks_complex_to_float_1, '0']
-- [blocks_multiply_xx_0, '0', lora_rx_0, '0']
-- [blocks_multiply_xx_0_0, '0', blocks_conjugate_cc_0, '0']
+- [blocks_multiply_const_vxx_0, '0', blocks_complex_to_float_0, '0']
+- [blocks_multiply_xx_0, '0', blocks_conjugate_cc_0, '0']
+- [blocks_multiply_xx_0_0, '0', blocks_multiply_const_vxx_0, '0']
 - [lora_sdr_payload_id_inc_0, msg_out, blocks_message_strobe_0, set_msg]
 - [lora_tx_0, '0', blocks_multiply_xx_0_0, '1']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.5.1
+  grc_version: 3.10.9.2
