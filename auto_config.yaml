@@ -1,27 +1,32 @@
 parameter_sets:
-  - message_str: "TEST"
-    mult_amp: 0.5
-    rx_mix_freq: -1000
-    tx_mix_freq: 1000
-    tx_rx_bw: 8000
-    tx_cr: 1
+  - message_str: "The quick brown fox jumps over the lazy dog"
+    mult_amp: 0.2
+    rx_mix_freq: -12000
+    tx_mix_freq: 12000
+    tx_rx_bw: 5000
+    tx_cr: 0
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
   - message_str: "TEST"
-    mult_amp: 0.1
-    rx_mix_freq: -2000
-    tx_mix_freq: 2000
-    tx_rx_bw: 12500
-    tx_cr: 2
-    tx_rx_sf: 11
-    tx_rx_sync_word: [34]
-
-  - message_str: "TEST"
     mult_amp: 0.2
-    rx_mix_freq: -500
-    tx_mix_freq: 500
-    tx_rx_bw: 6250
-    tx_cr: 1
-    tx_rx_sf: 9
-    tx_rx_sync_word: [52]
+    rx_mix_freq: -12000
+    tx_mix_freq: 12000
+    tx_rx_bw: 5000
+    tx_cr: 0
+    tx_rx_sf: 7
+    tx_rx_sync_word: [18]
+
+  - message_str: "The underwater modem transmitted chirped acoustic signals across the lakebed, enabling reliable communication between autonomous vehicles exploring submerged environments with minimal packet loss."
+    mult_amp: 0.2
+    rx_mix_freq: -12000
+    tx_mix_freq: 12000
+    tx_rx_bw: 5000
+    tx_cr: 0
+    tx_rx_sf: 7
+    tx_rx_sync_word: [18]
+
+    # BW is 5000 for all
+    # CR is same for all
+    # sync word is same for all (default 18)
+    # mix frequency is 12000 +/- for all (center freq)

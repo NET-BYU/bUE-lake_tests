@@ -1,0 +1,29 @@
+Base Station Location: [40.43139, -111.49199] -???
+
+
+TEST 1 (.1km):
+
+Eli, Perry, tu_rd.py, [40.42881, -111.49769]
+
+Bryson, Major, td_ru.py, [40.42782, -111.49798]
+
+
+TEST 2 (.25km):
+
+Eli, Perry, tu_rd.py, [40.42955, -111.49751]
+
+Bryson, Major, td_ru.py, [40.42751, -111.49819]
+
+
+TEST 3 (.5km):
+
+Eli, Perry, tu_rd.py, [40.43241, -111.49706]
+
+Bryson, Major, td_ru.py, [40.42732, -111.49823]
+
+
+TEST 4 (1.0km):
+
+Eli, Perry, tu_rd.py, [40.43609, -111.49677]
+
+Bryson, Major, td_ru.py, [40.42686, -111.49840]

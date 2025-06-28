@@ -63,7 +63,7 @@ for idx, params in enumerate(parameter_sets):
 
     tb.start()
 
-    timeout = 10  # seconds
+    timeout = 30  # seconds
     start_time = time.time()
     try:
         print('Running for up to 10 seconds. Press Ctrl+C to quit early.')
