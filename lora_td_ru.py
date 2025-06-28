@@ -12,6 +12,11 @@ with open('auto_config.yaml', 'r') as f:
 
 parameter_sets = config['parameter_sets']
 
+with open('auto_config_indiv.yaml', 'r') as f:
+    individual_config = yaml.safe_load(f)
+
+parameter_sets.extend(individual_config['parameter_sets'])
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--hydrophone-separation', type=float, required=True)
 parser.add_argument('-d', '--distance', type=float, required=True)
