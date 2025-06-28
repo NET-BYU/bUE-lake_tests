@@ -18,8 +18,8 @@ with open('auto_config_indiv.yaml', 'r') as f:
 parameter_sets.extend(individual_config['parameter_sets'])
 
 parser = argparse.ArgumentParser()
-parser.add_argument('s', '--hydrophone-separation', type=float, required=True)
-parser.add_argument('d', '--distance', type=float, required=True)
+parser.add_argument('s', type=float, required=True)
+parser.add_argument('d', type=float, required=True)
 args = parser.parse_args()
 hydrophone_separation = args.hydrophone_separation
 distance = args.distance
