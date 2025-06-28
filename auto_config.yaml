@@ -8,7 +8,7 @@ parameter_sets:
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
-  - message_str: "TEST"
+  - message_str: "The quick brown fox jumps over the lazy dog"
     mult_amp: 0.2
     rx_mix_freq: -12000
     tx_mix_freq: 12000
@@ -17,7 +17,7 @@ parameter_sets:
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
-  - message_str: "The underwater modem transmitted chirped acoustic signals across the lakebed, enabling reliable communication between autonomous vehicles exploring submerged environments with minimal packet loss."
+  - message_str: "The quick brown fox jumps over the lazy dog"
     mult_amp: 0.2
     rx_mix_freq: -12000
     tx_mix_freq: 12000
