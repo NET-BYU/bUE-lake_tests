@@ -4,7 +4,7 @@ parameter_sets:
     rx_mix_freq: -12000
     tx_mix_freq: 12000
     tx_rx_bw: 5000
-    tx_cr: 0
+    tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
@@ -13,7 +13,7 @@ parameter_sets:
     rx_mix_freq: -12000
     tx_mix_freq: 12000
     tx_rx_bw: 5000
-    tx_cr: 0
+    tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
@@ -22,7 +22,7 @@ parameter_sets:
     rx_mix_freq: -12000
     tx_mix_freq: 12000
     tx_rx_bw: 5000
-    tx_cr: 0
+    tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
 
