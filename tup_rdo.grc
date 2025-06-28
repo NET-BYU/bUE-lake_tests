@@ -143,6 +143,22 @@ blocks:
     coordinate: [1016, 256.0]
     rotation: 0
     state: enabled
+- name: blocks_complex_to_float_0_0
+  id: blocks_complex_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 544.0]
+    rotation: 0
+    state: enabled
 - name: blocks_conjugate_cc_0
   id: blocks_conjugate_cc
   parameters:
@@ -264,7 +280,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1240, 88.0]
+    coordinate: [1408, 448.0]
     rotation: 0
     state: enabled
 - name: lora_rx_0
@@ -466,7 +482,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1400, 96.0]
+    coordinate: [1424, 568.0]
     rotation: 0
     state: enabled
 
@@ -475,7 +491,8 @@ connections:
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '0']
 - [audio_source_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_complex_to_float_0, '0', audio_sink_0, '0']
-- [blocks_complex_to_float_0, '0', blocks_wavfile_sink_0, '0']
+- [blocks_complex_to_float_0_0, '0', blocks_wavfile_sink_0, '0']
+- [blocks_conjugate_cc_0, '0', blocks_complex_to_float_0_0, '0']
 - [blocks_conjugate_cc_0, '0', lora_rx_0, '0']
 - [blocks_float_to_complex_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_message_strobe_0, strobe, lora_sdr_payload_id_inc_0, msg_in]
