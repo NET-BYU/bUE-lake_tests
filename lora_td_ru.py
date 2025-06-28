@@ -44,7 +44,7 @@ for idx, params in enumerate(parameter_sets):
     wav_filename = f"ru_{idx+1}_{param_str}.wav"
     wav_path = os.path.join(output_dir, wav_filename)
 
-    print(f"\nRunning configuration {idx+1}: {params}")
+    print(f"\nRunning configuration {idx+1}:")
     print(f"Saving WAV to: {wav_path}")
 
     tb = tdo_rup(
