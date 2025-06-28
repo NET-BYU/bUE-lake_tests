@@ -49,8 +49,7 @@ for idx, params in enumerate(parameter_sets):
     tb = tup_rdo(
         message_str=params.get('message_str', 'TEST'),
         mult_amp=params.get('mult_amp', 0.5),
-        rx_mix_freq=params.get('rx_mix_freq', -1000),
-        tx_mix_freq=params.get('tx_mix_freq', 1000),
+        tx_rx_mix_freq=params.get('tx_mix_freq', 1000),  # Use the correct YAML key
         tx_cr=params.get('tx_cr', 1),
         tx_rx_bw=params.get('tx_rx_bw', 8000),
         tx_rx_sf=params.get('tx_rx_sf', 7),
@@ -65,7 +64,7 @@ for idx, params in enumerate(parameter_sets):
     timeout = 30  # seconds
     start_time = time.time()
     try:
-        print('Running for up to 10 seconds. Press Ctrl+C to quit early.')
+        print(f'Running for up to {timeout} seconds. Press Ctrl+C to quit early.')
         while True:
             if time.time() - start_time > timeout:
                 print('Timeout reached, stopping...')
