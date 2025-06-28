@@ -334,6 +334,8 @@ class bUE_Main:
                 with self.test_output_lock:
                     self.test_output_buffer.clear()
 
+                print(["python3", f"{file}.py"] + parameters)
+
                 process = subprocess.Popen(
                     ["python3", f"{file}.py"] + parameters,
                     stdout=subprocess.PIPE,
