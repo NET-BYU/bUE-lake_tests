@@ -178,6 +178,7 @@ class Base_Station_Main:
                     continue  # Skip to the next message
 
                 if "REQ" in message:
+                    logger.debug("Sending a CON")
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
