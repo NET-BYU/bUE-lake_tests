@@ -183,7 +183,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     msg: pmt.intern(f"{message_str}")
-    period: '1000'
+    period: '500'
   states:
     bus_sink: false
     bus_source: false
@@ -308,7 +308,7 @@ blocks:
     bus_structure: null
     coordinate: [120, 240.0]
     rotation: 180
-    state: true
+    state: disabled
 - name: lora_tx_0
   id: lora_tx
   parameters:

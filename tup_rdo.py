@@ -61,7 +61,6 @@ class tup_rdo(gr.top_block):
             samp_rate=samp_rate,
             sf=tx_rx_sf,
          ldro_mode=2,frame_zero_padd=1280,sync_word=tx_rx_sync_word )
-        self.lora_sdr_payload_id_inc_0 = lora_sdr.payload_id_inc(':')
         self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[True,True])
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
             wav_file_path,
@@ -74,7 +73,7 @@ class tup_rdo(gr.top_block):
         self.blocks_multiply_xx_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(mult_amp)
-        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern(f"{message_str}"), 1000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern(f"{message_str}"), 500)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
         self.blocks_conjugate_cc_0 = blocks.conjugate_cc()
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
@@ -87,9 +86,7 @@ class tup_rdo(gr.top_block):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.lora_sdr_payload_id_inc_0, 'msg_in'))
         self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.lora_tx_0, 'in'))
-        self.msg_connect((self.lora_sdr_payload_id_inc_0, 'msg_out'), (self.blocks_message_strobe_0, 'set_msg'))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_multiply_xx_0_0, 0))
         self.connect((self.audio_source_0, 0), (self.blocks_float_to_complex_0, 0))
