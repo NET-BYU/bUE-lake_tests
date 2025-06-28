@@ -114,6 +114,8 @@ def user_input_handler(base_station):
                     parameters = survey.routines.input(f'Enter parameters for {bUEs[str(bue)]}, {file_name} separated by a space: ')
                     bue_params[bue] = parameters
 
+                    logger.debug(bue_params)
+
                 send_test(base_station, bue_test, start_time, bue_params)
 
 
@@ -132,7 +134,7 @@ def user_input_handler(base_station):
                 print(base_station.bue_coordinates)
                 print(base_station.get_distance(bues[0], bues[1]))
 
-            if index == Command.DISCONNECT.value:
+            elif index == Command.DISCONNECT.value:
                 connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
@@ -208,7 +210,7 @@ def send_test(base_station, bue_test, start_time, bue_params):
     for bue in bue_test.keys():
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
-        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[bue]}-{unix_timestamp}-{bue_params[bue]}")
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[int(bue)]}-{unix_timestamp}-{bue_params[bue]}")
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""
