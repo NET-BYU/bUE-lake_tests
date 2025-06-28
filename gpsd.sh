@@ -16,7 +16,7 @@ sudo tee /etc/default/gpsd > /dev/null <<EOT
 # Default settings for gpsd
 START_DAEMON="true"
 GPSD_OPTIONS="-n -b"
-DEVICES="/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_R>
+DEVICES="/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00"
 USBAUTO="false"
 GPSD_SOCKET="/var/run/gpsd.sock"
 EOT
