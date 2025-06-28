@@ -40,7 +40,7 @@ signal.signal(signal.SIGINT, cleanup_and_exit)
 signal.signal(signal.SIGTERM, cleanup_and_exit)
 
 for idx, params in enumerate(parameter_sets):
-    wav_filename = f"ru_{idx+1}.wav"
+    wav_filename = f"rd_{idx+1}.wav"
     wav_path = os.path.join(output_dir, wav_filename)
 
     print(f"\nRunning configuration {idx+1}:")

@@ -28,7 +28,7 @@ import gnuradio.lora_sdr as lora_sdr
 
 class tdo_rup(gr.top_block):
 
-    def __init__(self, message_str='TEST', mult_amp=0.5, rx_mix_freq=(-1000), tx_cr=1, tx_mix_freq=1000, tx_rx_bw=8000, tx_rx_sf=7, tx_rx_sync_word=[0x12], wav_file_path=''):
+    def __init__(self, message_str='TEST', mult_amp=0.5, tx_cr=1, tx_rx_bw=8000, tx_rx_mix_freq=1000, tx_rx_sf=7, tx_rx_sync_word=[0x12], wav_file_path=''):
         gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
 
         ##################################################
@@ -36,10 +36,9 @@ class tdo_rup(gr.top_block):
         ##################################################
         self.message_str = message_str
         self.mult_amp = mult_amp
-        self.rx_mix_freq = rx_mix_freq
         self.tx_cr = tx_cr
-        self.tx_mix_freq = tx_mix_freq
         self.tx_rx_bw = tx_rx_bw
+        self.tx_rx_mix_freq = tx_rx_mix_freq
         self.tx_rx_sf = tx_rx_sf
         self.tx_rx_sync_word = tx_rx_sync_word
         self.wav_file_path = wav_file_path
@@ -80,8 +79,8 @@ class tdo_rup(gr.top_block):
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
         self.audio_source_0 = audio.source(samp_rate, 'hw:3,0', True)
         self.audio_sink_0 = audio.sink(samp_rate, 'hw:3,0', True)
-        self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, tx_mix_freq, 1, 0, 0)
-        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-1000), 1, 0, 0)
+        self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, tx_rx_mix_freq, 1, 0, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (-tx_rx_mix_freq), 1, 0, 0)
 
 
         ##################################################
@@ -115,12 +114,6 @@ class tdo_rup(gr.top_block):
         self.mult_amp = mult_amp
         self.blocks_multiply_const_vxx_0.set_k(self.mult_amp)
 
-    def get_rx_mix_freq(self):
-        return self.rx_mix_freq
-
-    def set_rx_mix_freq(self, rx_mix_freq):
-        self.rx_mix_freq = rx_mix_freq
-
     def get_tx_cr(self):
         return self.tx_cr
 
@@ -128,18 +121,19 @@ class tdo_rup(gr.top_block):
         self.tx_cr = tx_cr
         self.lora_tx_0.set_cr(self.tx_cr)
 
-    def get_tx_mix_freq(self):
-        return self.tx_mix_freq
-
-    def set_tx_mix_freq(self, tx_mix_freq):
-        self.tx_mix_freq = tx_mix_freq
-        self.analog_sig_source_x_0_0.set_frequency(self.tx_mix_freq)
-
     def get_tx_rx_bw(self):
         return self.tx_rx_bw
 
     def set_tx_rx_bw(self, tx_rx_bw):
         self.tx_rx_bw = tx_rx_bw
+
+    def get_tx_rx_mix_freq(self):
+        return self.tx_rx_mix_freq
+
+    def set_tx_rx_mix_freq(self, tx_rx_mix_freq):
+        self.tx_rx_mix_freq = tx_rx_mix_freq
+        self.analog_sig_source_x_0.set_frequency((-self.tx_rx_mix_freq))
+        self.analog_sig_source_x_0_0.set_frequency(self.tx_rx_mix_freq)
 
     def get_tx_rx_sf(self):
         return self.tx_rx_sf
@@ -180,17 +174,14 @@ def argument_parser():
         "--mult-amp", dest="mult_amp", type=eng_float, default=eng_notation.num_to_str(float(0.5)),
         help="Set mult_amp [default=%(default)r]")
     parser.add_argument(
-        "--rx-mix-freq", dest="rx_mix_freq", type=intx, default=(-1000),
-        help="Set rx_mix_freq [default=%(default)r]")
-    parser.add_argument(
         "--tx-cr", dest="tx_cr", type=intx, default=1,
         help="Set tx_cr [default=%(default)r]")
     parser.add_argument(
-        "--tx-mix-freq", dest="tx_mix_freq", type=intx, default=1000,
-        help="Set tx_mix_freq [default=%(default)r]")
-    parser.add_argument(
         "--tx-rx-bw", dest="tx_rx_bw", type=intx, default=8000,
         help="Set tx_rx_bw [default=%(default)r]")
+    parser.add_argument(
+        "--tx-rx-mix-freq", dest="tx_rx_mix_freq", type=intx, default=1000,
+        help="Set tx_rx_mix_freq [default=%(default)r]")
     parser.add_argument(
         "--tx-rx-sf", dest="tx_rx_sf", type=intx, default=7,
         help="Set tx_rx_sf [default=%(default)r]")
@@ -203,7 +194,7 @@ def argument_parser():
 def main(top_block_cls=tdo_rup, options=None):
     if options is None:
         options = argument_parser().parse_args()
-    tb = top_block_cls(message_str=options.message_str, mult_amp=options.mult_amp, rx_mix_freq=options.rx_mix_freq, tx_cr=options.tx_cr, tx_mix_freq=options.tx_mix_freq, tx_rx_bw=options.tx_rx_bw, tx_rx_sf=options.tx_rx_sf, wav_file_path=options.wav_file_path)
+    tb = top_block_cls(message_str=options.message_str, mult_amp=options.mult_amp, tx_cr=options.tx_cr, tx_rx_bw=options.tx_rx_bw, tx_rx_mix_freq=options.tx_rx_mix_freq, tx_rx_sf=options.tx_rx_sf, wav_file_path=options.wav_file_path)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()

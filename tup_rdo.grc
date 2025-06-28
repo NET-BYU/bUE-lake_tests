@@ -52,7 +52,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: '-1000'
+    freq: -tx_rx_mix_freq
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -75,7 +75,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: tx_mix_freq
+    freq: tx_rx_mix_freq
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -367,23 +367,6 @@ blocks:
     coordinate: [808, 216.0]
     rotation: 0
     state: enabled
-- name: rx_mix_freq
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '-1000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [632, 888.0]
-    rotation: 0
-    state: enabled
 - name: tx_cr
   id: parameter
   parameters:
@@ -401,23 +384,6 @@ blocks:
     coordinate: [344, 8.0]
     rotation: 0
     state: enabled
-- name: tx_mix_freq
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '1000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [392, 272.0]
-    rotation: 0
-    state: enabled
 - name: tx_rx_bw
   id: parameter
   parameters:
@@ -433,6 +399,23 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [264, 8.0]
+    rotation: 0
+    state: enabled
+- name: tx_rx_mix_freq
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 8.0]
     rotation: 0
     state: enabled
 - name: tx_rx_sf
