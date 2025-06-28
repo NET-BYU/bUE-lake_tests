@@ -305,6 +305,8 @@ class bUE_Main:
             try:
                 self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
 
+                print(parts)
+
                 parts = input.split("-")
                 if len(parts) < 4:
                     raise ValueError(f"Invalid input format: {input}")
