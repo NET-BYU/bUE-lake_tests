@@ -5,11 +5,19 @@ import RPi.GPIO as GPIO
 import signal
 import os
 import sys
+import argparse
 
 with open('auto_config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 parameter_sets = config['parameter_sets']
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--hydrophone-separation', type=float, required=True)
+parser.add_argument('--distance', type=float, required=True)
+args = parser.parse_args()
+hydrophone_separation = args.hydrophone_separation
+distance = args.distance
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -40,7 +48,7 @@ signal.signal(signal.SIGINT, cleanup_and_exit)
 signal.signal(signal.SIGTERM, cleanup_and_exit)
 
 for idx, params in enumerate(parameter_sets):
-    wav_filename = f"ru_{idx+1}.wav"
+    wav_filename = f"rd_{idx+1}_sep-{hydrophone_separation}_dist-{distance}.wav"
     wav_path = os.path.join(output_dir, wav_filename)
 
     print(f"\nRunning configuration {idx+1}:")

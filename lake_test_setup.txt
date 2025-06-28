@@ -1,5 +1,22 @@
+For Ty <3
+-------------------------------------------------------------------------------------------
 Base Station Location: [40.43139, -111.49199] -???
 
+
+When running tu_rd.py or td_ru.py scripts, you'll need to pass the 2 physical parameters in like so:
+
+    python3 lora_tu_rd.py --hydrophone-separation 1.5 --distance 1000 
+
+
+hydrophone-separation values will be 2, 1.5, 1.0, and 0.5
+
+distance values will be 1000, 500, 250, 100
+
+you MUST pass these in correctly - very important, make sure to double check the config
+with the bUE adjusters on the lake (Eli, Bryson)
+
+
+-------------------------------------------------------------------------------------------
 
 TEST 1 (.1km):
 
