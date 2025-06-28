@@ -77,10 +77,15 @@ def bue_distance_table(base_station) -> Table:
                 
                 dist = base_station.get_distance(bue1, bue2)
                 
-                if dist is not None:
-                    table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", f"{dist:.2f}m")
-                else:
-                    table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", "[red]Invalid coordinates[/red]")
+                try:
+                    dist = base_station.get_distance(bue1, bue2)
+                    if dist is not None:
+                        table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", f"{dist:.2f}m")
+                    else:
+                        table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", "[red]Invalid coordinates[/red]")
+                except Exception as e:
+                    table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", f"[red]Error: {str(e)}[/red]")
+
                 
                 # Mark this pair as processed
                 processed_pairs.add((bue1, bue2))
