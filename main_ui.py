@@ -112,7 +112,7 @@ def user_input_handler(base_station):
                     file_name = FILES[file_index]
                     bue_test[bue] = file_name
                     parameters = survey.routines.input(f'Enter parameters for {bUEs[str(bue)]}, {file_name} separated by a space: ')
-                    bue_params[bue] = parameters
+                    bue_params[int(bue)] = parameters
 
                     logger.debug(bue_params)
 
