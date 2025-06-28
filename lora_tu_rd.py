@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('s', type=float)
 parser.add_argument('d', type=float)
 args = parser.parse_args()
-hydrophone_separation = args.hydrophone_separation
-distance = args.distance
+hydrophone_separation = args.s
+distance = args.d
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
