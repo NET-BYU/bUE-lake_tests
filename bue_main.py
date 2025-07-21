@@ -215,7 +215,9 @@ class bUE_Main:
                 logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
                 self.ota_connected = False
 
-
+    '''
+    This function is the premative gps_handler. It cannot run at the same time as gpsd, and gpsd is needed for clock syncing.
+    '''
     # def gps_handler(self, max_attempts=20, max_runtime = 5):
     #     start_time = time.time()
     #     try:
@@ -394,23 +396,6 @@ class bUE_Main:
                         print("TRYING TO CANCEL")
                         print("TRYING TO CANCEL")
                         print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
                         logger.info(f"Sending termination to: {file}.py")
                         try:
                             process.send_signal(signal.SIGINT)
@@ -419,6 +404,10 @@ class bUE_Main:
                         break
                     time.sleep(0.1)
 
+                """
+                Leave this code in! If we want all the output messages from the bUE uncomment it. Otherwise,
+                we will only get the output messages before it ends/receives a CANC
+                """
                 # while not stdout_queue.empty():
                 #     line = stdout_queue.get()
                 #     clean_line = f"[{file}.py STDOUT] {line.strip()}"
@@ -507,10 +496,20 @@ class bUE_Main:
             if "CANC" in message:
                 logger.info(f"Received a CANC message")
                 self.cancel_test = True
+            if "RELOAD" in message:
+                logger.info(f"Received a RELOAD message")
+                self.restart_service()
             else:
                 logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
 
-
+    """
+    Restarts the service entirely
+    """
+    def restart_service():
+        try:
+            subprocess.call(["sudo", "systemctl", "restart", "bue.service"])
+        except Exception as e:
+            print(f"Error restarting bue.service': {e}")
 
     ### STATE MACHINE METHODS ###
 

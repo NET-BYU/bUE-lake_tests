@@ -22,6 +22,7 @@ class Command(Enum):
     DISTANCE = auto()
     DISCONNECT = auto()
     CANCEL = auto()
+    RELOAD = auto()
     # LIST = auto()
     EXIT = auto()
 
@@ -67,6 +68,7 @@ def user_input_handler(base_station):
         ("DISTANCE", "Calculate distance between two bUEs"),
         ("DISCONNECT", "Disconnect from selected bUEs"),
         ("CANCEL", "Cancel running tests on selected bUEs"),
+        ("RELOAD", "Reload bue.service script on selected bUEs"),
         # ("LIST", "Show all currently connected bUEs"),
         ("EXIT", "Exit the base station application")
     ]
@@ -167,11 +169,26 @@ def user_input_handler(base_station):
                     logger.info(f"Sending CANC to {bue}")
                 print("\n")
 
-            # elif index == Command.LIST.value:
-            #     print("\n")
-            #     connected_bues = " ".join(bUEs[str(bue)] for bue in base_station.connected_bues)
-            #     print(f"Currently connected to {connected_bues}\n\n")
-            #     logger.info(f"Currently connected to {connected_bues}")
+            elif index == Command.RELOAD.value:
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                indexes = survey.routines.basket('What bUEs do you want to reload? ',
+                                                options = connected_bues)
+
+                for i in indexes:
+                    bue = base_station.connected_bues[i]
+                    logger.info(f"Reloading script for {bue}")
+                    base_station.ota.send_ota_message(bue, "RELOAD")
+
+                    # Disconnect from the bUE
+                    bue = base_station.connected_bues[i]
+                    base_station.connected_bues.remove(bue)
+                    if bue in base_station.bue_coordinates.keys():
+                        del base_station.bue_coordinates[bue]
+                    if bue in base_station.testing_bues:
+                        base_station.testing_bues.remove(bue)
+                    if bue in base_station.bue_timeout_tracker.keys():
+                        del base_station.bue_timeout_tracker[bue]
             
             elif index == Command.EXIT.value:
                 base_station.EXIT = True
