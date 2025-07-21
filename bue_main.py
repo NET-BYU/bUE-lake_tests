@@ -508,7 +508,7 @@ class bUE_Main:
     """
     Restarts the service entirely
     """
-    def restart_service():
+    def restart_service(self):
         try:
             subprocess.call(["sudo", "systemctl", "restart", "bue.service"])
         except Exception as e:
