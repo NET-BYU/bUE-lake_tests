@@ -202,6 +202,9 @@ class bUE_Main:
                 input = parts[2]
 
                 self.test_handler(input)
+            elif "RELOAD" in message:
+                logger.info(f"Received a RELOAD message")
+                self.restart_service()
 
             else:
                 logger.error(f"Unknown message type: {message}")
@@ -496,7 +499,7 @@ class bUE_Main:
             if "CANC" in message:
                 logger.info(f"Received a CANC message")
                 self.cancel_test = True
-            if "RELOAD" in message:
+            elif "RELOAD" in message:
                 logger.info(f"Received a RELOAD message")
                 self.restart_service()
             else:
