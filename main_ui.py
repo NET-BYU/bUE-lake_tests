@@ -23,6 +23,7 @@ class Command(Enum):
     DISCONNECT = auto()
     CANCEL = auto()
     RELOAD = auto()
+    RESTART = auto()
     # LIST = auto()
     EXIT = auto()
 
@@ -69,6 +70,7 @@ def user_input_handler(base_station):
         ("DISCONNECT", "Disconnect from selected bUEs"),
         ("CANCEL", "Cancel running tests on selected bUEs"),
         ("RELOAD", "Reload bue.service script on selected bUEs"),
+        ("RESTART", "Completely restart bUE (sudo reboot)"),
         # ("LIST", "Show all currently connected bUEs"),
         ("EXIT", "Exit the base station application")
     ]
@@ -143,14 +145,7 @@ def user_input_handler(base_station):
                                                 options = connected_bues)
                 
                 for i in indexes:
-                    bue = base_station.connected_bues[i]
-                    base_station.connected_bues.remove(bue)
-                    if bue in base_station.bue_coordinates.keys():
-                        del base_station.bue_coordinates[bue]
-                    if bue in base_station.testing_bues:
-                        base_station.testing_bues.remove(bue)
-                    if bue in base_station.bue_timeout_tracker.keys():
-                        del base_station.bue_timeout_tracker[bue]
+                    disconnect(base_station, i)
                 print("\n")
             
             elif index == Command.CANCEL.value:
@@ -181,14 +176,21 @@ def user_input_handler(base_station):
                     base_station.ota.send_ota_message(bue, "RELOAD")
 
                     # Disconnect from the bUE
+                    disconnect(base_station, i)
+            
+            elif index == Command.RESTART.value:
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                indexes = survey.routines.basket('What bUEs do you want to restart? ',
+                                                options = connected_bues)
+                
+                for i in indexes:
                     bue = base_station.connected_bues[i]
-                    base_station.connected_bues.remove(bue)
-                    if bue in base_station.bue_coordinates.keys():
-                        del base_station.bue_coordinates[bue]
-                    if bue in base_station.testing_bues:
-                        base_station.testing_bues.remove(bue)
-                    if bue in base_station.bue_timeout_tracker.keys():
-                        del base_station.bue_timeout_tracker[bue]
+                    logger.info(f"Restarting {bue}")
+                    base_station.ota.send_ota_message(bue, "RESTART")
+
+                    # Disconnect from the bUE
+                    disconnect(base_station, i)
             
             elif index == Command.EXIT.value:
                 base_station.EXIT = True
@@ -228,6 +230,16 @@ def send_test(base_station, bue_test, start_time, bue_params):
         if not hasattr(base_station, 'testing_bues'):
             base_station.testing_bues = []
         base_station.ota.send_ota_message(bue, f"TEST-{bue_test[int(bue)]}-{unix_timestamp}-{bue_params[bue]}")
+
+def disconnect(base_station, index):
+    bue = base_station.connected_bues[index]
+    base_station.connected_bues.remove(bue)
+    if bue in base_station.bue_coordinates.keys():
+        del base_station.bue_coordinates[bue]
+    if bue in base_station.testing_bues:
+        base_station.testing_bues.remove(bue)
+    if bue in base_station.bue_timeout_tracker.keys():
+        del base_station.bue_timeout_tracker[bue]
 
 def open_new_terminal():
     """Open a new terminal window and run this script in it."""

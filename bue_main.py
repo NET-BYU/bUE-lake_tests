@@ -204,7 +204,11 @@ class bUE_Main:
                 self.test_handler(input)
             elif "RELOAD" in message:
                 logger.info(f"Received a RELOAD message")
-                self.restart_service()
+                self.reload_service()
+            
+            elif "RESTART" in message:
+                logger.info(f"Received a RESTART message")
+                self.restart_system()
 
             else:
                 logger.error(f"Unknown message type: {message}")
@@ -501,18 +505,31 @@ class bUE_Main:
                 self.cancel_test = True
             elif "RELOAD" in message:
                 logger.info(f"Received a RELOAD message")
-                self.restart_service()
+                self.reload_service_service()
+            elif "RESTART" in message:
+                logger.info(f"Received a RESTART message")
+                self.restart_system()
             else:
                 logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
 
     """
     Restarts the service entirely
     """
-    def restart_service(self):
+    def reload_service(self):
         try:
             subprocess.call(["sudo", "systemctl", "restart", "bue.service"])
         except Exception as e:
             print(f"Error restarting bue.service': {e}")
+
+    def restart_system(self):
+        """
+        Restarts the entire system using sudo reboot
+        """
+        try:
+            logger.info("Initiating system restart...")
+            subprocess.call(["sudo", "reboot"])
+        except Exception as e:
+            logger.error(f"Error restarting system: {e}")
 
     ### STATE MACHINE METHODS ###
 
