@@ -6,3 +6,4 @@ pyserial
 pynmeagps
 rich
 keyboard
+matplotlib

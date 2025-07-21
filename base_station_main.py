@@ -22,6 +22,7 @@ from yaml import load, Loader
 
 # For getting the distance between two bUE coordinates
 from geopy import distance # type:ignore
+
 from collections import deque
 
 logger.remove()  # Remove default sink
@@ -281,6 +282,9 @@ class Base_Station_Main:
         except Exception as e:
             logger.error(f"Error calculating distance: {e}")
             return None
+    
+    def send_tests(self):
+        pass ## TODO: write this function
 
     def base_station_tick(self, loop_dur=0.01):
 
