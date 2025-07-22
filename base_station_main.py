@@ -88,8 +88,8 @@ class Base_Station_Main:
         # Dictionary holds what each bUE's currently location is depending on last PING/UPD
         self.bue_coordinates = {}
 
-        # Hold the last 10 UPD messages so they can be displayed in the UI 
-        self.stdout_history = deque(maxlen=10)
+        # Hold all UPD messages so they can be displayed in the UI 
+        self.stdout_history = deque()
 
         # A list that tracks what bUEs are currently in the TEST state
         self.testing_bues = []

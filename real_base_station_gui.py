@@ -442,6 +442,32 @@ class RealBaseStationGUI:
                                 self.dist_tree.insert('', 'end', text=pair_name, values=(f"{distance:.2f}"))
                         
                         processed_pairs.add((bue1, bue2))
+        
+        # Add bUE to custom marker distances
+        if (self.base_station and 
+            hasattr(self.base_station, 'connected_bues') and
+            hasattr(self.base_station, 'bue_coordinates') and
+            self.custom_markers):
+            
+            for bue_id in self.base_station.connected_bues:
+                if bue_id in self.base_station.bue_coordinates:
+                    bue_coords = self.base_station.bue_coordinates[bue_id]
+                    try:
+                        bue_lat, bue_lon = float(bue_coords[0]), float(bue_coords[1])
+                        
+                        # Find paired marker for this bUE
+                        for marker in self.custom_markers.values():
+                            if marker.get('paired_bue') == bue_id:
+                                distance = self.calculate_distance(bue_lat, bue_lon, marker['lat'], marker['lon'])
+                                bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
+                                marker_name = marker['name']
+                                pair_name = f"{bue_name} ↔ {marker_name}"
+                                self.dist_tree.insert('', 'end', text=pair_name, values=(f"{distance:.2f}"))
+                                break  # Only one paired marker per bUE
+                                
+                    except (ValueError, TypeError, IndexError) as e:
+                        # Skip invalid coordinates
+                        continue
     
     def update_messages(self):
         """Update the messages display"""
