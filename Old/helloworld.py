@@ -15,7 +15,7 @@ if __name__ == "__main__":
     message = sys.argv[2]
     try:
         for i in range(iterations):
-            print(message, flush=True)
+            print(f"rx msg: {message}", flush=True)
             time.sleep(10)
     
     except KeyboardInterrupt:
