@@ -19,9 +19,9 @@ from constants import bUEs
 class Command(Enum):
     REFRESH = 0
     TEST = auto()
-    DISTANCE = auto()
-    DISCONNECT = auto()
+    # DISTANCE = auto()
     CANCEL = auto()
+    DISCONNECT = auto()
     RELOAD = auto()
     RESTART = auto()
     # LIST = auto()
@@ -66,9 +66,9 @@ def user_input_handler(base_station):
     COMMANDS_WITH_DESC = [
         ("REFRESH", "Update the dashboard display"),
         ("TEST", "Run a test file on selected bUEs"),
-        ("DISTANCE", "Calculate distance between two bUEs"),
-        ("DISCONNECT", "Disconnect from selected bUEs"),
+        # ("DISTANCE", "Calculate distance between two bUEs"),
         ("CANCEL", "Cancel running tests on selected bUEs"),
+        ("DISCONNECT", "Disconnect from selected bUEs"),
         ("RELOAD", "Reload bue.service script on selected bUEs"),
         ("RESTART", "Completely restart bUE (sudo reboot)"),
         # ("LIST", "Show all currently connected bUEs"),
@@ -122,32 +122,6 @@ def user_input_handler(base_station):
 
                 send_test(base_station, bue_test, start_time, bue_params)
 
-
-            elif index == Command.DISTANCE.value: 
-                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
-
-                indexes = survey.routines.basket('Select two bUEs: ',
-                                                options = connected_bues)
-                
-                ## TODO: Need to implement the rest of this once I fixed the coordinates 
-
-                bues = []
-                for i in indexes:
-                    bues.append(base_station.connected_bues[i])
-
-                print(base_station.bue_coordinates)
-                print(base_station.get_distance(bues[0], bues[1]))
-
-            elif index == Command.DISCONNECT.value:
-                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
-
-                indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
-                                                options = connected_bues)
-                
-                for i in indexes:
-                    disconnect(base_station, i)
-                print("\n")
-            
             elif index == Command.CANCEL.value:
                 testing_bues = tuple(bUEs[str(x)] for x in base_station.testing_bues)
                 if(len(testing_bues) == 0):
@@ -163,6 +137,17 @@ def user_input_handler(base_station):
                     base_station.ota.send_ota_message(bue, "CANC")
                     logger.info(f"Sending CANC to {bue}")
                 print("\n")
+                
+            elif index == Command.DISCONNECT.value:
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
+
+                indexes = survey.routines.basket('What bUEs do you want to disconnect from? ',
+                                                options = connected_bues)
+                
+                for i in indexes:
+                    disconnect(base_station, i)
+                print("\n")
+            
 
             elif index == Command.RELOAD.value:
                 connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)

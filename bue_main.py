@@ -505,7 +505,7 @@ class bUE_Main:
                 self.cancel_test = True
             elif "RELOAD" in message:
                 logger.info(f"Received a RELOAD message")
-                self.reload_service_service()
+                self.reload_service()
             elif "RESTART" in message:
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
