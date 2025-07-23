@@ -121,6 +121,9 @@ class RealBaseStationGUI:
         # Bind right-click context menu
         self.bue_tree.bind("<Button-3>", self.show_bue_context_menu)
         
+        # Bind left-click to handle deselection when clicking empty space
+        self.bue_tree.bind("<Button-1>", self.on_bue_tree_click)
+        
         # Control buttons frame
         control_frame = ttk.LabelFrame(parent, text="Base Station Controls")
         control_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -273,31 +276,67 @@ class RealBaseStationGUI:
     
     def update_bue_list(self):
         """Update the bUE list with current connections and status"""
-        # Clear existing items
-        for item in self.bue_tree.get_children():
-            self.bue_tree.delete(item)
+        # Store current selection
+        selected_items = self.bue_tree.selection()
         
-        # Add connected bUEs
-        for bue_id in self.base_station.connected_bues:
-            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
+        # Get current items for comparison
+        current_items = set(self.bue_tree.get_children())
+        new_items = set(str(bue_id) for bue_id in self.base_station.connected_bues)
+        
+        # Only rebuild if the set of bUEs has changed
+        if current_items != new_items:
+            # Clear existing items
+            for item in self.bue_tree.get_children():
+                self.bue_tree.delete(item)
             
-            # Determine status
-            if hasattr(self.base_station, 'testing_bues') and bue_id in self.base_station.testing_bues:
-                status = "🧪 Testing"
-            else:
-                status = "💤 Idle"
+            # Add connected bUEs
+            for bue_id in self.base_station.connected_bues:
+                bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
+                
+                # Determine status
+                if hasattr(self.base_station, 'testing_bues') and bue_id in self.base_station.testing_bues:
+                    status = "🧪 Testing"
+                else:
+                    status = "💤 Idle"
+                
+                # Determine ping status
+                timeout_val = self.base_station.bue_timeout_tracker.get(bue_id, 0)
+                if timeout_val >= TIMEOUT / 2:
+                    ping_status = "🟢 Good"
+                elif timeout_val > 0:
+                    ping_status = "🟡 Warning"
+                else:
+                    ping_status = "🔴 Lost"
+                
+                self.bue_tree.insert('', 'end', iid=bue_id, text=bue_name, 
+                                   values=(status, ping_status))
             
-            # Determine ping status
-            timeout_val = self.base_station.bue_timeout_tracker.get(bue_id, 0)
-            if timeout_val >= TIMEOUT / 2:
-                ping_status = "🟢 Good"
-            elif timeout_val > 0:
-                ping_status = "🟡 Warning"
-            else:
-                ping_status = "🔴 Lost"
-            
-            self.bue_tree.insert('', 'end', iid=bue_id, text=bue_name, 
-                               values=(status, ping_status))
+            # Restore selection if the item still exists
+            for item in selected_items:
+                if self.bue_tree.exists(item):
+                    self.bue_tree.selection_add(item)
+        else:
+            # Just update the values for existing items without clearing
+            for bue_id in self.base_station.connected_bues:
+                item_id = str(bue_id)
+                if self.bue_tree.exists(item_id):
+                    # Determine status
+                    if hasattr(self.base_station, 'testing_bues') and bue_id in self.base_station.testing_bues:
+                        status = "🧪 Testing"
+                    else:
+                        status = "💤 Idle"
+                    
+                    # Determine ping status
+                    timeout_val = self.base_station.bue_timeout_tracker.get(bue_id, 0)
+                    if timeout_val >= TIMEOUT / 2:
+                        ping_status = "🟢 Good"
+                    elif timeout_val > 0:
+                        ping_status = "🟡 Warning"
+                    else:
+                        ping_status = "🔴 Lost"
+                    
+                    # Update values without disturbing selection
+                    self.bue_tree.item(item_id, values=(status, ping_status))
     
     def update_map(self):
         """Update the map with bUE locations and markers"""
@@ -498,6 +537,15 @@ class RealBaseStationGUI:
             current_time = datetime.now().strftime('%H:%M:%S')
             self.status_var.set(f"Time: {current_time} | Connected: {connected} | Testing: {testing}")
     
+    def on_bue_tree_click(self, event):
+        """Handle left-click on bUE tree to allow deselection"""
+        # Get the item that was clicked
+        item = self.bue_tree.identify_row(event.y)
+        
+        # If no item was clicked (clicked in empty space), deselect all
+        if not item:
+            self.bue_tree.selection_remove(self.bue_tree.selection())
+    
     def show_bue_context_menu(self, event):
         """Show context menu for bUE operations"""
         item = self.bue_tree.selection()[0] if self.bue_tree.selection() else None
@@ -508,15 +556,62 @@ class RealBaseStationGUI:
         
         # Create context menu
         context_menu = tk.Menu(self.root, tearoff=0)
-        context_menu.add_command(label="Disconnect", command=lambda: self.disconnect_bue(bue_id))
-        context_menu.add_command(label="Reload", command=lambda: self.reload_bue(bue_id))
-        context_menu.add_command(label="Restart", command=lambda: self.restart_bue(bue_id))
+        
+        # Add menu items with commands that also dismiss the menu
+        def disconnect_and_close():
+            context_menu.unpost()
+            self.disconnect_bue(bue_id)
+            
+        def reload_and_close():
+            context_menu.unpost()
+            self.reload_bue(bue_id)
+            
+        def restart_and_close():
+            context_menu.unpost()
+            self.restart_bue(bue_id)
+            
+        def open_log_and_close():
+            context_menu.unpost()
+            self.open_bue_log(bue_id)
+        
+        context_menu.add_command(label="Disconnect", command=disconnect_and_close)
+        context_menu.add_command(label="Reload", command=reload_and_close)
+        context_menu.add_command(label="Restart", command=restart_and_close)
         context_menu.add_separator()
-        context_menu.add_command(label="Open Log File", command=lambda: self.open_bue_log(bue_id))
+        context_menu.add_command(label="Open Log File", command=open_log_and_close)
+        
+        # Store the menu reference so we can dismiss it
+        self.active_context_menu = context_menu
+        
+        # Function to dismiss menu when clicking elsewhere
+        def dismiss_menu(event):
+            if hasattr(self, 'active_context_menu') and self.active_context_menu:
+                try:
+                    self.active_context_menu.unpost()
+                    self.active_context_menu = None
+                except:
+                    pass
+            
+            # Remove the binding after use to prevent interference
+            # Check if we have a binding ID and it hasn't been unbound already
+            if hasattr(self, 'dismiss_binding_id') and self.dismiss_binding_id:
+                try:
+                    self.root.unbind("<Button-1>", self.dismiss_binding_id)
+                    self.dismiss_binding_id = None  # Clear the binding ID
+                except tk.TclError:
+                    # Binding was already removed, ignore the error
+                    pass
+                except Exception:
+                    # Any other error, just clear the binding ID
+                    self.dismiss_binding_id = None
         
         # Show menu
         try:
             context_menu.tk_popup(event.x_root, event.y_root)
+            # Bind left-click elsewhere to dismiss menu
+            self.dismiss_binding_id = self.root.bind("<Button-1>", dismiss_menu, add='+')
+        except Exception as e:
+            print(f"Error showing context menu: {e}")
         finally:
             context_menu.grab_release()
     
