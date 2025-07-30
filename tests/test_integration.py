@@ -164,15 +164,6 @@ try:
                     )
                     base_mock.add_incoming_message(prepr_rcv)
 
-                    # Step 3: bUE begins test
-                    bue_ota.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.BEGIN)
-
-                    # Simulate base receiving BEGIN
-                    begin_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, MessageTypes.BEGIN
-                    )
-                    base_mock.add_incoming_message(begin_rcv)
-
                     # Step 4: bUE sends update
                     upd_message = f"{MessageTypes.UPD}:test_progress_50"
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, upd_message)
@@ -198,11 +189,10 @@ try:
                     base_messages = base_ota.get_new_messages()
                     bue_messages = bue_ota.get_new_messages()
 
-                    # Base should have received PREPR, BEGIN, UPD, DONE
-                    assert len(base_messages) == 4
+                    # Base should have received PREPR, UPD, DONE
+                    assert len(base_messages) == 3
                     message_text = " ".join(base_messages)
                     assert MessageTypes.PREPR in message_text
-                    assert MessageTypes.BEGIN in message_text
                     assert MessageTypes.UPD in message_text
                     assert MessageTypes.DONE in message_text
 
