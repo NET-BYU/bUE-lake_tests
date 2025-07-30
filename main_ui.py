@@ -90,15 +90,10 @@ def user_input_handler(base_station):
             is_user_inputting = False
 
             # Get input with simple prompt
-            index = survey.routines.select(
-                "Pick a command: ", options=formatted_options
-            )
+            index = survey.routines.select("Pick a command: ", options=formatted_options)
             is_user_inputting = True
 
-            if (
-                index != (len(COMMANDS_WITH_DESC) - 1)
-                and len(base_station.connected_bues) == 0
-            ):
+            if index != (len(COMMANDS_WITH_DESC) - 1) and len(base_station.connected_bues) == 0:
                 print("Currently not connected to any bUEs")
                 continue
 
@@ -106,18 +101,14 @@ def user_input_handler(base_station):
                 continue
 
             elif index == Command.TEST.value:
-                connected_bues = tuple(
-                    bUEs[str(x)] for x in base_station.connected_bues
-                )
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
                 bues_indexes = []
                 bue_test = {}
                 bue_params = {}
 
                 while len(bues_indexes) == 0:
-                    bues_indexes = survey.routines.basket(
-                        "What bUEs will be running tests? ", options=connected_bues
-                    )
+                    bues_indexes = survey.routines.basket("What bUEs will be running tests? ", options=connected_bues)
                     if len(bues_indexes) == 0:
                         print("You must select at least one bUE...")
 
@@ -148,9 +139,7 @@ def user_input_handler(base_station):
                 if len(testing_bues) == 0:
                     print("No bUEs are currently running any tests")
 
-                indexes = survey.routines.basket(
-                    "What bUE tests do you want to cancel? ", options=testing_bues
-                )
+                indexes = survey.routines.basket("What bUE tests do you want to cancel? ", options=testing_bues)
 
                 print("\n")
                 for i in indexes:
@@ -161,26 +150,18 @@ def user_input_handler(base_station):
                 print("\n")
 
             elif index == Command.DISCONNECT.value:
-                connected_bues = tuple(
-                    bUEs[str(x)] for x in base_station.connected_bues
-                )
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
-                indexes = survey.routines.basket(
-                    "What bUEs do you want to disconnect from? ", options=connected_bues
-                )
+                indexes = survey.routines.basket("What bUEs do you want to disconnect from? ", options=connected_bues)
 
                 for i in indexes:
                     disconnect(base_station, i)
                 print("\n")
 
             elif index == Command.RELOAD.value:
-                connected_bues = tuple(
-                    bUEs[str(x)] for x in base_station.connected_bues
-                )
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
-                indexes = survey.routines.basket(
-                    "What bUEs do you want to reload? ", options=connected_bues
-                )
+                indexes = survey.routines.basket("What bUEs do you want to reload? ", options=connected_bues)
 
                 for i in indexes:
                     bue = base_station.connected_bues[i]
@@ -191,13 +172,9 @@ def user_input_handler(base_station):
                     disconnect(base_station, i)
 
             elif index == Command.RESTART.value:
-                connected_bues = tuple(
-                    bUEs[str(x)] for x in base_station.connected_bues
-                )
+                connected_bues = tuple(bUEs[str(x)] for x in base_station.connected_bues)
 
-                indexes = survey.routines.basket(
-                    "What bUEs do you want to restart? ", options=connected_bues
-                )
+                indexes = survey.routines.basket("What bUEs do you want to restart? ", options=connected_bues)
 
                 for i in indexes:
                     bue = base_station.connected_bues[i]
@@ -245,9 +222,7 @@ def send_test(base_station, bue_test, start_time, bue_params):
     for bue in bue_test.keys():
         if not hasattr(base_station, "testing_bues"):
             base_station.testing_bues = []
-        base_station.ota.send_ota_message(
-            bue, f"TEST-{bue_test[int(bue)]}-{unix_timestamp}-{bue_params[bue]}"
-        )
+        base_station.ota.send_ota_message(bue, f"TEST-{bue_test[int(bue)]}-{unix_timestamp}-{bue_params[bue]}")
 
 
 def disconnect(base_station, index):

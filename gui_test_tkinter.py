@@ -91,15 +91,11 @@ class MockBaseStation:
         """Simulate sending a test to a bUE (like PREPR message)"""
         if bue_id in self.connected_bues and bue_id not in self.testing_bues:
             self.testing_bues.append(bue_id)
-            self.stdout_history.append(
-                f"[test_manager.py] PREPR sent to bUE {bue_id} for {test_script}"
-            )
+            self.stdout_history.append(f"[test_manager.py] PREPR sent to bUE {bue_id} for {test_script}")
 
             # Simulate test completion after random time (5-15 seconds)
             completion_delay = random.uniform(5, 15)
-            completion_timer = threading.Timer(
-                completion_delay, self._complete_test, args=[bue_id]
-            )
+            completion_timer = threading.Timer(completion_delay, self._complete_test, args=[bue_id])
             completion_timer.daemon = True
             completion_timer.start()
 
@@ -108,17 +104,13 @@ class MockBaseStation:
         if bue_id in self.testing_bues:
             self.testing_bues.remove(bue_id)
             completion_type = random.choice(["DONE", "FAIL"])
-            self.stdout_history.append(
-                f"[test_manager.py] Test {completion_type} on bUE {bue_id}"
-            )
+            self.stdout_history.append(f"[test_manager.py] Test {completion_type} on bUE {bue_id}")
 
     def cancel_test_on_bue(self, bue_id):
         """Simulate canceling a test on a bUE (like CANCD message)"""
         if bue_id in self.testing_bues:
             self.testing_bues.remove(bue_id)
-            self.stdout_history.append(
-                f"[test_manager.py] CANCD sent to bUE {bue_id} - test cancelled"
-            )
+            self.stdout_history.append(f"[test_manager.py] CANCD sent to bUE {bue_id} - test cancelled")
 
     def mock_updates(self):
         """Simulate dynamic updates to the base station data"""
@@ -186,9 +178,7 @@ class MockBaseStation:
 
             # Convert to approximate meters (rough calculation)
             lat_meters = lat_diff * 111000  # 1 degree lat ≈ 111km
-            lon_meters = (
-                lon_diff * 111000 * 0.8
-            )  # Adjust for longitude at this latitude
+            lon_meters = lon_diff * 111000 * 0.8  # Adjust for longitude at this latitude
 
             distance = (lat_meters**2 + lon_meters**2) ** 0.5
             return distance

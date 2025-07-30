@@ -43,9 +43,7 @@ class BaseStationGUI:
         self.running = False
 
         # Custom markers for the map
-        self.custom_markers = (
-            {}
-        )  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
+        self.custom_markers = {}  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
         self.marker_counter = 0
 
         # Setup GUI
@@ -96,9 +94,7 @@ class BaseStationGUI:
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Initializing...")
-        status_bar = ttk.Label(
-            self.root, textvariable=self.status_var, relief=tk.SUNKEN
-        )
+        status_bar = ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def setup_left_panel(self, parent):
@@ -108,9 +104,7 @@ class BaseStationGUI:
         bue_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # bUE Treeview
-        self.bue_tree = ttk.Treeview(
-            bue_frame, columns=("status", "ping"), show="tree headings"
-        )
+        self.bue_tree = ttk.Treeview(bue_frame, columns=("status", "ping"), show="tree headings")
         self.bue_tree.heading("#0", text="bUE ID")
         self.bue_tree.heading("status", text="Status")
         self.bue_tree.heading("ping", text="Ping Status")
@@ -120,9 +114,7 @@ class BaseStationGUI:
         self.bue_tree.column("ping", width=100)
 
         # Scrollbar for treeview
-        bue_scrollbar = ttk.Scrollbar(
-            bue_frame, orient=tk.VERTICAL, command=self.bue_tree.yview
-        )
+        bue_scrollbar = ttk.Scrollbar(bue_frame, orient=tk.VERTICAL, command=self.bue_tree.yview)
         self.bue_tree.configure(yscrollcommand=bue_scrollbar.set)
 
         self.bue_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -136,30 +128,20 @@ class BaseStationGUI:
         control_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # Test button
-        ttk.Button(control_frame, text="Run Test", command=self.run_test).pack(
-            fill=tk.X, pady=2
-        )
+        ttk.Button(control_frame, text="Run Test", command=self.run_test).pack(fill=tk.X, pady=2)
 
         # Cancel test button
-        ttk.Button(control_frame, text="Cancel Tests", command=self.cancel_tests).pack(
-            fill=tk.X, pady=2
-        )
+        ttk.Button(control_frame, text="Cancel Tests", command=self.cancel_tests).pack(fill=tk.X, pady=2)
 
         # Open base station log
-        ttk.Button(
-            control_frame, text="Open Base Station Log", command=self.open_base_log
-        ).pack(fill=tk.X, pady=2)
+        ttk.Button(control_frame, text="Open Base Station Log", command=self.open_base_log).pack(fill=tk.X, pady=2)
 
         # Map controls frame
         map_control_frame = ttk.LabelFrame(parent, text="Map Controls")
         map_control_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        ttk.Button(
-            map_control_frame, text="Add Custom Marker", command=self.add_custom_marker
-        ).pack(fill=tk.X, pady=2)
-        ttk.Button(
-            map_control_frame, text="Manage Markers", command=self.manage_markers
-        ).pack(fill=tk.X, pady=2)
+        ttk.Button(map_control_frame, text="Add Custom Marker", command=self.add_custom_marker).pack(fill=tk.X, pady=2)
+        ttk.Button(map_control_frame, text="Manage Markers", command=self.manage_markers).pack(fill=tk.X, pady=2)
 
     def setup_map_view(self, parent):
         """Setup the map view with bUE locations and custom markers"""
@@ -172,15 +154,9 @@ class BaseStationGUI:
         map_info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         ttk.Label(map_info_frame, text="Legend:").pack(side=tk.LEFT)
-        ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(
-            side=tk.LEFT, padx=5
-        )
+        ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(side=tk.LEFT, padx=5)
+        ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(side=tk.LEFT, padx=5)
+        ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(side=tk.LEFT, padx=5)
 
         # Bind canvas events
         self.map_canvas.bind("<Button-1>", self.on_map_click)
@@ -196,9 +172,7 @@ class BaseStationGUI:
         coord_frame = ttk.LabelFrame(tables_paned, text="bUE Coordinates")
         tables_paned.add(coord_frame, weight=1)
 
-        self.coord_tree = ttk.Treeview(
-            coord_frame, columns=("latitude", "longitude"), show="tree headings"
-        )
+        self.coord_tree = ttk.Treeview(coord_frame, columns=("latitude", "longitude"), show="tree headings")
         self.coord_tree.heading("#0", text="bUE ID")
         self.coord_tree.heading("latitude", text="Latitude")
         self.coord_tree.heading("longitude", text="Longitude")
@@ -208,9 +182,7 @@ class BaseStationGUI:
         dist_frame = ttk.LabelFrame(tables_paned, text="bUE Distances")
         tables_paned.add(dist_frame, weight=1)
 
-        self.dist_tree = ttk.Treeview(
-            dist_frame, columns=("distance",), show="tree headings"
-        )
+        self.dist_tree = ttk.Treeview(dist_frame, columns=("distance",), show="tree headings")
         self.dist_tree.heading("#0", text="bUE Pair")
         self.dist_tree.heading("distance", text="Distance (m)")
         self.dist_tree.pack(fill=tk.BOTH, expand=True)
@@ -226,9 +198,7 @@ class BaseStationGUI:
         control_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # Clear messages button
-        ttk.Button(
-            control_frame, text="Clear Messages", command=self.clear_messages
-        ).pack(side=tk.LEFT)
+        ttk.Button(control_frame, text="Clear Messages", command=self.clear_messages).pack(side=tk.LEFT)
 
     def start_base_station(self):
         """Initialize and start the base station"""
@@ -294,9 +264,7 @@ class BaseStationGUI:
             else:
                 ping_status = "🔴 Lost"
 
-            self.bue_tree.insert(
-                "", "end", iid=bue_id, text=bue_name, values=(status, ping_status)
-            )
+            self.bue_tree.insert("", "end", iid=bue_id, text=bue_name, values=(status, ping_status))
 
     def update_map(self):
         """Update the map with bUE locations and markers"""
@@ -360,9 +328,7 @@ class BaseStationGUI:
 
         # Map coordinate conversion functions
         def lat_to_y(lat):
-            return (
-                canvas_height - ((lat - min_lat) / (max_lat - min_lat)) * canvas_height
-            )
+            return canvas_height - ((lat - min_lat) / (max_lat - min_lat)) * canvas_height
 
         def lon_to_x(lon):
             return ((lon - min_lon) / (max_lon - min_lon)) * canvas_width
@@ -377,9 +343,7 @@ class BaseStationGUI:
                 is_close = False
                 for marker in self.custom_markers.values():
                     if marker.get("paired_bue") == bue_id:
-                        distance = self.calculate_distance(
-                            lat, lon, marker["lat"], marker["lon"]
-                        )
+                        distance = self.calculate_distance(lat, lon, marker["lat"], marker["lon"])
                         if distance <= 20:  # 20 meters proximity
                             is_close = True
                             break
@@ -454,9 +418,7 @@ class BaseStationGUI:
                     lat, lon = coords[0], coords[1]
                     self.coord_tree.insert("", "end", text=bue_name, values=(lat, lon))
                 except (IndexError, ValueError):
-                    self.coord_tree.insert(
-                        "", "end", text=bue_name, values=("Invalid", "Invalid")
-                    )
+                    self.coord_tree.insert("", "end", text=bue_name, values=("Invalid", "Invalid"))
 
         # Update distance table
         for item in self.dist_tree.get_children():
@@ -477,9 +439,7 @@ class BaseStationGUI:
                         distance = self.base_station.get_distance(bue1, bue2)
                         if distance is not None:
                             pair_name = f"{bUEs.get(str(bue1), str(bue1))} ↔ {bUEs.get(str(bue2), str(bue2))}"
-                            self.dist_tree.insert(
-                                "", "end", text=pair_name, values=(f"{distance:.2f}")
-                            )
+                            self.dist_tree.insert("", "end", text=pair_name, values=(f"{distance:.2f}"))
 
                         processed_pairs.add((bue1, bue2))
 
@@ -504,9 +464,7 @@ class BaseStationGUI:
             connected = len(self.base_station.connected_bues)
             testing = len(getattr(self.base_station, "testing_bues", []))
             current_time = datetime.now().strftime("%H:%M:%S")
-            self.status_var.set(
-                f"Time: {current_time} | Connected: {connected} | Testing: {testing}"
-            )
+            self.status_var.set(f"Time: {current_time} | Connected: {connected} | Testing: {testing}")
 
     def show_bue_context_menu(self, event):
         """Show context menu for bUE operations"""
@@ -518,19 +476,11 @@ class BaseStationGUI:
 
         # Create context menu
         context_menu = tk.Menu(self.root, tearoff=0)
-        context_menu.add_command(
-            label="Disconnect", command=lambda: self.disconnect_bue(bue_id)
-        )
-        context_menu.add_command(
-            label="Reload", command=lambda: self.reload_bue(bue_id)
-        )
-        context_menu.add_command(
-            label="Restart", command=lambda: self.restart_bue(bue_id)
-        )
+        context_menu.add_command(label="Disconnect", command=lambda: self.disconnect_bue(bue_id))
+        context_menu.add_command(label="Reload", command=lambda: self.reload_bue(bue_id))
+        context_menu.add_command(label="Restart", command=lambda: self.restart_bue(bue_id))
         context_menu.add_separator()
-        context_menu.add_command(
-            label="Open Log File", command=lambda: self.open_bue_log(bue_id)
-        )
+        context_menu.add_command(label="Open Log File", command=lambda: self.open_bue_log(bue_id))
 
         # Show menu
         try:
@@ -558,9 +508,7 @@ class BaseStationGUI:
 
     def reload_bue(self, bue_id):
         """Reload a specific bUE"""
-        if messagebox.askyesno(
-            "Confirm Reload", f"Reload {bUEs.get(str(bue_id), str(bue_id))}?"
-        ):
+        if messagebox.askyesno("Confirm Reload", f"Reload {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 self.base_station.ota.send_ota_message(bue_id, "RELOAD")
                 self.disconnect_bue(bue_id)
@@ -570,9 +518,7 @@ class BaseStationGUI:
 
     def restart_bue(self, bue_id):
         """Restart a specific bUE"""
-        if messagebox.askyesno(
-            "Confirm Restart", f"Restart {bUEs.get(str(bue_id), str(bue_id))}?"
-        ):
+        if messagebox.askyesno("Confirm Restart", f"Restart {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 self.base_station.ota.send_ota_message(bue_id, "RESTART")
                 self.disconnect_bue(bue_id)
@@ -602,10 +548,7 @@ class BaseStationGUI:
 
     def cancel_tests(self):
         """Cancel running tests"""
-        if (
-            not hasattr(self.base_station, "testing_bues")
-            or not self.base_station.testing_bues
-        ):
+        if not hasattr(self.base_station, "testing_bues") or not self.base_station.testing_bues:
             messagebox.showinfo("No Tests", "No tests currently running")
             return
 
@@ -646,9 +589,9 @@ class BaseStationGUI:
         delta_lat = math.radians(lat2 - lat1)
         delta_lon = math.radians(lon2 - lon1)
 
-        a = math.sin(delta_lat / 2) * math.sin(delta_lat / 2) + math.cos(
-            lat1_rad
-        ) * math.cos(lat2_rad) * math.sin(delta_lon / 2) * math.sin(delta_lon / 2)
+        a = math.sin(delta_lat / 2) * math.sin(delta_lat / 2) + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(
+            delta_lon / 2
+        ) * math.sin(delta_lon / 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return R * c
@@ -694,14 +637,10 @@ class TestDialog:
     def setup_dialog(self):
         """Setup the all-in-one test dialog"""
         # Step 1: bUE Selection
-        selection_frame = ttk.LabelFrame(
-            self.dialog, text="Step 1: Select bUEs for Testing", padding="10"
-        )
+        selection_frame = ttk.LabelFrame(self.dialog, text="Step 1: Select bUEs for Testing", padding="10")
         selection_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(selection_frame, text="Choose which bUEs will run tests:").pack(
-            anchor=tk.W, pady=(0, 5)
-        )
+        ttk.Label(selection_frame, text="Choose which bUEs will run tests:").pack(anchor=tk.W, pady=(0, 5))
 
         # Create checkboxes for connected bUEs
         self.bue_vars = {}
@@ -729,15 +668,11 @@ class TestDialog:
                 row += 1
 
         # Selection summary
-        self.selection_label = ttk.Label(
-            selection_frame, text="No bUEs selected", foreground="gray"
-        )
+        self.selection_label = ttk.Label(selection_frame, text="No bUEs selected", foreground="gray")
         self.selection_label.pack(anchor=tk.W, pady=(5, 0))
 
         # Step 2: Test Delay
-        time_frame = ttk.LabelFrame(
-            self.dialog, text="Step 2: Set Test Delay", padding="10"
-        )
+        time_frame = ttk.LabelFrame(self.dialog, text="Step 2: Set Test Delay", padding="10")
         time_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # Delay input
@@ -746,16 +681,12 @@ class TestDialog:
 
         ttk.Label(delay_controls, text="Start test in:").grid(row=0, column=0, padx=5)
         self.delay_var = tk.StringVar(value="30")
-        delay_spin = tk.Spinbox(
-            delay_controls, from_=5, to=300, textvariable=self.delay_var, width=5
-        )
+        delay_spin = tk.Spinbox(delay_controls, from_=5, to=300, textvariable=self.delay_var, width=5)
         delay_spin.grid(row=0, column=1, padx=5)
         ttk.Label(delay_controls, text="seconds").grid(row=0, column=2, padx=5)
 
         # Calculated start time display
-        self.start_time_label = ttk.Label(
-            time_frame, text="", foreground="blue", font=("TkDefaultFont", 9)
-        )
+        self.start_time_label = ttk.Label(time_frame, text="", foreground="blue", font=("TkDefaultFont", 9))
         self.start_time_label.pack(pady=(10, 0))
 
         # Update the calculated time when delay changes
@@ -766,9 +697,7 @@ class TestDialog:
         self.update_calculated_time()  # Initial calculation
 
         # Step 3: Configure Individual bUEs - ALL IN ONE WINDOW
-        config_frame = ttk.LabelFrame(
-            self.dialog, text="Step 3: Configure Each Selected bUE", padding="10"
-        )
+        config_frame = ttk.LabelFrame(self.dialog, text="Step 3: Configure Each Selected bUE", padding="10")
         config_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         # Create a scrollable frame for bUE configurations
@@ -776,9 +705,7 @@ class TestDialog:
         scrollbar = ttk.Scrollbar(config_frame, orient="vertical", command=canvas.yview)
         self.scrollable_frame = ttk.Frame(canvas)
 
-        self.scrollable_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        self.scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
         canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
@@ -798,26 +725,18 @@ class TestDialog:
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        self.run_btn = ttk.Button(
-            button_frame, text="Run Tests", command=self.run_tests, state=tk.DISABLED
-        )
+        self.run_btn = ttk.Button(button_frame, text="Run Tests", command=self.run_tests, state=tk.DISABLED)
         self.run_btn.pack(side=tk.LEFT, padx=5)
 
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def update_selection(self):
         """Update the selection and show inline configuration"""
-        self.selected_bues = [
-            bue_id for bue_id, var in self.bue_vars.items() if var.get()
-        ]
+        self.selected_bues = [bue_id for bue_id, var in self.bue_vars.items() if var.get()]
 
         if self.selected_bues:
             bue_names = [bUEs.get(str(bid), f"bUE {bid}") for bid in self.selected_bues]
-            self.selection_label.config(
-                text=f"Selected: {', '.join(bue_names)}", foreground="blue"
-            )
+            self.selection_label.config(text=f"Selected: {', '.join(bue_names)}", foreground="blue")
 
             # Show inline configuration for each selected bUE
             self.show_inline_configs()
@@ -846,14 +765,10 @@ class TestDialog:
 
             if start_time.date() == current_time.date():
                 # Same day
-                self.start_time_label.config(
-                    text=f"Tests will start at: {time_str} (today)"
-                )
+                self.start_time_label.config(text=f"Tests will start at: {time_str} (today)")
             else:
                 # Next day
-                self.start_time_label.config(
-                    text=f"Tests will start at: {time_str} on {date_str}"
-                )
+                self.start_time_label.config(text=f"Tests will start at: {time_str} on {date_str}")
 
         except ValueError:
             self.start_time_label.config(text="Invalid delay time")
@@ -870,9 +785,7 @@ class TestDialog:
             bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
             # Create a frame for this bUE's configuration
-            bue_frame = ttk.LabelFrame(
-                self.scrollable_frame, text=f"Configure {bue_name}", padding="10"
-            )
+            bue_frame = ttk.LabelFrame(self.scrollable_frame, text=f"Configure {bue_name}", padding="10")
             bue_frame.pack(fill=tk.X, padx=5, pady=5)
 
             # Test file selection
@@ -927,11 +840,7 @@ class TestDialog:
 
     def check_ready_to_run(self, *args):
         """Check if all configurations are ready and enable run button"""
-        if (
-            self.selected_bues
-            and hasattr(self, "config_widgets")
-            and self.config_widgets
-        ):
+        if self.selected_bues and hasattr(self, "config_widgets") and self.config_widgets:
             # All selected bUEs have configuration widgets, enable run
             self.run_btn.config(state=tk.NORMAL)
         else:
@@ -959,9 +868,7 @@ class TestDialog:
         # Calculate start time using delay - use CURRENT time for actual execution
         try:
             delay_seconds = int(self.delay_var.get())
-            execution_time = datetime.now().replace(
-                microsecond=0
-            )  # Fresh time for execution
+            execution_time = datetime.now().replace(microsecond=0)  # Fresh time for execution
             start_time = execution_time + timedelta(seconds=delay_seconds)
             unix_timestamp = int(start_time.timestamp())
 
@@ -974,9 +881,7 @@ class TestDialog:
                 self.base_station.ota.send_ota_message(bue_id, command)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 
-            bue_names = [
-                bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()
-            ]
+            bue_names = [bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()]
             messagebox.showinfo(
                 "Tests Scheduled",
                 f"Tests scheduled for: {', '.join(bue_names)}\n\n"
@@ -1029,20 +934,14 @@ class ConfigureBueDialog:
         # Parameters
         ttk.Label(self.dialog, text="Parameters:").pack(anchor=tk.W, padx=20)
         self.params_var = tk.StringVar()
-        ttk.Entry(self.dialog, textvariable=self.params_var).pack(
-            fill=tk.X, padx=20, pady=5
-        )
+        ttk.Entry(self.dialog, textvariable=self.params_var).pack(fill=tk.X, padx=20, pady=5)
 
         # Buttons
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        ttk.Button(button_frame, text="OK", command=self.save_config).pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="OK", command=self.save_config).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def save_config(self):
         """Save the configuration"""
@@ -1079,20 +978,14 @@ class CancelTestDialog:
             bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
             var = tk.BooleanVar()
             self.test_vars[bue_id] = var
-            ttk.Checkbutton(self.dialog, text=bue_name, variable=var).pack(
-                anchor=tk.W, padx=20
-            )
+            ttk.Checkbutton(self.dialog, text=bue_name, variable=var).pack(anchor=tk.W, padx=20)
 
         # Buttons
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        ttk.Button(
-            button_frame, text="Cancel Selected", command=self.cancel_tests
-        ).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Close", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="Cancel Selected", command=self.cancel_tests).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Close", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def cancel_tests(self):
         """Cancel selected tests"""
@@ -1107,9 +1000,7 @@ class CancelTestDialog:
                     logger.error(f"Failed to cancel test for bUE {bue_id}: {e}")
 
         if canceled:
-            messagebox.showinfo(
-                "Tests Canceled", f"Canceled tests for: {', '.join(canceled)}"
-            )
+            messagebox.showinfo("Tests Canceled", f"Canceled tests for: {', '.join(canceled)}")
 
         self.dialog.destroy()
 
@@ -1131,39 +1022,24 @@ class AddMarkerDialog:
     def setup_dialog(self):
         """Setup the add marker dialog"""
         # Marker name
-        ttk.Label(self.dialog, text="Marker Name:").pack(
-            anchor=tk.W, padx=20, pady=(20, 5)
-        )
+        ttk.Label(self.dialog, text="Marker Name:").pack(anchor=tk.W, padx=20, pady=(20, 5))
         self.name_var = tk.StringVar()
-        ttk.Entry(self.dialog, textvariable=self.name_var, width=30).pack(
-            fill=tk.X, padx=20, pady=5
-        )
+        ttk.Entry(self.dialog, textvariable=self.name_var, width=30).pack(fill=tk.X, padx=20, pady=5)
 
         # Coordinates
-        ttk.Label(self.dialog, text="Latitude:").pack(
-            anchor=tk.W, padx=20, pady=(10, 5)
-        )
+        ttk.Label(self.dialog, text="Latitude:").pack(anchor=tk.W, padx=20, pady=(10, 5))
         self.lat_var = tk.StringVar()
-        ttk.Entry(self.dialog, textvariable=self.lat_var, width=30).pack(
-            fill=tk.X, padx=20, pady=5
-        )
+        ttk.Entry(self.dialog, textvariable=self.lat_var, width=30).pack(fill=tk.X, padx=20, pady=5)
 
-        ttk.Label(self.dialog, text="Longitude:").pack(
-            anchor=tk.W, padx=20, pady=(10, 5)
-        )
+        ttk.Label(self.dialog, text="Longitude:").pack(anchor=tk.W, padx=20, pady=(10, 5))
         self.lon_var = tk.StringVar()
-        ttk.Entry(self.dialog, textvariable=self.lon_var, width=30).pack(
-            fill=tk.X, padx=20, pady=5
-        )
+        ttk.Entry(self.dialog, textvariable=self.lon_var, width=30).pack(fill=tk.X, padx=20, pady=5)
 
         # Pair with bUE
-        ttk.Label(self.dialog, text="Pair with bUE (optional):").pack(
-            anchor=tk.W, padx=20, pady=(10, 5)
-        )
+        ttk.Label(self.dialog, text="Pair with bUE (optional):").pack(anchor=tk.W, padx=20, pady=(10, 5))
         try:
             bue_options = ["None"] + [
-                bUEs.get(str(bue_id), f"bUE {bue_id}")
-                for bue_id in self.main_gui.base_station.connected_bues
+                bUEs.get(str(bue_id), f"bUE {bue_id}") for bue_id in self.main_gui.base_station.connected_bues
             ]
             self.bue_var = tk.StringVar(value="None")
             ttk.Combobox(
@@ -1188,12 +1064,8 @@ class AddMarkerDialog:
         button_frame.pack(fill=tk.X, padx=20, pady=20)
 
         # Add some spacing between buttons
-        ttk.Button(button_frame, text="Add Marker", command=self.add_marker).pack(
-            side=tk.LEFT, padx=(0, 10)
-        )
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
-            side=tk.LEFT, padx=(10, 0)
-        )
+        ttk.Button(button_frame, text="Add Marker", command=self.add_marker).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.LEFT, padx=(10, 0))
 
     def add_marker(self):
         """Add the custom marker"""
@@ -1256,9 +1128,7 @@ class ManageMarkersDialog:
     def setup_dialog(self):
         """Setup the manage markers dialog"""
         # Markers list
-        self.markers_tree = ttk.Treeview(
-            self.dialog, columns=("lat", "lon", "paired_bue"), show="tree headings"
-        )
+        self.markers_tree = ttk.Treeview(self.dialog, columns=("lat", "lon", "paired_bue"), show="tree headings")
         self.markers_tree.heading("#0", text="Marker Name")
         self.markers_tree.heading("lat", text="Latitude")
         self.markers_tree.heading("lon", text="Longitude")
@@ -1270,15 +1140,9 @@ class ManageMarkersDialog:
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        ttk.Button(
-            button_frame, text="Delete Selected", command=self.delete_marker
-        ).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Edit Selected", command=self.edit_marker).pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Button(button_frame, text="Close", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="Delete Selected", command=self.delete_marker).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Edit Selected", command=self.edit_marker).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Close", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def refresh_markers(self):
         """Refresh the markers list"""
@@ -1288,9 +1152,7 @@ class ManageMarkersDialog:
         for marker_id, marker in self.main_gui.custom_markers.items():
             paired_bue_name = "None"
             if marker.get("paired_bue"):
-                paired_bue_name = bUEs.get(
-                    str(marker["paired_bue"]), f"bUE {marker['paired_bue']}"
-                )
+                paired_bue_name = bUEs.get(str(marker["paired_bue"]), f"bUE {marker['paired_bue']}")
 
             self.markers_tree.insert(
                 "",
@@ -1348,9 +1210,7 @@ class LogViewerDialog:
 
         # Auto-refresh thread for live log viewing
         self.auto_refresh = True
-        self.refresh_thread = threading.Thread(
-            target=self.auto_refresh_loop, daemon=True
-        )
+        self.refresh_thread = threading.Thread(target=self.auto_refresh_loop, daemon=True)
         self.refresh_thread.start()
 
         # Handle dialog close
@@ -1370,15 +1230,9 @@ class LogViewerDialog:
         button_frame = ttk.Frame(control_frame)
         button_frame.pack(side=tk.RIGHT)
 
-        ttk.Button(button_frame, text="Refresh", command=self.refresh_log).pack(
-            side=tk.LEFT, padx=2
-        )
-        ttk.Button(button_frame, text="Clear", command=self.clear_log).pack(
-            side=tk.LEFT, padx=2
-        )
-        ttk.Button(button_frame, text="Save As...", command=self.save_log).pack(
-            side=tk.LEFT, padx=2
-        )
+        ttk.Button(button_frame, text="Refresh", command=self.refresh_log).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Clear", command=self.clear_log).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Save As...", command=self.save_log).pack(side=tk.LEFT, padx=2)
 
         # Auto-refresh toggle
         self.auto_refresh_var = tk.BooleanVar(value=True)
@@ -1400,12 +1254,8 @@ class LogViewerDialog:
         self.search_entry.bind("<Return>", self.search_log)
         self.search_entry.bind("<KeyRelease>", self.search_as_type)
 
-        ttk.Button(search_frame, text="Find", command=self.search_log).pack(
-            side=tk.LEFT, padx=2
-        )
-        ttk.Button(search_frame, text="Clear Search", command=self.clear_search).pack(
-            side=tk.LEFT, padx=2
-        )
+        ttk.Button(search_frame, text="Find", command=self.search_log).pack(side=tk.LEFT, padx=2)
+        ttk.Button(search_frame, text="Clear Search", command=self.clear_search).pack(side=tk.LEFT, padx=2)
 
         # Log content area with scrollbars
         content_frame = ttk.Frame(self.dialog)
@@ -1421,21 +1271,15 @@ class LogViewerDialog:
         self.log_text.pack(fill=tk.BOTH, expand=True)
 
         # Configure text tags for highlighting
-        self.log_text.tag_configure(
-            "error", foreground="red", font=("Consolas", 10, "bold")
-        )
-        self.log_text.tag_configure(
-            "warning", foreground="orange", font=("Consolas", 10, "bold")
-        )
+        self.log_text.tag_configure("error", foreground="red", font=("Consolas", 10, "bold"))
+        self.log_text.tag_configure("warning", foreground="orange", font=("Consolas", 10, "bold"))
         self.log_text.tag_configure("info", foreground="blue")
         self.log_text.tag_configure("debug", foreground="gray")
         self.log_text.tag_configure("search_highlight", background="yellow")
 
         # Status bar
         self.status_var = tk.StringVar()
-        status_bar = ttk.Label(
-            self.dialog, textvariable=self.status_var, relief=tk.SUNKEN
-        )
+        status_bar = ttk.Label(self.dialog, textvariable=self.status_var, relief=tk.SUNKEN)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def load_log_content(self):
@@ -1458,9 +1302,7 @@ class LogViewerDialog:
                 # Update file info
                 file_size = os.path.getsize(self.log_path)
                 line_count = content.count("\n")
-                self.file_info_var.set(
-                    f"File: {self.log_path} | Size: {file_size:,} bytes | Lines: {line_count:,}"
-                )
+                self.file_info_var.set(f"File: {self.log_path} | Size: {file_size:,} bytes | Lines: {line_count:,}")
                 self.status_var.set("Log loaded successfully")
 
             else:
@@ -1486,11 +1328,7 @@ class LogViewerDialog:
             line_lower = line.lower()
 
             # Determine tag based on log level
-            if (
-                "error" in line_lower
-                or "failed" in line_lower
-                or "exception" in line_lower
-            ):
+            if "error" in line_lower or "failed" in line_lower or "exception" in line_lower:
                 tag = "error"
             elif "warning" in line_lower or "warn" in line_lower:
                 tag = "warning"
@@ -1604,10 +1442,7 @@ class LogViewerDialog:
                     # Check if file has been modified
                     if os.path.exists(self.log_path):
                         current_mtime = os.path.getmtime(self.log_path)
-                        if (
-                            not hasattr(self, "last_mtime")
-                            or current_mtime > self.last_mtime
-                        ):
+                        if not hasattr(self, "last_mtime") or current_mtime > self.last_mtime:
                             self.last_mtime = current_mtime
                             self.dialog.after(0, self.load_log_content)
 

@@ -31,9 +31,7 @@ class TestOtaBasicFunctionality:
 
         # Check that the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
-        expected = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, MessageTypes.PING
-        )
+        expected = MessageHelper.create_at_command(DeviceIds.BASE_STATION, MessageTypes.PING)
         assert len(sent_messages) == 1
         assert sent_messages[0] == f"AT+SEND=1,4,PING\r\n"
 
@@ -85,9 +83,7 @@ class TestConnectionProtocol:
 
         # Verify the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
-        expected = MessageHelper.create_at_command(
-            DeviceIds.BROADCAST, MessageTypes.REQ
-        )
+        expected = MessageHelper.create_at_command(DeviceIds.BROADCAST, MessageTypes.REQ)
         assert expected in sent_messages
 
     def test_connection_confirm(self, ota_device):
@@ -96,9 +92,7 @@ class TestConnectionProtocol:
 
         # Simulate base station sending CON message with its ID
         con_message = f"{MessageTypes.CON}:{DeviceIds.BASE_STATION}"
-        rcv_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, con_message
-        )
+        rcv_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, con_message)
         mock_serial.add_incoming_message(rcv_message)
 
         # Wait and get messages
@@ -117,9 +111,7 @@ class TestConnectionProtocol:
 
         # Verify the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
-        expected = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, MessageTypes.ACK
-        )
+        expected = MessageHelper.create_at_command(DeviceIds.BASE_STATION, MessageTypes.ACK)
         assert expected in sent_messages
 
 
@@ -135,9 +127,7 @@ class TestPingProtocol:
 
         # Verify the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
-        expected = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, MessageTypes.PING
-        )
+        expected = MessageHelper.create_at_command(DeviceIds.BASE_STATION, MessageTypes.PING)
         assert expected in sent_messages
 
     def test_ping_response(self, ota_device):
@@ -145,9 +135,7 @@ class TestPingProtocol:
         device, mock_serial = ota_device
 
         # Simulate base station sending PINGR message
-        rcv_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, MessageTypes.PINGR
-        )
+        rcv_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, MessageTypes.PINGR)
         mock_serial.add_incoming_message(rcv_message)
 
         # Wait and get messages
@@ -168,9 +156,7 @@ class TestTestProtocol:
         # Simulate base station sending TEST message
         test_config = "0.1.1745004290"  # config.role.starttime
         test_message = f"{MessageTypes.TEST}:{test_config}"
-        rcv_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, test_message
-        )
+        rcv_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, test_message)
         mock_serial.add_incoming_message(rcv_message)
 
         # Wait and get messages
@@ -199,9 +185,7 @@ class TestTestProtocol:
         device, mock_serial = ota_device
 
         # Simulate base station sending CANC message
-        rcv_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, MessageTypes.CANC
-        )
+        rcv_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, MessageTypes.CANC)
         mock_serial.add_incoming_message(rcv_message)
 
         # Wait and get messages
@@ -222,9 +206,7 @@ class TestTestProtocol:
 
         # Verify the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
-        expected = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, prepr_message
-        )
+        expected = MessageHelper.create_at_command(DeviceIds.BASE_STATION, prepr_message)
         assert expected in sent_messages
 
     def test_test_lifecycle_messages(self, ota_device):
@@ -242,12 +224,8 @@ class TestTestProtocol:
         sent_messages = mock_serial.get_sent_messages()
         assert len(sent_messages) == 2
 
-        expected_upd = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, upd_message
-        )
-        expected_done = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, MessageTypes.DONE
-        )
+        expected_upd = MessageHelper.create_at_command(DeviceIds.BASE_STATION, upd_message)
+        expected_done = MessageHelper.create_at_command(DeviceIds.BASE_STATION, MessageTypes.DONE)
 
         assert expected_upd in sent_messages
         assert expected_done in sent_messages
@@ -363,9 +341,7 @@ class TestConcurrentAccess:
 
         # Add multiple messages to the buffer
         for i in range(10):
-            test_message = MessageHelper.create_rcv_message(
-                DeviceIds.BASE_STATION, f"MSG_{i}"
-            )
+            test_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, f"MSG_{i}")
             mock_serial.add_incoming_message(test_message)
 
         # Send some messages while receiving

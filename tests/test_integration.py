@@ -39,9 +39,7 @@ try:
                     bue_ota.send_ota_message(DeviceIds.BROADCAST, MessageTypes.REQ)
 
                     # Simulate base station receiving REQ
-                    req_message = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, MessageTypes.REQ
-                    )
+                    req_message = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, MessageTypes.REQ)
                     base_mock.add_incoming_message(req_message)
 
                     # Step 2: Base station responds with CON
@@ -49,18 +47,14 @@ try:
                     base_ota.send_ota_message(DeviceIds.BUE_DEVICE, con_message)
 
                     # Simulate bUE receiving CON
-                    con_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BASE_STATION, con_message
-                    )
+                    con_rcv = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, con_message)
                     bue_mock.add_incoming_message(con_rcv)
 
                     # Step 3: bUE sends ACK
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.ACK)
 
                     # Simulate base station receiving ACK
-                    ack_message = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, MessageTypes.ACK
-                    )
+                    ack_message = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, MessageTypes.ACK)
                     base_mock.add_incoming_message(ack_message)
 
                     # Wait for processing
@@ -100,18 +94,14 @@ try:
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.PING)
 
                     # Simulate base station receiving PING
-                    ping_message = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, MessageTypes.PING
-                    )
+                    ping_message = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, MessageTypes.PING)
                     base_mock.add_incoming_message(ping_message)
 
                     # Base station responds with PINGR
                     base_ota.send_ota_message(DeviceIds.BUE_DEVICE, MessageTypes.PINGR)
 
                     # Simulate bUE receiving PINGR
-                    pingr_message = MessageHelper.create_rcv_message(
-                        DeviceIds.BASE_STATION, MessageTypes.PINGR
-                    )
+                    pingr_message = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, MessageTypes.PINGR)
                     bue_mock.add_incoming_message(pingr_message)
 
                     time.sleep(0.3)
@@ -148,9 +138,7 @@ try:
                     base_ota.send_ota_message(DeviceIds.BUE_DEVICE, test_message)
 
                     # Simulate bUE receiving TEST
-                    test_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BASE_STATION, test_message
-                    )
+                    test_rcv = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, test_message)
                     bue_mock.add_incoming_message(test_rcv)
 
                     # Step 2: bUE responds with PREPR
@@ -159,9 +147,7 @@ try:
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, prepr_message)
 
                     # Simulate base receiving PREPR
-                    prepr_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, prepr_message
-                    )
+                    prepr_rcv = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, prepr_message)
                     base_mock.add_incoming_message(prepr_rcv)
 
                     # Step 4: bUE sends update
@@ -169,18 +155,14 @@ try:
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, upd_message)
 
                     # Simulate base receiving UPD
-                    upd_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, upd_message
-                    )
+                    upd_rcv = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, upd_message)
                     base_mock.add_incoming_message(upd_rcv)
 
                     # Step 5: bUE finishes test
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.DONE)
 
                     # Simulate base receiving DONE
-                    done_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, MessageTypes.DONE
-                    )
+                    done_rcv = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, MessageTypes.DONE)
                     base_mock.add_incoming_message(done_rcv)
 
                     time.sleep(0.5)
@@ -222,9 +204,7 @@ try:
                     base_ota.send_ota_message(DeviceIds.BUE_DEVICE, bad_test_message)
 
                     # Simulate bUE receiving bad TEST
-                    test_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BASE_STATION, bad_test_message
-                    )
+                    test_rcv = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, bad_test_message)
                     bue_mock.add_incoming_message(test_rcv)
 
                     # bUE responds with FAIL
@@ -232,9 +212,7 @@ try:
                     bue_ota.send_ota_message(DeviceIds.BASE_STATION, fail_message)
 
                     # Simulate base receiving FAIL
-                    fail_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BUE_DEVICE, fail_message
-                    )
+                    fail_rcv = MessageHelper.create_rcv_message(DeviceIds.BUE_DEVICE, fail_message)
                     base_mock.add_incoming_message(fail_rcv)
 
                     time.sleep(0.3)
@@ -273,9 +251,7 @@ try:
                     base_ota.send_ota_message(DeviceIds.BUE_DEVICE, MessageTypes.CANC)
 
                     # Simulate bUE receiving CANC
-                    canc_rcv = MessageHelper.create_rcv_message(
-                        DeviceIds.BASE_STATION, MessageTypes.CANC
-                    )
+                    canc_rcv = MessageHelper.create_rcv_message(DeviceIds.BASE_STATION, MessageTypes.CANC)
                     bue_mock.add_incoming_message(canc_rcv)
 
                     # After cancellation, bUE should resume pinging
@@ -301,9 +277,7 @@ try:
 
 except ImportError as e:
     print(f"Warning: Could not import test dependencies: {e}")
-    print(
-        "Run 'pip install -r setup/requirements_test.txt' to install test dependencies"
-    )
+    print("Run 'pip install -r setup/requirements_test.txt' to install test dependencies")
 
     # Create dummy test class for when pytest is not available
     class TestProtocolIntegration:

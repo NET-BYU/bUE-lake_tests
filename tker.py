@@ -3,12 +3,13 @@ from tkinter import ttk
 from datetime import datetime
 from enum import Enum, auto
 
-import tkintermapview #type:ignore
-import customtkinter #type:ignore
+import tkintermapview  # type:ignore
+import customtkinter  # type:ignore
 
 from loguru import logger
 
 from constants import TIMEOUT, bUEs
+
 
 class Command(Enum):
     REFRESH = 0
@@ -17,6 +18,7 @@ class Command(Enum):
     DISCONNECT = auto()
     CANCEL = auto()
     EXIT = auto()
+
 
 class BaseStationDashboard(tk.Tk):
     def __init__(self, base_station):
@@ -97,10 +99,12 @@ class BaseStationDashboard(tk.Tk):
         self.base_station.cancel_all_operations()
 
     def update_dashboard(self):
-        now = datetime.now().strftime('%H:%M:%S')
+        now = datetime.now().strftime("%H:%M:%S")
         connected_count = len(self.base_station.connected_bues)
-        testing_count = len(getattr(self.base_station, 'testing_bues', []))
-        self.header_label.config(text=f"🏢 Base Station Dashboard - {now} | Connected: {connected_count} | Testing: {testing_count}")
+        testing_count = len(getattr(self.base_station, "testing_bues", []))
+        self.header_label.config(
+            text=f"🏢 Base Station Dashboard - {now} | Connected: {connected_count} | Testing: {testing_count}"
+        )
 
         self.populate_connected_table()
         self.populate_ping_table()
@@ -121,7 +125,7 @@ class BaseStationDashboard(tk.Tk):
             tree.insert("", "end", values=("No bUEs connected", "N/A"))
             return
         for bue in self.base_station.connected_bues:
-            status = "🧪 Testing" if bue in getattr(self.base_station, 'testing_bues', []) else "💤 Idle"
+            status = "🧪 Testing" if bue in getattr(self.base_station, "testing_bues", []) else "💤 Idle"
             tree.insert("", "end", values=(bUEs[str(bue)], status))
 
     def populate_ping_table(self):
@@ -180,4 +184,3 @@ class BaseStationDashboard(tk.Tk):
             return
         for msg in self.base_station.stdout_history:
             tree.insert("", "end", values=(msg,))
-

@@ -14,11 +14,7 @@ def bue_status_table(base_station) -> Table:
     table.add_column("Status", style="yellow", justify="center")
 
     for bue in base_station.connected_bues:
-        status = (
-            "🧪 Testing"
-            if bue in getattr(base_station, "testing_bues", [])
-            else "💤 Idle"
-        )
+        status = "🧪 Testing" if bue in getattr(base_station, "testing_bues", []) else "💤 Idle"
         table.add_row(bUEs[str(bue)], status)
 
     if not base_station.connected_bues:
@@ -51,9 +47,7 @@ def bue_ping_table(base_station) -> Table:
 
 def bue_coordinates_table(base_station) -> Table:
     """Make a styled coordinates table."""
-    table = Table(
-        title="🌍 bUE Coordinates", show_header=True, header_style="bold blue"
-    )
+    table = Table(title="🌍 bUE Coordinates", show_header=True, header_style="bold blue")
     table.add_column("bUE ID", style="cyan", justify="center")
     table.add_column("Coordinates", style="yellow", justify="left")
 
@@ -92,9 +86,7 @@ def bue_distance_table(base_station) -> Table:
                 try:
                     dist = base_station.get_distance(bue1, bue2)
                     if dist is not None:
-                        table.add_row(
-                            f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", f"{dist:.2f}m"
-                        )
+                        table.add_row(f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}", f"{dist:.2f}m")
                     else:
                         table.add_row(
                             f"{bUEs[str(bue1)]} ↔ {bUEs[str(bue2)]}",
@@ -117,9 +109,7 @@ def bue_distance_table(base_station) -> Table:
 
 def received_messages_table(base_station) -> Table:
     """Make a styled coordinates table."""
-    table = Table(
-        title="💌  Received Messages", show_header=True, header_style="bold blue"
-    )
+    table = Table(title="💌  Received Messages", show_header=True, header_style="bold blue")
     table.add_column("Messages", style="cyan", justify="center")
 
     for message in base_station.stdout_history:

@@ -40,14 +40,10 @@ class TestDialog:
     def setup_dialog(self):
         """Setup the simplified test dialog like main_ui.py"""
         # Step 1: bUE Selection (like basket in main_ui)
-        selection_frame = ttk.LabelFrame(
-            self.dialog, text="Step 1: Select bUEs for Testing", padding="10"
-        )
+        selection_frame = ttk.LabelFrame(self.dialog, text="Step 1: Select bUEs for Testing", padding="10")
         selection_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(selection_frame, text="Choose which bUEs will run tests:").pack(
-            anchor=tk.W, pady=(0, 10)
-        )
+        ttk.Label(selection_frame, text="Choose which bUEs will run tests:").pack(anchor=tk.W, pady=(0, 10))
 
         # Create checkboxes for connected bUEs
         self.bue_vars = {}
@@ -75,15 +71,11 @@ class TestDialog:
                 row += 1
 
         # Selection summary
-        self.selection_label = ttk.Label(
-            selection_frame, text="No bUEs selected", foreground="gray"
-        )
+        self.selection_label = ttk.Label(selection_frame, text="No bUEs selected", foreground="gray")
         self.selection_label.pack(anchor=tk.W, pady=(10, 0))
 
         # Step 2: Start Time (like main_ui datetime prompt)
-        time_frame = ttk.LabelFrame(
-            self.dialog, text="Step 2: Set Start Time", padding="10"
-        )
+        time_frame = ttk.LabelFrame(self.dialog, text="Step 2: Set Start Time", padding="10")
         time_frame.pack(fill=tk.X, padx=10, pady=5)
 
         now = datetime.now()
@@ -92,26 +84,18 @@ class TestDialog:
 
         ttk.Label(time_controls, text="Hour:").grid(row=0, column=0, padx=5)
         self.hour_var = tk.StringVar(value=str(now.hour))
-        ttk.Spinbox(
-            time_controls, from_=0, to=23, textvariable=self.hour_var, width=5
-        ).grid(row=0, column=1, padx=5)
+        ttk.Spinbox(time_controls, from_=0, to=23, textvariable=self.hour_var, width=5).grid(row=0, column=1, padx=5)
 
         ttk.Label(time_controls, text="Minute:").grid(row=0, column=2, padx=5)
         self.minute_var = tk.StringVar(value=str(now.minute))
-        ttk.Spinbox(
-            time_controls, from_=0, to=59, textvariable=self.minute_var, width=5
-        ).grid(row=0, column=3, padx=5)
+        ttk.Spinbox(time_controls, from_=0, to=59, textvariable=self.minute_var, width=5).grid(row=0, column=3, padx=5)
 
         ttk.Label(time_controls, text="Second:").grid(row=0, column=4, padx=5)
         self.second_var = tk.StringVar(value=str(now.second))
-        ttk.Spinbox(
-            time_controls, from_=0, to=59, textvariable=self.second_var, width=5
-        ).grid(row=0, column=5, padx=5)
+        ttk.Spinbox(time_controls, from_=0, to=59, textvariable=self.second_var, width=5).grid(row=0, column=5, padx=5)
 
         # Step 3: Configure Individual bUEs
-        config_frame = ttk.LabelFrame(
-            self.dialog, text="Step 3: Configure Selected bUEs", padding="10"
-        )
+        config_frame = ttk.LabelFrame(self.dialog, text="Step 3: Configure Selected bUEs", padding="10")
         config_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         ttk.Label(
@@ -120,9 +104,7 @@ class TestDialog:
         ).pack(anchor=tk.W)
 
         # Configuration display/status
-        self.config_text = tk.Text(
-            config_frame, height=10, wrap=tk.WORD, state=tk.DISABLED
-        )
+        self.config_text = tk.Text(config_frame, height=10, wrap=tk.WORD, state=tk.DISABLED)
         config_scroll = ttk.Scrollbar(config_frame, command=self.config_text.yview)
         self.config_text.configure(yscrollcommand=config_scroll.set)
 
@@ -141,26 +123,18 @@ class TestDialog:
         )
         self.config_btn.pack(side=tk.LEFT, padx=5)
 
-        self.run_btn = ttk.Button(
-            button_frame, text="Run Tests", command=self.run_tests, state=tk.DISABLED
-        )
+        self.run_btn = ttk.Button(button_frame, text="Run Tests", command=self.run_tests, state=tk.DISABLED)
         self.run_btn.pack(side=tk.LEFT, padx=5)
 
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def update_selection(self):
         """Update the selection when checkboxes change"""
-        self.selected_bues = [
-            bue_id for bue_id, var in self.bue_vars.items() if var.get()
-        ]
+        self.selected_bues = [bue_id for bue_id, var in self.bue_vars.items() if var.get()]
 
         if self.selected_bues:
             bue_names = [bUEs.get(str(bid), f"bUE {bid}") for bid in self.selected_bues]
-            self.selection_label.config(
-                text=f"Selected: {', '.join(bue_names)}", foreground="blue"
-            )
+            self.selection_label.config(text=f"Selected: {', '.join(bue_names)}", foreground="blue")
             self.config_btn.config(state=tk.NORMAL)
 
             # Clear previous configs if selection changed
@@ -182,9 +156,7 @@ class TestDialog:
         for bue_id in self.selected_bues:
             if bue_id not in self.bue_configs:
                 # Launch individual bUE configuration dialog
-                config_dialog = IndividualBueConfigDialog(
-                    self.dialog, bue_id, self.test_files, self.bue_configs
-                )
+                config_dialog = IndividualBueConfigDialog(self.dialog, bue_id, self.test_files, self.bue_configs)
                 self.dialog.wait_window(config_dialog.dialog)
 
         self.update_config_display()
@@ -216,9 +188,7 @@ class TestDialog:
     def run_tests(self):
         """Execute the configured tests (like main_ui send_test)"""
         if not self.bue_configs:
-            messagebox.showwarning(
-                "No Configuration", "Please configure at least one bUE for testing"
-            )
+            messagebox.showwarning("No Configuration", "Please configure at least one bUE for testing")
             return
 
         # Calculate start time (like main_ui.py)
@@ -240,12 +210,8 @@ class TestDialog:
                 self.base_station.ota.send_ota_message(bue_id, command)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 
-            bue_names = [
-                bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()
-            ]
-            messagebox.showinfo(
-                "Tests Started", f"Started tests on: {', '.join(bue_names)}"
-            )
+            bue_names = [bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()]
+            messagebox.showinfo("Tests Started", f"Started tests on: {', '.join(bue_names)}")
             self.dialog.destroy()
 
         except Exception as e:
@@ -289,23 +255,17 @@ class IndividualBueConfigDialog:
         file_frame = ttk.LabelFrame(self.dialog, text="Select Test File", padding="10")
         file_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        ttk.Label(file_frame, text="What file would you like to run?").pack(
-            anchor=tk.W, pady=(0, 5)
-        )
+        ttk.Label(file_frame, text="What file would you like to run?").pack(anchor=tk.W, pady=(0, 5))
 
         self.file_var = tk.StringVar(value=self.test_files[0])
         for i, test_file in enumerate(self.test_files):
-            ttk.Radiobutton(
-                file_frame, text=test_file, variable=self.file_var, value=test_file
-            ).pack(anchor=tk.W, padx=20)
+            ttk.Radiobutton(file_frame, text=test_file, variable=self.file_var, value=test_file).pack(anchor=tk.W, padx=20)
 
         # Parameters (like main_ui.py input prompt)
         params_frame = ttk.LabelFrame(self.dialog, text="Parameters", padding="10")
         params_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        ttk.Label(params_frame, text="Enter parameters separated by space:").pack(
-            anchor=tk.W, pady=(0, 5)
-        )
+        ttk.Label(params_frame, text="Enter parameters separated by space:").pack(anchor=tk.W, pady=(0, 5))
         self.params_var = tk.StringVar()
         ttk.Entry(params_frame, textvariable=self.params_var, width=40).pack(fill=tk.X)
 
@@ -313,12 +273,8 @@ class IndividualBueConfigDialog:
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=20, pady=20)
 
-        ttk.Button(
-            button_frame, text="Save Configuration", command=self.save_config
-        ).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        ttk.Button(button_frame, text="Save Configuration", command=self.save_config).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.RIGHT, padx=5)
 
     def save_config(self):
         """Save the bUE configuration"""

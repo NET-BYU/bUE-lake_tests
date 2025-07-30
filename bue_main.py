@@ -120,9 +120,7 @@ class bUE_Main:
     # Send out REQs until a base station is found
     def ota_connect_req(self):
         if self.ota_connected:
-            logger.warning(
-                f"connect_ota_req: OTA device is already connected to base station {self.ota_base_station_id}"
-            )
+            logger.warning(f"connect_ota_req: OTA device is already connected to base station {self.ota_base_station_id}")
             return
 
         # See if there are any new messages from the OTA device
@@ -144,14 +142,10 @@ class bUE_Main:
                     if parts[2].startswith(
                         "CON:"
                     ):  # TY This checks to see if the received message matches a base station connecting
-                        if (
-                            parts[0] == parts[2][4:]
-                        ):  # format. If it does we are now going to be in the connected state
+                        if parts[0] == parts[2][4:]:  # format. If it does we are now going to be in the connected state
                             self.ota_connected = True
                             self.ota_base_station_id = int(parts[0])
-                            logger.info(
-                                f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}"
-                            )
+                            logger.info(f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}")
                             self.ota_timeout = TIMEOUT
                             self.ota.send_ota_message(self.ota_base_station_id, "ACK")
                             return
@@ -164,15 +158,11 @@ class bUE_Main:
                 logger.error("ota_connect_req: Error parsing OTA message")
                 continue
 
-        self.ota_base_station_id = (
-            0 if self.ota_base_station_id is None else self.ota_base_station_id
-        )
+        self.ota_base_station_id = 0 if self.ota_base_station_id is None else self.ota_base_station_id
 
         # Send a REQ (request) message through the OTA device
         # Next cycle we will hopefully have a CON (connected) response
-        self.ota.send_ota_message(
-            self.ota_base_station_id, "REQ"
-        )  # bUE sends a message back to the base station asking to
+        self.ota.send_ota_message(self.ota_base_station_id, "REQ")  # bUE sends a message back to the base station asking to
         # be connected as well
         print("Sending a REQ")
 
@@ -187,9 +177,7 @@ class bUE_Main:
         print("Getting GPS Data")
         lat, long = self.gps_handler()
         print("trying to send a ping")
-        self.ota.send_ota_message(
-            self.ota_base_station_id, f"PING,{lat},{long}"
-        )  # test ping for now
+        self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}")  # test ping for now
 
         # See if there are any new messages from the OTA device
         try:
@@ -215,9 +203,7 @@ class bUE_Main:
                 self.ota_timeout = TIMEOUT
                 got_pingr = True
 
-            elif (
-                "TEST" in message
-            ):  # Message should look like 1,34,TEST.<file>.<configuration>.<role>.<starttime>,-1,8
+            elif "TEST" in message:  # Message should look like 1,34,TEST.<file>.<configuration>.<role>.<starttime>,-1,8
                 input = parts[2]
 
                 self.test_handler(input)
@@ -236,13 +222,9 @@ class bUE_Main:
             self.ota_timeout -= 1
 
             if self.ota_timeout <= TIMEOUT / 2:
-                logger.info(
-                    f"We haven't heard from {self.ota_base_station_id} in a while...."
-                )
+                logger.info(f"We haven't heard from {self.ota_base_station_id} in a while....")
             if self.ota_timeout <= 0:
-                logger.info(
-                    f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting..."
-                )
+                logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
                 self.ota_connected = False
 
     """
@@ -284,9 +266,7 @@ class bUE_Main:
     #         logger.error(f"GPS error: {e}")    #     logger.debug("Could not find coordinates. Are they off?")
     #     return "", ""
 
-    def gps_handler(
-        self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10
-    ):
+    def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
         start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
@@ -310,9 +290,7 @@ class bUE_Main:
                             eph = getattr(report, "eph", None)
 
                             if lat is not None and lon is not None:
-                                logger.debug(
-                                    f"Got GPS fix: lat={lat}, lon={lon}, HDOP={eph}"
-                                )
+                                logger.debug(f"Got GPS fix: lat={lat}, lon={lon}, HDOP={eph}")
                                 all_fixes.append((lat, lon))
                             else:
                                 logger.debug("GPS fix missing lat/lon fields")
@@ -352,9 +330,7 @@ class bUE_Main:
                 current_time = int(time.time())
                 if start_time > current_time:
                     wait_duration = start_time - current_time
-                    logger.info(
-                        f"Waiting {wait_duration} seconds until start time {start_time}"
-                    )
+                    logger.info(f"Waiting {wait_duration} seconds until start time {start_time}")
 
                     # Wait in small increments to allow for cancellation
                     while int(time.time()) < start_time and not self.cancel_test:
@@ -382,9 +358,7 @@ class bUE_Main:
                     text=True,  # decode bytes to str
                 )
 
-                logger.info(
-                    f"Started test script: {file}.py with parameters {parameters}"
-                )
+                logger.info(f"Started test script: {file}.py with parameters {parameters}")
 
                 def reader_thread(pipe, output_queue):
                     for line in iter(pipe.readline, ""):
@@ -413,9 +387,7 @@ class bUE_Main:
 
                 # We also collect all the terminal outputs from the script so we can send them back to the base station
                 """
-                while (
-                    process.poll() is None
-                ):  # poll() returns None if process hasn't terminated
+                while process.poll() is None:  # poll() returns None if process hasn't terminated
                     # Get all normal terminal outputs
                     try:
                         stdout_line = stdout_queue.get_nowait()
@@ -514,22 +486,14 @@ class bUE_Main:
         with self.test_output_lock:
             if self.test_output_buffer:
                 for line in self.test_output_buffer:
-                    self.ota.send_ota_message(
-                        self.ota_base_station_id, f"UPD:,{lat},{long},{line}"
-                    )
-                    logger.info(
-                        f"Sent UPD to {self.ota_base_station_id} with console output: {line}"
-                    )
+                    self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
+                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
                     time.sleep(0.4)  # Sleep so UART does not get overwhelmed
                 self.test_output_buffer.clear()
 
             else:  # If there is no message send it blank
-                self.ota.send_ota_message(
-                    self.ota_base_station_id, f"UPD:,{lat},{long},"
-                )
-                logger.info(
-                    f"Sent UPD to {self.ota_base_station_id} with no console output"
-                )
+                self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
+                logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output")
 
     """
     # This function checks for incoming messages while in the system is the UTW_TEST state.
@@ -553,9 +517,7 @@ class bUE_Main:
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
             else:
-                logger.error(
-                    f"Received unexpected message while in UTW_TEST state: {message}"
-                )
+                logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
 
     """
     Restarts the service entirely
@@ -581,9 +543,7 @@ class bUE_Main:
 
     def state_change_logger(self):
         if self.cur_st != self.prv_st:
-            logger.info(
-                f"state_change_logger: State changed from {self.prv_st.name} to {self.cur_st.name}"
-            )
+            logger.info(f"state_change_logger: State changed from {self.prv_st.name} to {self.cur_st.name}")
             self.prv_st = self.cur_st
 
     def bue_tick(self, loop_dur=0.01):

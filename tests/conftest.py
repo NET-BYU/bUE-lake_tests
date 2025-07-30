@@ -37,9 +37,7 @@ class MessageHelper:
     """Helper class for creating and parsing OTA messages"""
 
     @staticmethod
-    def create_rcv_message(
-        sender_id: int, message: str, rssi: int = -80, snr: int = 10
-    ) -> str:
+    def create_rcv_message(sender_id: int, message: str, rssi: int = -80, snr: int = 10) -> str:
         """Create a +RCV message as received from the LoRa module"""
         return f"+RCV={sender_id},{len(message)},{message},{rssi},{snr}"
 

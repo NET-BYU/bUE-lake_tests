@@ -57,25 +57,15 @@ def test_base_station(config_file="config_base.yaml"):
 
                 if connected_count > 0:
                     print(f"      📡 Connected bUEs: {base_station.connected_bues}")
-                    if (
-                        hasattr(base_station, "bue_coordinates")
-                        and base_station.bue_coordinates
-                    ):
-                        print(
-                            f"      📍 Coordinates available for: {list(base_station.bue_coordinates.keys())}"
-                        )
+                    if hasattr(base_station, "bue_coordinates") and base_station.bue_coordinates:
+                        print(f"      📍 Coordinates available for: {list(base_station.bue_coordinates.keys())}")
 
                 if testing_count > 0:
                     print(f"      🧪 Testing bUEs: {base_station.testing_bues}")
 
                 # Show recent messages
-                if (
-                    hasattr(base_station, "stdout_history")
-                    and base_station.stdout_history
-                ):
-                    recent_msgs = list(base_station.stdout_history)[
-                        -2:
-                    ]  # Last 2 messages
+                if hasattr(base_station, "stdout_history") and base_station.stdout_history:
+                    recent_msgs = list(base_station.stdout_history)[-2:]  # Last 2 messages
                     for msg in recent_msgs:
                         print(f"      💬 Recent: {msg}")
 

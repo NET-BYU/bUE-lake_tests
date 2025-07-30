@@ -16,9 +16,7 @@ def send_test(base_station, bue_indexes, file_name, start_time, parameters):
     bues = [base_station.connected_bues[index] for index in bue_indexes]
     for bue in bues:
         base_station.testing_bues.append(bue)
-        base_station.ota.send_ota_message(
-            bue, f"TEST-{file_name}-{start_time}-{parameters}"
-        )
+        base_station.ota.send_ota_message(bue, f"TEST-{file_name}-{start_time}-{parameters}")
 
 
 def user_input_handler(base_station):
@@ -29,9 +27,7 @@ def user_input_handler(base_station):
 
     FILES = ("lora_td_ru", "lora_tu_rd", "helloworld", "gpstest", "gpstest2")
 
-    while (
-        not base_station.EXIT
-    ):  ## TODO: Make sure that connected_bues_tests are taken out
+    while not base_station.EXIT:  ## TODO: Make sure that connected_bues_tests are taken out
         try:
 
             index = survey.routines.select(
@@ -48,14 +44,10 @@ def user_input_handler(base_station):
                 if len(connected_bues) == 0:
                     print("Currently not connected to any bUEs")
 
-                bues_indexes = survey.routines.basket(
-                    "What bUEs will be running tests? ", options=connected_bues
-                )
+                bues_indexes = survey.routines.basket("What bUEs will be running tests? ", options=connected_bues)
                 ## TODO: Should there be a check to see if a bUE is currently being tested or trust the user to handle this themselves?
 
-                file_index = survey.routines.select(
-                    "What file would you like to run? ", options=FILES
-                )
+                file_index = survey.routines.select("What file would you like to run? ", options=FILES)
                 file_name = FILES[file_index]
 
                 start_time = survey.routines.datetime(
@@ -64,9 +56,7 @@ def user_input_handler(base_station):
                 ).time()
                 ## TODO: It would be nice if these parameters setup to conincide with the script being run
 
-                parameters = survey.routines.input(
-                    "Enter parameters separated by a space:\n"
-                )
+                parameters = survey.routines.input("Enter parameters separated by a space:\n")
 
                 send_test(base_station, bues_indexes, file_name, start_time, parameters)
 
@@ -75,9 +65,7 @@ def user_input_handler(base_station):
                 if len(connected_bues) == 0:
                     print("Currently not connected to any bUEs")
 
-                indexes = survey.routines.basket(
-                    "Select two bUEs: ", options=connected_bues
-                )
+                indexes = survey.routines.basket("Select two bUEs: ", options=connected_bues)
 
                 ## TODO: Need to implement the rest of this once I fixed the coordinates
 
@@ -93,9 +81,7 @@ def user_input_handler(base_station):
                 if len(connected_bues) == 0:
                     print("Currently not connected to any bUEs")
 
-                indexes = survey.routines.basket(
-                    "What bUEs do you want to disconnect from? ", options=connected_bues
-                )
+                indexes = survey.routines.basket("What bUEs do you want to disconnect from? ", options=connected_bues)
 
                 print("\n")
                 for i in indexes:
@@ -112,9 +98,7 @@ def user_input_handler(base_station):
                 if len(testing_bues) == 0:
                     print("No bUEs are currently running any tests")
 
-                indexes = survey.routines.basket(
-                    "What bUE tests do you want to cancel? ", options=testing_bues
-                )
+                indexes = survey.routines.basket("What bUE tests do you want to cancel? ", options=testing_bues)
 
                 print("\n")
                 ## TODO: Send a CANC to each of these bUEs
@@ -127,9 +111,7 @@ def user_input_handler(base_station):
 
             elif index == 4:  # LIST
                 print("\n")
-                connected_bues = " ".join(
-                    str(bue) for bue in base_station.connected_bues
-                )
+                connected_bues = " ".join(str(bue) for bue in base_station.connected_bues)
                 print(f"Currently connected to {connected_bues}\n\n")
                 logger.info(f"Currently connected to {connected_bues}")
 

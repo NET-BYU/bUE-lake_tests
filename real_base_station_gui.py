@@ -42,9 +42,7 @@ class RealBaseStationGUI:
         self.running = False
 
         # Custom markers for the map
-        self.custom_markers = (
-            {}
-        )  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
+        self.custom_markers = {}  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
         self.marker_counter = 0
 
         # Status variables
@@ -95,9 +93,7 @@ class RealBaseStationGUI:
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Initializing...")
-        status_bar = ttk.Label(
-            self.root, textvariable=self.status_var, relief=tk.SUNKEN
-        )
+        status_bar = ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def setup_left_panel(self, parent):
@@ -107,9 +103,7 @@ class RealBaseStationGUI:
         bue_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # bUE Treeview
-        self.bue_tree = ttk.Treeview(
-            bue_frame, columns=("status", "ping"), show="tree headings"
-        )
+        self.bue_tree = ttk.Treeview(bue_frame, columns=("status", "ping"), show="tree headings")
         self.bue_tree.heading("#0", text="bUE ID")
         self.bue_tree.heading("status", text="Status")
         self.bue_tree.heading("ping", text="Ping Status")
@@ -119,9 +113,7 @@ class RealBaseStationGUI:
         self.bue_tree.column("ping", width=100)
 
         # Scrollbar for treeview
-        bue_scrollbar = ttk.Scrollbar(
-            bue_frame, orient=tk.VERTICAL, command=self.bue_tree.yview
-        )
+        bue_scrollbar = ttk.Scrollbar(bue_frame, orient=tk.VERTICAL, command=self.bue_tree.yview)
         self.bue_tree.configure(yscrollcommand=bue_scrollbar.set)
 
         self.bue_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -154,31 +146,21 @@ class RealBaseStationGUI:
         test_frame = ttk.LabelFrame(control_frame, text="Test Controls")
         test_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        ttk.Button(test_frame, text="Run Test", command=self.run_test).pack(
-            fill=tk.X, pady=2
-        )
-        ttk.Button(test_frame, text="Cancel Tests", command=self.cancel_tests).pack(
-            fill=tk.X, pady=2
-        )
+        ttk.Button(test_frame, text="Run Test", command=self.run_test).pack(fill=tk.X, pady=2)
+        ttk.Button(test_frame, text="Cancel Tests", command=self.cancel_tests).pack(fill=tk.X, pady=2)
 
         # Log controls
         log_frame = ttk.LabelFrame(control_frame, text="Logs")
         log_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        ttk.Button(
-            log_frame, text="Open Base Station Log", command=self.open_base_log
-        ).pack(fill=tk.X, pady=2)
+        ttk.Button(log_frame, text="Open Base Station Log", command=self.open_base_log).pack(fill=tk.X, pady=2)
 
         # Map controls frame
         map_control_frame = ttk.LabelFrame(parent, text="Map Controls")
         map_control_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        ttk.Button(
-            map_control_frame, text="Add Custom Marker", command=self.add_custom_marker
-        ).pack(fill=tk.X, pady=2)
-        ttk.Button(
-            map_control_frame, text="Manage Markers", command=self.manage_markers
-        ).pack(fill=tk.X, pady=2)
+        ttk.Button(map_control_frame, text="Add Custom Marker", command=self.add_custom_marker).pack(fill=tk.X, pady=2)
+        ttk.Button(map_control_frame, text="Manage Markers", command=self.manage_markers).pack(fill=tk.X, pady=2)
 
     def setup_map_view(self, parent):
         """Setup the map view with bUE locations and custom markers"""
@@ -191,15 +173,9 @@ class RealBaseStationGUI:
         map_info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         ttk.Label(map_info_frame, text="Legend:").pack(side=tk.LEFT)
-        ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(
-            side=tk.LEFT, padx=5
-        )
-        ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(
-            side=tk.LEFT, padx=5
-        )
+        ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(side=tk.LEFT, padx=5)
+        ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(side=tk.LEFT, padx=5)
+        ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(side=tk.LEFT, padx=5)
 
         # Bind canvas events
         self.map_canvas.bind("<Button-1>", self.on_map_click)
@@ -215,9 +191,7 @@ class RealBaseStationGUI:
         coord_frame = ttk.LabelFrame(tables_paned, text="bUE Coordinates")
         tables_paned.add(coord_frame, weight=1)
 
-        self.coord_tree = ttk.Treeview(
-            coord_frame, columns=("latitude", "longitude"), show="tree headings"
-        )
+        self.coord_tree = ttk.Treeview(coord_frame, columns=("latitude", "longitude"), show="tree headings")
         self.coord_tree.heading("#0", text="bUE ID")
         self.coord_tree.heading("latitude", text="Latitude")
         self.coord_tree.heading("longitude", text="Longitude")
@@ -227,9 +201,7 @@ class RealBaseStationGUI:
         dist_frame = ttk.LabelFrame(tables_paned, text="bUE Distances")
         tables_paned.add(dist_frame, weight=1)
 
-        self.dist_tree = ttk.Treeview(
-            dist_frame, columns=("distance",), show="tree headings"
-        )
+        self.dist_tree = ttk.Treeview(dist_frame, columns=("distance",), show="tree headings")
         self.dist_tree.heading("#0", text="bUE Pair")
         self.dist_tree.heading("distance", text="Distance (m)")
         self.dist_tree.pack(fill=tk.BOTH, expand=True)
@@ -245,9 +217,7 @@ class RealBaseStationGUI:
         control_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # Clear messages button
-        ttk.Button(
-            control_frame, text="Clear Messages", command=self.clear_messages
-        ).pack(side=tk.LEFT)
+        ttk.Button(control_frame, text="Clear Messages", command=self.clear_messages).pack(side=tk.LEFT)
 
     def start_base_station(self):
         """Initialize and start the base station"""
@@ -330,10 +300,7 @@ class RealBaseStationGUI:
                 bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
                 # Determine status
-                if (
-                    hasattr(self.base_station, "testing_bues")
-                    and bue_id in self.base_station.testing_bues
-                ):
+                if hasattr(self.base_station, "testing_bues") and bue_id in self.base_station.testing_bues:
                     status = "🧪 Testing"
                 else:
                     status = "💤 Idle"
@@ -347,9 +314,7 @@ class RealBaseStationGUI:
                 else:
                     ping_status = "🔴 Lost"
 
-                self.bue_tree.insert(
-                    "", "end", iid=bue_id, text=bue_name, values=(status, ping_status)
-                )
+                self.bue_tree.insert("", "end", iid=bue_id, text=bue_name, values=(status, ping_status))
 
             # Restore selection if the item still exists
             for item in selected_items:
@@ -361,10 +326,7 @@ class RealBaseStationGUI:
                 item_id = str(bue_id)
                 if self.bue_tree.exists(item_id):
                     # Determine status
-                    if (
-                        hasattr(self.base_station, "testing_bues")
-                        and bue_id in self.base_station.testing_bues
-                    ):
+                    if hasattr(self.base_station, "testing_bues") and bue_id in self.base_station.testing_bues:
                         status = "🧪 Testing"
                     else:
                         status = "💤 Idle"
@@ -386,11 +348,7 @@ class RealBaseStationGUI:
         # Clear canvas
         self.map_canvas.delete("all")
 
-        if (
-            not self.base_station
-            or not hasattr(self.base_station, "bue_coordinates")
-            or not self.base_station.bue_coordinates
-        ):
+        if not self.base_station or not hasattr(self.base_station, "bue_coordinates") or not self.base_station.bue_coordinates:
             self.map_canvas.create_text(
                 300,
                 200,
@@ -447,9 +405,7 @@ class RealBaseStationGUI:
 
         # Map coordinate conversion functions
         def lat_to_y(lat):
-            return (
-                canvas_height - ((lat - min_lat) / (max_lat - min_lat)) * canvas_height
-            )
+            return canvas_height - ((lat - min_lat) / (max_lat - min_lat)) * canvas_height
 
         def lon_to_x(lon):
             return ((lon - min_lon) / (max_lon - min_lon)) * canvas_width
@@ -464,9 +420,7 @@ class RealBaseStationGUI:
                 is_close = False
                 for marker in self.custom_markers.values():
                     if marker.get("paired_bue") == bue_id:
-                        distance = self.calculate_distance(
-                            lat, lon, marker["lat"], marker["lon"]
-                        )
+                        distance = self.calculate_distance(lat, lon, marker["lat"], marker["lon"])
                         if distance <= 20:  # 20 meters proximity
                             is_close = True
                             break
@@ -541,9 +495,7 @@ class RealBaseStationGUI:
                     lat, lon = coords[0], coords[1]
                     self.coord_tree.insert("", "end", text=bue_name, values=(lat, lon))
                 except (IndexError, ValueError, TypeError):
-                    self.coord_tree.insert(
-                        "", "end", text=bue_name, values=("Invalid", "Invalid")
-                    )
+                    self.coord_tree.insert("", "end", text=bue_name, values=("Invalid", "Invalid"))
 
         # Update distance table
         for item in self.dist_tree.get_children():
@@ -597,9 +549,7 @@ class RealBaseStationGUI:
                         # Find paired marker for this bUE
                         for marker in self.custom_markers.values():
                             if marker.get("paired_bue") == bue_id:
-                                distance = self.calculate_distance(
-                                    bue_lat, bue_lon, marker["lat"], marker["lon"]
-                                )
+                                distance = self.calculate_distance(bue_lat, bue_lon, marker["lat"], marker["lon"])
                                 bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
                                 marker_name = marker["name"]
                                 pair_name = f"{bue_name} ↔ {marker_name}"
@@ -642,9 +592,7 @@ class RealBaseStationGUI:
 
             # Update main status bar
             current_time = datetime.now().strftime("%H:%M:%S")
-            self.status_var.set(
-                f"Time: {current_time} | Connected: {connected} | Testing: {testing}"
-            )
+            self.status_var.set(f"Time: {current_time} | Connected: {connected} | Testing: {testing}")
 
     def on_bue_tree_click(self, event):
         """Handle left-click on bUE tree to allow deselection"""
@@ -718,9 +666,7 @@ class RealBaseStationGUI:
         try:
             context_menu.tk_popup(event.x_root, event.y_root)
             # Bind left-click elsewhere to dismiss menu
-            self.dismiss_binding_id = self.root.bind(
-                "<Button-1>", dismiss_menu, add="+"
-            )
+            self.dismiss_binding_id = self.root.bind("<Button-1>", dismiss_menu, add="+")
         except Exception as e:
             print(f"Error showing context menu: {e}")
         finally:
@@ -735,15 +681,9 @@ class RealBaseStationGUI:
             try:
                 if bue_id in self.base_station.connected_bues:
                     self.base_station.connected_bues.remove(bue_id)
-                if (
-                    hasattr(self.base_station, "bue_coordinates")
-                    and bue_id in self.base_station.bue_coordinates
-                ):
+                if hasattr(self.base_station, "bue_coordinates") and bue_id in self.base_station.bue_coordinates:
                     del self.base_station.bue_coordinates[bue_id]
-                if (
-                    hasattr(self.base_station, "testing_bues")
-                    and bue_id in self.base_station.testing_bues
-                ):
+                if hasattr(self.base_station, "testing_bues") and bue_id in self.base_station.testing_bues:
                     self.base_station.testing_bues.remove(bue_id)
                 if bue_id in self.base_station.bue_timeout_tracker:
                     del self.base_station.bue_timeout_tracker[bue_id]
@@ -753,35 +693,27 @@ class RealBaseStationGUI:
 
     def reload_bue(self, bue_id):
         """Reload a specific bUE"""
-        if messagebox.askyesno(
-            "Confirm Reload", f"Reload {bUEs.get(str(bue_id), str(bue_id))}?"
-        ):
+        if messagebox.askyesno("Confirm Reload", f"Reload {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 if hasattr(self.base_station, "ota"):
                     self.base_station.ota.send_ota_message(bue_id, "RELOAD")
                     self.disconnect_bue(bue_id)
                     logger.info(f"Sent reload command to bUE {bue_id}")
                 else:
-                    messagebox.showwarning(
-                        "Feature Unavailable", "OTA functionality not available"
-                    )
+                    messagebox.showwarning("Feature Unavailable", "OTA functionality not available")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to reload: {e}")
 
     def restart_bue(self, bue_id):
         """Restart a specific bUE"""
-        if messagebox.askyesno(
-            "Confirm Restart", f"Restart {bUEs.get(str(bue_id), str(bue_id))}?"
-        ):
+        if messagebox.askyesno("Confirm Restart", f"Restart {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 if hasattr(self.base_station, "ota"):
                     self.base_station.ota.send_ota_message(bue_id, "RESTART")
                     self.disconnect_bue(bue_id)
                     logger.info(f"Sent restart command to bUE {bue_id}")
                 else:
-                    messagebox.showwarning(
-                        "Feature Unavailable", "OTA functionality not available"
-                    )
+                    messagebox.showwarning("Feature Unavailable", "OTA functionality not available")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to restart: {e}")
 
@@ -807,10 +739,7 @@ class RealBaseStationGUI:
 
     def cancel_tests(self):
         """Cancel running tests"""
-        if (
-            not hasattr(self.base_station, "testing_bues")
-            or not self.base_station.testing_bues
-        ):
+        if not hasattr(self.base_station, "testing_bues") or not self.base_station.testing_bues:
             messagebox.showinfo("No Tests", "No tests currently running")
             return
 
@@ -849,9 +778,9 @@ class RealBaseStationGUI:
         delta_lat = math.radians(lat2 - lat1)
         delta_lon = math.radians(lon2 - lon1)
 
-        a = math.sin(delta_lat / 2) * math.sin(delta_lat / 2) + math.cos(
-            lat1_rad
-        ) * math.cos(lat2_rad) * math.sin(delta_lon / 2) * math.sin(delta_lon / 2)
+        a = math.sin(delta_lat / 2) * math.sin(delta_lat / 2) + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(
+            delta_lon / 2
+        ) * math.sin(delta_lon / 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return R * c
