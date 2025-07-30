@@ -477,6 +477,10 @@ class bUE_Main:
                 if self.cancel_test:
                     self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
                 elif exit_code == 0:
+                    # Any extra messages that have not already been sent to the base station are sent
+                    with self.test_output_lock:
+                        self.ota_send_upd()
+
                     logger.info(f"{file}.py completed successfully.")
                     self.ota.send_ota_message(self.ota_base_station_id, "DONE")
                 else:
