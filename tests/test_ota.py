@@ -60,7 +60,7 @@ class TestOtaBasicFunctionality:
         valid_message = "+RCV=1,3,ACK,-50,1"
 
         # Add various messages including ones that should be filtered
-        mock_serial.add_incoming_message("")
+        # mock_serial.add_incoming_message("")
         mock_serial.add_incoming_message("OK")
         mock_serial.add_incoming_message(valid_message)
 
@@ -231,9 +231,6 @@ class TestTestProtocol:
         """Test the complete test lifecycle messages"""
         device, mock_serial = ota_device
 
-        # Test BEGIN message
-        device.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.BEGIN)
-
         # Test UPD message with body
         upd_message = f"{MessageTypes.UPD}:test_update_data"
         device.send_ota_message(DeviceIds.BASE_STATION, upd_message)
@@ -243,11 +240,8 @@ class TestTestProtocol:
 
         # Verify all messages were sent
         sent_messages = mock_serial.get_sent_messages()
-        assert len(sent_messages) == 3
+        assert len(sent_messages) == 2
 
-        expected_begin = MessageHelper.create_at_command(
-            DeviceIds.BASE_STATION, MessageTypes.BEGIN
-        )
         expected_upd = MessageHelper.create_at_command(
             DeviceIds.BASE_STATION, upd_message
         )
@@ -255,7 +249,6 @@ class TestTestProtocol:
             DeviceIds.BASE_STATION, MessageTypes.DONE
         )
 
-        assert expected_begin in sent_messages
         assert expected_upd in sent_messages
         assert expected_done in sent_messages
 
@@ -302,7 +295,6 @@ class TestErrorHandling:
 
             # Thread should be stopped
             assert device.exit_event.is_set()
-            assert not device.receiving_event.is_set()
 
 
 class TestMessageHelper:

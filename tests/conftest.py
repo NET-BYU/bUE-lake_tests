@@ -68,7 +68,6 @@ class MessageTypes:
     FAIL = "FAIL"  # bUE -> base: Test failure
     CANC = "CANC"  # base -> bUE: Cancel test
     PREPR = "PREPR"  # bUE -> base: Test preparation response
-    BEGIN = "BEGIN"  # bUE -> base: Test begin notification
     UPD = "UPD"  # bUE -> base: Test update
     DONE = "DONE"  # bUE -> base: Test completion
 
