@@ -9,3 +9,4 @@ uw_env/
 __pycache__/
 *.nmea
 .venv
+.coverage
