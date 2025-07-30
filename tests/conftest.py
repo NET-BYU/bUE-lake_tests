@@ -76,5 +76,5 @@ class MessageTypes:
 # Device ID constants
 class DeviceIds:
     BROADCAST = 0
-    BASE_STATION = 10
-    BUE_DEVICE = 5
+    BASE_STATION = 1
+    BUE_DEVICE = 10

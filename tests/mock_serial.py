@@ -30,7 +30,7 @@ class MockSerial:
 
     def write(self, data: bytes) -> int:
         """Write data to the mock serial port"""
-        message = data.decode("utf-8").strip()
+        message = data.decode("utf-8")
         self._sent_messages.append(message)
         return len(data)
 
@@ -39,7 +39,7 @@ class MockSerial:
         message = self._get_current_message()
         if message:
             self._read_position += 1
-            return f"{message}\n".encode("utf-8")
+            return f"{message}\r\n".encode("utf-8")
         return b""
 
     def close(self):

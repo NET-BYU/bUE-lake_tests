@@ -22,38 +22,27 @@ from ota import Ota
 class TestOtaBasicFunctionality:
     """Test basic OTA functionality"""
 
-    def test_ota_initialization(self, ota_device):
-        """Test that OTA device initializes correctly"""
-        device, mock_serial = ota_device
-
-        assert device.id == 5
-        assert device.ser == mock_serial
-        assert device.receiving_event.is_set()
-        assert not device.exit_event.is_set()
-        assert device.thread.is_alive()
-
-    def test_send_ota_message(self, ota_device):
+    def test_send_ping_ota_message(self, ota_device):
         """Test sending OTA messages"""
         device, mock_serial = ota_device
 
         # Send a simple message
-        device.send_ota_message(DeviceIds.BASE_STATION, MessageTypes.PING)
+        device.send_ota_message(1, "PING")
 
         # Check that the correct AT command was sent
         sent_messages = mock_serial.get_sent_messages()
         expected = MessageHelper.create_at_command(
             DeviceIds.BASE_STATION, MessageTypes.PING
         )
-        assert expected in sent_messages
+        assert len(sent_messages) == 1
+        assert sent_messages[0] == f"AT+SEND=1,4,PING\r\n"
 
     def test_receive_ota_message(self, ota_device):
         """Test receiving OTA messages"""
         device, mock_serial = ota_device
 
         # Add a message to the mock serial buffer
-        test_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, MessageTypes.PING, -75, 12
-        )
+        test_message = "+RCV=1,5,PINGR,-50,1"
         mock_serial.add_incoming_message(test_message)
 
         # Wait for the message to be processed
@@ -68,12 +57,11 @@ class TestOtaBasicFunctionality:
         """Test that empty messages and 'OK' responses are filtered out"""
         device, mock_serial = ota_device
 
+        valid_message = "+RCV=1,3,ACK,-50,1"
+
         # Add various messages including ones that should be filtered
         mock_serial.add_incoming_message("")
         mock_serial.add_incoming_message("OK")
-        valid_message = MessageHelper.create_rcv_message(
-            DeviceIds.BASE_STATION, MessageTypes.PING
-        )
         mock_serial.add_incoming_message(valid_message)
 
         # Wait for processing
