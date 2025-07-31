@@ -5,10 +5,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--verbose",
-    "--tb=short",
-    "--cov=.",
-    "--cov-report=html",
-    "--cov-report=term-missing"
+    "--tb=short"
 ]
 filterwarnings = [
     "ignore::DeprecationWarning"
