@@ -62,17 +62,17 @@ class Ota:
 
                 print(message_with_crc)
 
-                if len(parts) != 5:
+                if len(parts) < 5:
                     continue
                     # TODO: Maybe log if we are not putting a message into the recv_msgs?
 
-                # Extract components: +RCV=sender,length,message_with_crc,rssi,snr
+                # Extract components: +RCV=origin,length,message_with_crc,rssi,snr
                 origin = parts[0][5:]
-                message_with_crc_part = parts[2]
+                message_with_crc_part = ",".join(parts[2:-2])
+                print(parts)
+                print(f"Message with CRC Part: {message_with_crc_part}")
 
                 valid_crc, original_message = self.verify_crc(message_with_crc_part)
-
-                print(message_with_crc_part)
 
                 if not valid_crc:  # Bad checksum
                     continue
