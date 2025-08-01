@@ -173,6 +173,7 @@ class Base_Station_Main:
         new_messages = self.ota.get_new_messages()
 
         for message in new_messages:
+            print(message)
             try:  # Receive messages should look like "{bue_id},{message}"
                 try:
                     message = message[5:]

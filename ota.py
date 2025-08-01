@@ -72,8 +72,12 @@ class Ota:
 
                 valid_crc, original_message = self.verify_crc(message_with_crc_part)
 
+                print(message_with_crc_part)
+
                 if not valid_crc:  # Bad checksum
                     continue
+
+                print("!!!!!!!!!!!")
 
                 self.recv_msgs.put(f"{origin},{original_message}")
             except Exception as e:
@@ -122,11 +126,14 @@ class Ota:
         """
         try:
 
-            if include_crc:
-                crc = self.calculate_crc(message)
-                message_with_crc = f"{message}{crc}"
-            else:
-                message_with_crc = message
+            # if include_crc:
+            #     crc = self.calculate_crc(message)
+            #     message_with_crc = f"{message}{crc}"
+            # else:
+            #     message_with_crc = message
+
+            crc = self.calculate_crc(message)
+            message_with_crc = f"{message}{crc}"
 
             full_message = f"AT+SEND={dest},{len(message)},{message_with_crc}\r\n"
             self.ser.write(full_message.encode("utf-8"))
