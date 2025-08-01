@@ -514,10 +514,10 @@ class bUE_Main:
             if parts[1].startswith("CANC:"):
                 logger.info(f"Received a CANC message")
                 self.cancel_test = True
-            if parts[1].startswith("RELOAD:"):
+            elif parts[1].startswith("RELOAD:"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
-            if parts[1].startswith("RESTART:"):
+            elif parts[1].startswith("RESTART:"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
             else:
