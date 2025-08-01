@@ -7,6 +7,7 @@ import sys
 import os
 from unittest.mock import patch, MagicMock
 import time
+import crc8
 
 # Add the parent directory to the path so we can import ota
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -37,14 +38,36 @@ class MessageHelper:
     """Helper class for creating and parsing OTA messages"""
 
     @staticmethod
-    def create_rcv_message(sender_id: int, message: str, rssi: int = -80, snr: int = 10) -> str:
-        """Create a +RCV message as received from the LoRa module"""
-        return f"+RCV={sender_id},{len(message)},{message},{rssi},{snr}"
+    def calculate_crc8(message: str) -> str:
+        """Calculate CRC8 checksum for a message (same as OTA class)"""
+        crc8_calculator = crc8.crc8()
+        crc8_calculator.update(message.encode("utf-8"))
+        return format(crc8_calculator.digest()[0], "02x")
 
     @staticmethod
-    def create_at_command(dest_id: int, message: str) -> str:
+    def create_rcv_message(sender_id: int, message: str, rssi: int = -80, snr: int = 10, include_crc: bool = True) -> str:
+        """Create a +RCV message as received from the LoRa module"""
+        if include_crc:
+            # Create the message format used for CRC: "{len(message)},{message}"
+            msg_for_crc = f"{len(message)},{message}"
+            crc = MessageHelper.calculate_crc8(msg_for_crc)
+            message_with_crc = f"{message}{crc}"
+            return f"+RCV={sender_id},{len(message_with_crc)},{message_with_crc},{rssi},{snr}"
+        else:
+            return f"+RCV={sender_id},{len(message)},{message},{rssi},{snr}"
+
+    @staticmethod
+    def create_at_command(dest_id: int, message: str, include_crc: bool = True) -> str:
         """Create an AT+SEND command as sent to the LoRa module"""
-        return f"AT+SEND={dest_id},{len(message)},{message}\r\n"
+        if include_crc:
+            # Create the message format used for CRC: "{len(message)},{message}"
+            msg_for_crc = f"{len(message)},{message}"
+            crc = MessageHelper.calculate_crc8(msg_for_crc)
+            message_with_crc = f"{msg_for_crc}{crc}"
+            return f"AT+SEND={dest_id},{message_with_crc}\r\n"
+        else:
+            msg_for_send = f"{len(message)},{message}"
+            return f"AT+SEND={dest_id},{msg_for_send}\r\n"
 
     @staticmethod
     def parse_message_type(message: str) -> tuple:

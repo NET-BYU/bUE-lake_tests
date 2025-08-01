@@ -877,7 +877,7 @@ class TestDialog:
 
             # Send test commands
             for bue_id, config in self.bue_configs.items():
-                command = f"TEST-{config['file']}-{unix_timestamp}-{config['params']}"
+                command = f"TEST,{config['file']},{unix_timestamp},{config['params']}"
                 self.base_station.ota.send_ota_message(bue_id, command)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 

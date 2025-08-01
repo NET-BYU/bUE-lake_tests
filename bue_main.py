@@ -134,15 +134,15 @@ class bUE_Main:
 
         for message in new_messages:
             try:
-                # A connecting message would take the form of "+RCV=<base station id>,<Length>,CON:<base station id>,<RSSI>,<SNR>"
+                # A connecting message would take the form of "+RCV=<base station id>,<Length>,CON:<base station id>"
                 #  We want to extract the base station id from this message
                 if "CON:" in message:
                     message = message[5:]  # Remove the "+RCV=" part
                     parts = message.split(",")
-                    if parts[2].startswith(
-                        "CON:"
-                    ):  # TY This checks to see if the received message matches a base station connecting
-                        if parts[0] == parts[2][4:]:  # format. If it does we are now going to be in the connected state
+                    # This checks to see if the received message matches a base station connecting
+                    # format. If it does we are now going to be in the connected state
+                    if parts[2].startswith("CON:"):
+                        if parts[0] == parts[2][4:]:
                             self.ota_connected = True
                             self.ota_base_station_id = int(parts[0])
                             logger.info(f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}")
@@ -166,9 +166,12 @@ class bUE_Main:
         # be connected as well
         print("Sending a REQ")
 
+    """
     # This function looks for all messages it might receive while in the IDLE state.
     # It keeps track of whether or not it received a PING in a given rotation (timing defined by IDLE_PING_OTA_INTERVAL in bue_tick())
     # If enough PINGRs are missed, it will automatically disconnect and return to the OTA_CONNECT state
+    """
+
     def ota_idle_ping(self):
         if not self.ota_connected:
             logger.warning("ota_idle_ping: OTA device is not connected to base station")
@@ -189,29 +192,29 @@ class bUE_Main:
 
         for message in new_messages:
             message = message[5:]  # Remove the "+RCV=" part
-            parts = message.split(",")
+            parts = message.split(",", 3)
 
             # 1. A CON (connect0 message from the base station; we can (probably) ignore this for now;
             #     ideally, the base station would have seen our ACK message, but it can also see our PING
-            if "ACK" in message:
+            if parts[2].startswith("ACK"):
                 logger.info(f"Got an ACK from {self.ota_base_station_id}")
 
             # If we received a PINGR message, we know we are still connected to the base station.
             # We will not time out our connection
-            elif "PINGR" in message:
+            if parts[2].startswith("PINGR"):
                 logger.info(f"Got a PINGR from {self.ota_base_station_id}")
                 self.ota_timeout = TIMEOUT
                 got_pingr = True
 
-            elif "TEST" in message:  # Message should look like 1,34,TEST.<file>.<configuration>.<role>.<starttime>,-1,8
+            # Message should look like 1,34,TEST,<file>,<configuration>,<role>,<starttime>
+            if parts[2].startswith("TEST"):
                 input = parts[2]
-
                 self.test_handler(input)
-            elif "RELOAD" in message:
+            if parts[2].startswith("RELOAD"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
 
-            elif "RESTART" in message:
+            if parts[2].startswith("RESTART"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
 
@@ -311,12 +314,12 @@ class bUE_Main:
         return "", ""
 
     # This function handles operations that happen while a bUE is in the TESTING state
-    def test_handler(self, input):  # Input Format: TEST-<file>-<wait_time>-<parameters>
+    def test_handler(self, input):  # Input Format: TEST,<file>,<wait_time>,<parameters>
         if not ";" in input:  ## TODO: Perform other checks
             try:
                 self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
 
-                parts = input.split("-")
+                parts = input.split(",")
                 print(parts)
                 if len(parts) < 4:
                     raise ValueError(f"Invalid input format: {input}")
@@ -506,14 +509,18 @@ class bUE_Main:
         except Exception as e:
             logger.error(f"Failed to get OTA messages: {e}")
             return
+
         for message in new_messages:
-            if "CANC" in message:
+            message = message[5:]  # Remove the "+RCV=" part
+            parts = message.split(",")
+
+            if parts[2].startswith("CANC:"):
                 logger.info(f"Received a CANC message")
                 self.cancel_test = True
-            elif "RELOAD" in message:
+            if parts[2].startswith("RELOAD:"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
-            elif "RESTART" in message:
+            if parts[2].startswith("RESTART:"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
             else:

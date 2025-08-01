@@ -16,7 +16,6 @@ import os
 import sys
 import threading
 import time
-from datetime import datetime
 from loguru import logger
 from yaml import load, Loader
 
@@ -141,15 +140,13 @@ class Base_Station_Main:
             except Exception as e:
                 logger.bind(bue_id=bue_id).error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
 
-    """
-    # This function will cycle through each bUE the base station should be connected to and make sure that
-    # it has been receiving some sort of message from it.
-    # The messages it checks for our PINGs and UPDs
-    #
-    # If we went a rotation without receiving a message, we might have lost connection with the bUE 
-    """
-
     def check_bue_timeout(self):
+        """
+        This function will cycle through each bUE the base station should be connected to and make sure that
+        it has been receiving some sort of message from it.
+        The messages it checks for our PINGs and UPDs
+        If we went a rotation without receiving a message, we might have lost connection with the bUE
+        """
         for bue_id in self.connected_bues:
             if self.bue_timeout_tracker[bue_id] == TIMEOUT + 1:
                 # If this is true we know we are getting PINGs from this bue. No need to fear
@@ -186,7 +183,7 @@ class Base_Station_Main:
                     logger.error(f"message_listener: Failed to parse message '{message}': {e}")
                     continue  # Skip to the next message
 
-                if "REQ" in message:
+                if parts[2].startswith("REQ:"):
                     logger.debug("Sending a CON")
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
@@ -196,16 +193,16 @@ class Base_Station_Main:
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
 
-                elif "ACK" in message:
+                if parts[2].startswith("ACK:"):
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
-                elif "PING" in message:  # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
+                if parts[2].startswith("PING:"):  # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
                     if len(parts) >= 5:
                         lat = parts[3]
                         long = parts[4]
                     self.ping_bue(bue_id, lat, long)
 
-                elif "UPD" in message:  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
+                if parts[2].startswith("UPD:"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     if not bue_id in self.testing_bues:
                         self.testing_bues.append(bue_id)
                     lat = parts[3]
@@ -223,19 +220,19 @@ class Base_Station_Main:
                     if stdout != "":
                         self.stdout_history.append(stdout)
 
-                elif "FAIL" in message:
+                if parts[2].startswith("FAIL:"):
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                elif "DONE" in message:
+                if parts[2].startswith("DONE:"):
                     logger.bind(bue_id=bue_id).info(f"Received DONE from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                elif "PREPR" in message:
+                if parts[2].startswith("PREPR:"):
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
                     self.testing_bues.append(bue_id)
 
-                elif "CANCD" in message:
+                if parts[2].startswith("CANCD:"):
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
@@ -290,9 +287,6 @@ class Base_Station_Main:
         except Exception as e:
             logger.error(f"Error calculating distance: {e}")
             return None
-
-    def send_tests(self):
-        pass  ## TODO: write this function
 
     def base_station_tick(self, loop_dur=0.01):
 

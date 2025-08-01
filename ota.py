@@ -10,6 +10,7 @@ import serial
 import threading
 import time
 import queue
+import crc8
 
 
 class Ota:
@@ -25,6 +26,9 @@ class Ota:
                 time.sleep(2)
 
         self.id = id
+
+        # Initialize CRC8 calculator
+        self.crc8_calculator = crc8.crc8()
 
         # Flags
         self.exit_event = threading.Event()
@@ -45,28 +49,90 @@ class Ota:
         Runs continuously until the program is shut down as set by the exit_event flag
 
         Allows reading from port is receiving_event is set (meaning is True)
+
+        Expected message format: +RCV=<sndr address>,<payload length>,<MESSAGE TYPE><:BODY (optional)>,<RSSI>,<SNR>
         """
         while not self.exit_event.is_set():
             try:
-                message = self.ser.readline().decode("utf-8", errors="ignore").strip()
+                message_with_crc = self.ser.readline().decode("utf-8", errors="ignore").strip()
+                parts = message_with_crc.split(",")
 
-                if message == "" or message == "OK":
+                if len(parts) != 5:
+                    continue
+                    # TODO: Maybe log if we are not putting a message into the recv_msgs?
+
+                # Extract components: +RCV=sender,length,message_with_crc,rssi,snr
+                message_with_crc_part = parts[2]
+
+                valid_crc, original_message = self.verify_crc(message_with_crc_part)
+
+                print(original_message)
+
+                if not valid_crc:  # Bad checksum
                     continue
 
-                self.recv_msgs.put(message)
+                self.recv_msgs.put(f"+RCV={original_message}")
             except Exception as e:
                 print(f"OTA encountered some error: {e}")
 
-    def send_ota_message(self, dest: int, message: str):
+    def calculate_crc(self, message):
+        """Calculate CRC8 checksum for a message."""
+        self.crc8_calculator.reset()
+        self.crc8_calculator.update(message.encode("utf-8"))
+        return format(self.crc8_calculator.digest()[0], "02x")
+
+    def verify_crc(self, message_with_crc):
+        """
+        Verify CRC8 checksum of a received message.
+
+        Args:
+            message_with_crc: The message content with CRC appended
+
+        Returns:
+            tuple: (is_valid, original_message)
+        """
+        if len(message_with_crc) < 2:
+            # Message too short to have CRC
+            return False, message_with_crc
+
+        # Extract the last 2 characters as CRC
+        original_message = message_with_crc[:-2]
+        received_crc = message_with_crc[-2:]
+
+        # Reconstruct the full message format that was used for CRC calculation
+        # This should match the format used in send_ota_message: "{len(message)},{message}"
+        full_message_for_crc = f"{len(original_message)},{original_message}"
+        calculated_crc = self.calculate_crc(full_message_for_crc)
+
+        is_valid = received_crc.lower() == calculated_crc.lower()
+        return is_valid, original_message
+
+    def send_ota_message(self, dest: int, message: str, include_crc: bool = True):
+        """
+        Send OTA message with optional CRC checksum.
+
+        Args:
+            dest (int): Destination address
+            message (str): Message to send
+            include_crc (bool): Whether to include CRC checksum (default: True)
+        """
         try:
-            full_message = f"AT+SEND={dest},{len(message)},{message}\r\n"
+            full_message = f"{len(message)},{message}"
+
+            if include_crc:
+                crc = self.calculate_crc(full_message)
+                message_with_crc = f"{full_message}{crc}"
+            else:
+                message_with_crc = full_message
+
+            full_message = f"AT+SEND={dest},{message_with_crc}\r\n"
             self.ser.write(full_message.encode("utf-8"))
         except Exception as e:
             print(f"Failed to send OTA message: {e}")
 
     def get_new_messages(self):
         """
-        Get all new messages received by the device
+        Get all new messages received by the device (raw, without CRC validation)
         """
 
         messages = []
