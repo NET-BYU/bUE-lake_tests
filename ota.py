@@ -136,6 +136,7 @@ class Ota:
             message_with_crc = f"{message}{crc}"
 
             full_message = f"AT+SEND={dest},{len(message)},{message_with_crc}\r\n"
+            print(full_message)
             self.ser.write(full_message.encode("utf-8"))
         except Exception as e:
             print(f"Failed to send OTA message: {e}")
