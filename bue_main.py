@@ -511,13 +511,13 @@ class bUE_Main:
         for message in new_messages:
             parts = message.split(",")
 
-            if parts[1].startswith("CANC:"):
+            if parts[1].startswith("CANC"):
                 logger.info(f"Received a CANC message")
                 self.cancel_test = True
-            elif parts[1].startswith("RELOAD:"):
+            elif parts[1].startswith("RELOAD"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
-            elif parts[1].startswith("RESTART:"):
+            elif parts[1].startswith("RESTART"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
             else:
