@@ -60,7 +60,7 @@ class Ota:
                 if message_with_crc == "" or message_with_crc == "OK":
                     continue
 
-                print(message_with_crc)
+                # print(f"Message with CRC: {message_with_crc}")
 
                 if len(parts) < 5:
                     continue
@@ -69,15 +69,15 @@ class Ota:
                 # Extract components: +RCV=origin,length,message_with_crc,rssi,snr
                 origin = parts[0][5:]
                 message_with_crc_part = ",".join(parts[2:-2])
-                print(parts)
-                print(f"Message with CRC Part: {message_with_crc_part}")
+                # print(parts)
+                # print(f"Message with CRC Part: {message_with_crc_part}")
 
                 valid_crc, original_message = self.verify_crc(message_with_crc_part)
 
                 if not valid_crc:  # Bad checksum
                     continue
 
-                print("!!!!!!!!!!!")
+                # print("!!!!!!!!!!!")
 
                 self.recv_msgs.put(f"{origin},{original_message}")
             except Exception as e:
@@ -85,9 +85,9 @@ class Ota:
 
     def calculate_crc(self, message):
         """Calculate CRC8 checksum for a message."""
-        self.crc8_calculator.reset()
-        self.crc8_calculator.update(message.encode("utf-8"))
-        return format(self.crc8_calculator.digest()[0], "02x")
+        calculator = crc8.crc8()
+        calculator.update(message.encode("utf-8"))
+        return format(calculator.digest()[0], "02x")
 
     def verify_crc(self, message_with_crc):
         """
@@ -145,15 +145,12 @@ class Ota:
         """
         Get all new messages received by the device (raw, without CRC validation)
         """
-
         messages = []
-        while not self.recv_msgs.empty():
-            try:
-                message = self.recv_msgs.get_nowait()
-                messages.append(message)
-            except queue.Empty:
-                break
-
+        try:
+            while True:
+                messages.append(self.recv_msgs.get_nowait())
+        except queue.Empty:
+            pass
         return messages
 
     def __del__(self):

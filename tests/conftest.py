@@ -51,7 +51,7 @@ class MessageHelper:
             # Create the message format used for CRC: "{len(message)},{message}"
             crc = MessageHelper.calculate_crc8(message)
             message_with_crc = f"{message}{crc}"
-            return f"+RCV={sender_id},{len(message)},{message_with_crc},{rssi},{snr}"
+            return f"+RCV={sender_id},{len(message_with_crc)},{message_with_crc},{rssi},{snr}"
         else:
             return f"+RCV={sender_id},{len(message)},{message},{rssi},{snr}"
 
@@ -62,7 +62,7 @@ class MessageHelper:
             # Create the message format used for CRC: "{len(message)},{message}"
             crc = MessageHelper.calculate_crc8(message)
             message_with_crc = f"{message}{crc}"
-            return f"AT+SEND={dest_id},{len(message)},{message_with_crc}\r\n"
+            return f"AT+SEND={dest_id},{len(message_with_crc)},{message_with_crc}\r\n"
         else:
             msg_for_send = f"{len(message)},{message}"
             return f"AT+SEND={dest_id},{msg_for_send}\r\n"

@@ -310,7 +310,7 @@ class TestMessageHelper:
         message = MessageHelper.create_rcv_message(5, MessageTypes.PING, -80, 10, include_crc=True)
         # With CRC, the length and content will be different
         expected_crc = MessageHelper.calculate_crc8(f"{MessageTypes.PING}")
-        expected = f"+RCV=5,{len(MessageTypes.PING)},{MessageTypes.PING}{expected_crc},-80,10"
+        expected = f"+RCV=5,{len(MessageTypes.PING)+2},{MessageTypes.PING}{expected_crc},-80,10"
         assert message == expected
 
     def test_create_at_command(self):
@@ -318,7 +318,7 @@ class TestMessageHelper:
         command = MessageHelper.create_at_command(10, MessageTypes.PING, include_crc=True)
         # With CRC, the command will include the checksum
         expected_crc = MessageHelper.calculate_crc8(MessageTypes.PING)
-        expected = f"AT+SEND=10,4,PING{expected_crc}\r\n"
+        expected = f"AT+SEND=10,{4+len(expected_crc)},PING{expected_crc}\r\n"
         assert command == expected
 
     def test_parse_message_type(self):
