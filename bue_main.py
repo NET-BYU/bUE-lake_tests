@@ -190,9 +190,7 @@ class bUE_Main:
         got_pingr = False
 
         for message in new_messages:
-            print(f"Message: {message}")
             sender, message_body = message.split(",", 1)
-            print(f"Message Body: {message_body}")
 
             # 1. A CON (connect0 message from the base station; we can (probably) ignore this for now;
             #     ideally, the base station would have seen our ACK message, but it can also see our PING
@@ -511,7 +509,6 @@ class bUE_Main:
             return
 
         for message in new_messages:
-            message = message[5:]  # Remove the "+RCV=" part
             parts = message.split(",")
 
             if parts[1].startswith("CANC:"):
