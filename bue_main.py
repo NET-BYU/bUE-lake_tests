@@ -201,20 +201,20 @@ class bUE_Main:
 
             # If we received a PINGR message, we know we are still connected to the base station.
             # We will not time out our connection
-            if message_body.startswith("PINGR"):
+            elif message_body.startswith("PINGR"):
                 logger.info(f"Got a PINGR from {self.ota_base_station_id}")
                 self.ota_timeout = TIMEOUT
                 got_pingr = True
 
             # Message should look like 1,34,TEST,<file>,<configuration>,<role>,<starttime>
-            if message_body.startswith("TEST"):
+            elif message_body.startswith("TEST"):
                 input = message_body
                 self.test_handler(input)
-            if message_body.startswith("RELOAD"):
+            elif message_body.startswith("RELOAD"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
 
-            if message_body.startswith("RESTART"):
+            elif message_body.startswith("RESTART"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
 
