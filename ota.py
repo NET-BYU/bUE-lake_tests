@@ -57,21 +57,25 @@ class Ota:
                 message_with_crc = self.ser.readline().decode("utf-8", errors="ignore").strip()
                 parts = message_with_crc.split(",")
 
+                if message_with_crc == "" or message_with_crc == "OK":
+                    continue
+
+                print(message_with_crc)
+
                 if len(parts) != 5:
                     continue
                     # TODO: Maybe log if we are not putting a message into the recv_msgs?
 
                 # Extract components: +RCV=sender,length,message_with_crc,rssi,snr
+                origin = parts[0][5:]
                 message_with_crc_part = parts[2]
 
                 valid_crc, original_message = self.verify_crc(message_with_crc_part)
 
-                print(original_message)
-
                 if not valid_crc:  # Bad checksum
                     continue
 
-                self.recv_msgs.put(f"+RCV={original_message}")
+                self.recv_msgs.put(f"{origin},{original_message}")
             except Exception as e:
                 print(f"OTA encountered some error: {e}")
 
@@ -101,7 +105,7 @@ class Ota:
 
         # Reconstruct the full message format that was used for CRC calculation
         # This should match the format used in send_ota_message: "{len(message)},{message}"
-        full_message_for_crc = f"{len(original_message)},{original_message}"
+        full_message_for_crc = f"{original_message}"
         calculated_crc = self.calculate_crc(full_message_for_crc)
 
         is_valid = received_crc.lower() == calculated_crc.lower()
@@ -117,15 +121,14 @@ class Ota:
             include_crc (bool): Whether to include CRC checksum (default: True)
         """
         try:
-            full_message = f"{len(message)},{message}"
 
             if include_crc:
-                crc = self.calculate_crc(full_message)
-                message_with_crc = f"{full_message}{crc}"
+                crc = self.calculate_crc(message)
+                message_with_crc = f"{message}{crc}"
             else:
-                message_with_crc = full_message
+                message_with_crc = message
 
-            full_message = f"AT+SEND={dest},{message_with_crc}\r\n"
+            full_message = f"AT+SEND={dest},{len(message)},{message_with_crc}\r\n"
             self.ser.write(full_message.encode("utf-8"))
         except Exception as e:
             print(f"Failed to send OTA message: {e}")

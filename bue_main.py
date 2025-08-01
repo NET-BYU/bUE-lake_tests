@@ -134,24 +134,23 @@ class bUE_Main:
 
         for message in new_messages:
             try:
-                # A connecting message would take the form of "+RCV=<base station id>,<Length>,CON:<base station id>"
+                # A connecting message would take the form of "<base station id>,CON:<base station id>"
                 #  We want to extract the base station id from this message
                 if "CON:" in message:
-                    message = message[5:]  # Remove the "+RCV=" part
-                    parts = message.split(",")
+                    base_id, message_body = message.split(",")
                     # This checks to see if the received message matches a base station connecting
                     # format. If it does we are now going to be in the connected state
-                    if parts[2].startswith("CON:"):
-                        if parts[0] == parts[2][4:]:
+                    if message_body.startswith("CON:"):
+                        if base_id == message_body[4:]:
                             self.ota_connected = True
-                            self.ota_base_station_id = int(parts[0])
+                            self.ota_base_station_id = int(base_id)
                             logger.info(f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}")
                             self.ota_timeout = TIMEOUT
                             self.ota.send_ota_message(self.ota_base_station_id, "ACK")
                             return
                         else:
                             logger.warning(
-                                f"ota_connect_req: received malformed message: base station id {parts[0]} does not match {parts[2][4:]}"
+                                f"ota_connect_req: received malformed message: base station id {base_id} does not match {message_body[4:]}"
                             )
 
             except ValueError:
@@ -191,30 +190,29 @@ class bUE_Main:
         got_pingr = False
 
         for message in new_messages:
-            message = message[5:]  # Remove the "+RCV=" part
-            parts = message.split(",", 3)
+            sender, message_body = message.split(",", 1)
 
             # 1. A CON (connect0 message from the base station; we can (probably) ignore this for now;
             #     ideally, the base station would have seen our ACK message, but it can also see our PING
-            if parts[2].startswith("ACK"):
+            if message_body.startswith("ACK"):
                 logger.info(f"Got an ACK from {self.ota_base_station_id}")
 
             # If we received a PINGR message, we know we are still connected to the base station.
             # We will not time out our connection
-            if parts[2].startswith("PINGR"):
+            if message_body.startswith("PINGR"):
                 logger.info(f"Got a PINGR from {self.ota_base_station_id}")
                 self.ota_timeout = TIMEOUT
                 got_pingr = True
 
             # Message should look like 1,34,TEST,<file>,<configuration>,<role>,<starttime>
-            if parts[2].startswith("TEST"):
-                input = parts[2]
+            if message_body.startswith("TEST"):
+                input = message_body
                 self.test_handler(input)
-            if parts[2].startswith("RELOAD"):
+            if message_body.startswith("RELOAD"):
                 logger.info(f"Received a RELOAD message")
                 self.reload_service()
 
-            if parts[2].startswith("RESTART"):
+            if message_body.startswith("RESTART"):
                 logger.info(f"Received a RESTART message")
                 self.restart_system()
 

@@ -49,7 +49,7 @@ class TestOtaBasicFunctionality:
         # Get new messages - should have CRC stripped and be prefixed with "RCV="
         messages = device.get_new_messages()
         assert len(messages) == 1
-        assert messages[0] == "+RCV=PINGR"
+        assert messages[0] == "1,PINGR"
 
     def test_message_filtering(self, ota_device):
         """Test that messages with bad CRC are filtered out"""
@@ -71,7 +71,7 @@ class TestOtaBasicFunctionality:
         # Should only get the valid message
         messages = device.get_new_messages()
         assert len(messages) == 1
-        assert messages[0] == "+RCV=ACK"
+        assert messages[0] == "1,ACK"
 
     def test_crc8_validation(self, ota_device):
         """Test CRC8 checksum validation specifically"""
@@ -79,10 +79,10 @@ class TestOtaBasicFunctionality:
 
         # Test with a known message and CRC
         message = "TEST"
-        crc = MessageHelper.calculate_crc8(f"{len(message)},{message}")
+        crc = MessageHelper.calculate_crc8(f"{message}")
 
         # Create a valid message with correct CRC
-        valid_rcv = f"+RCV=1,{len(message + crc)},{message}{crc},-50,1"
+        valid_rcv = f"+RCV=1,{len(message)},{message}{crc},-50,1"
         mock_serial.add_incoming_message(valid_rcv)
 
         # Create an invalid message with wrong CRC
@@ -95,7 +95,7 @@ class TestOtaBasicFunctionality:
         # Should only get the valid message
         messages = device.get_new_messages()
         assert len(messages) == 1
-        assert messages[0] == f"+RCV={message}"
+        assert messages[0] == f"1,{message}"
 
 
 class TestConnectionProtocol:
@@ -309,17 +309,16 @@ class TestMessageHelper:
         """Test creating RCV messages"""
         message = MessageHelper.create_rcv_message(5, MessageTypes.PING, -80, 10, include_crc=True)
         # With CRC, the length and content will be different
-        expected_crc = MessageHelper.calculate_crc8(f"{len(MessageTypes.PING)},{MessageTypes.PING}")
-        expected = f"+RCV=5,{len(MessageTypes.PING + expected_crc)},{MessageTypes.PING}{expected_crc},-80,10"
+        expected_crc = MessageHelper.calculate_crc8(f"{MessageTypes.PING}")
+        expected = f"+RCV=5,{len(MessageTypes.PING)},{MessageTypes.PING}{expected_crc},-80,10"
         assert message == expected
 
     def test_create_at_command(self):
         """Test creating AT commands"""
         command = MessageHelper.create_at_command(10, MessageTypes.PING, include_crc=True)
         # With CRC, the command will include the checksum
-        msg_for_crc = f"{len(MessageTypes.PING)},{MessageTypes.PING}"
-        expected_crc = MessageHelper.calculate_crc8(msg_for_crc)
-        expected = f"AT+SEND=10,{msg_for_crc}{expected_crc}\r\n"
+        expected_crc = MessageHelper.calculate_crc8(MessageTypes.PING)
+        expected = f"AT+SEND=10,4,PING{expected_crc}\r\n"
         assert command == expected
 
     def test_parse_message_type(self):

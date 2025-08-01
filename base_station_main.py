@@ -173,17 +173,18 @@ class Base_Station_Main:
         new_messages = self.ota.get_new_messages()
 
         for message in new_messages:
-            try:  # Receive messages should look like "+RCV={origin},{len(message)},{message}"
+            try:  # Receive messages should look like "{bue_id},{message}"
                 try:
                     message = message[5:]
                     parts = message.split(",")
                     bue_id = int(parts[0])
+                    message_body = parts[1]
 
                 except Exception as e:
                     logger.error(f"message_listener: Failed to parse message '{message}': {e}")
                     continue  # Skip to the next message
 
-                if parts[2].startswith("REQ:"):
+                if message_body.startswith("REQ:"):
                     logger.debug("Sending a CON")
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
@@ -193,21 +194,21 @@ class Base_Station_Main:
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
 
-                if parts[2].startswith("ACK:"):
+                if message_body.startswith("ACK:"):
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
-                if parts[2].startswith("PING:"):  # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
-                    if len(parts) >= 5:
-                        lat = parts[3]
-                        long = parts[4]
+                if message_body.startswith("PING:"):  # Looks like <origin id>,<length>,PING,<lat>,<long>,-55,8
+                    if len(parts) >= 4:
+                        lat = parts[2]
+                        long = parts[3]
                     self.ping_bue(bue_id, lat, long)
 
-                if parts[2].startswith("UPD:"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
+                if message_body.startswith("UPD:"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     if not bue_id in self.testing_bues:
                         self.testing_bues.append(bue_id)
-                    lat = parts[3]
-                    long = parts[4]
-                    stdout = parts[5]
+                    lat = parts[2]
+                    long = parts[3]
+                    stdout = parts[4]
                     # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
                     logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
                     if lat != "" and long != "":
@@ -220,19 +221,19 @@ class Base_Station_Main:
                     if stdout != "":
                         self.stdout_history.append(stdout)
 
-                if parts[2].startswith("FAIL:"):
+                if message_body.startswith("FAIL:"):
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                if parts[2].startswith("DONE:"):
+                if message_body.startswith("DONE:"):
                     logger.bind(bue_id=bue_id).info(f"Received DONE from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                if parts[2].startswith("PREPR:"):
+                if message_body.startswith("PREPR:"):
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
                     self.testing_bues.append(bue_id)
 
-                if parts[2].startswith("CANCD:"):
+                if message_body.startswith("CANCD:"):
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
