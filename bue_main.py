@@ -327,6 +327,7 @@ class bUE_Main:
 
                 self.is_testing = True
                 self.cancel_test = False
+                self.test_output_buffer = []
 
                 current_time = int(time.time())
                 if start_time > current_time:

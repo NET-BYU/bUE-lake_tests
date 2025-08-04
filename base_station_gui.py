@@ -621,8 +621,8 @@ class TestDialog:
 
         # Available test files
         self.test_files = [
-            "lora_td_ru",
-            "lora_tu_rd",
+            "grc/lora_td_ru",
+            "grc/lora_tu_rd",
             "Old/helloworld",
             "gpstest",
             "gpstest2",
