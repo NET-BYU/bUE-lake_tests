@@ -47,7 +47,7 @@ for bue_id in range(10, 61, 10):
 # The system will recommend disconnecting after missing TIMEOUT PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
 """
-from constants import TIMEOUT
+from constants import TIMEOUT, bUEs
 
 
 # Internal imports
@@ -195,15 +195,15 @@ class Base_Station_Main:
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
 
-                if message_body.startswith("ACK"):
+                elif message_body.startswith("ACK"):
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
-                if message_body.startswith("PING"):  # Looks like <origin id>,PING,<lat>,<long>
+                elif message_body.startswith("PING"):  # Looks like <origin id>,PING,<lat>,<long>
                     header, lat, long = message_body.split(",")
                     print(f"header: {header}, lat: {lat}, long: {long}", flush=True)
                     self.ping_bue(bue_id, lat, long)
 
-                if message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
+                elif message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     if not bue_id in self.testing_bues:
                         self.testing_bues.append(bue_id)
                     header, lat, long, stdout = message_body.split(",")
@@ -219,21 +219,24 @@ class Base_Station_Main:
                     if stdout != "":
                         self.stdout_history.append(stdout)
 
-                if message_body.startswith("FAIL"):
+                elif message_body.startswith("FAIL"):
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                if message_body.startswith("DONE"):
+                elif message_body.startswith("DONE"):
                     logger.bind(bue_id=bue_id).info(f"Received DONE from {bue_id}")
                     self.testing_bues.remove(bue_id)
 
-                if message_body.startswith("PREPR"):
+                elif message_body.startswith("PREPR"):
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
                     self.testing_bues.append(bue_id)
 
-                if message_body.startswith("CANCD"):
+                elif message_body.startswith("CANCD"):
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     self.testing_bues.remove(bue_id)
+                elif message_body.startswith("BAD"):
+                    logger.bind(bue_id=bue_id).info(f"Received BAD from {bue_id}")
+                    self.stdout_history.append(f"Received a BAD from {bUEs[str(bue_id)]}")
 
                 else:
                     logger.info(f"Received undefined message {message}")

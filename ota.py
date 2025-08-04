@@ -69,15 +69,12 @@ class Ota:
                 # Extract components: +RCV=origin,length,message_with_crc,rssi,snr
                 origin = parts[0][5:]
                 message_with_crc_part = ",".join(parts[2:-2])
-                # print(parts)
-                # print(f"Message with CRC Part: {message_with_crc_part}")
 
                 valid_crc, original_message = self.verify_crc(message_with_crc_part)
 
                 if not valid_crc:  # Bad checksum
+                    self.send_ota_message(origin, "BAD")
                     continue
-
-                # print("!!!!!!!!!!!")
 
                 self.recv_msgs.put(f"{origin},{original_message}")
             except Exception as e:
