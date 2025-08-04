@@ -199,8 +199,8 @@ class Base_Station_Main:
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {bue_id}")
 
                 if message_body.startswith("PING"):  # Looks like <origin id>,PING,<lat>,<long>
-                    print(f"Message body: {message_body}")
                     header, lat, long = message_body.split(",")
+                    print(f"header: {header}, lat: {lat}, long: {long}", flush=True)
                     self.ping_bue(bue_id, lat, long)
 
                 if message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
@@ -324,6 +324,7 @@ class Base_Station_Main:
 
     def __del__(self):
         try:
+            self.EXIT = True
             if hasattr(self, "ping_bue_thread"):
                 self.ping_bue_thread.join()
             if hasattr(self, "message_queue_thread"):

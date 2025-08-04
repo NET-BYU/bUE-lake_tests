@@ -655,6 +655,9 @@ class bUE_Main:
 
     def __del__(self):
         try:
+            self.EXIT = True
+            self.tick_enabled = False
+
             if hasattr(self, "st_thread"):
                 self.st_thread.join()
             if hasattr(self, "ota_thread"):
@@ -663,6 +666,7 @@ class bUE_Main:
                 self.utw_thread.join()
             if hasattr(self, "ota"):
                 self.ota.__del__()
+
         except Exception as e:
             logger.warning(f"__del__: Exception during cleanup: {e}")
 
