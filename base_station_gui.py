@@ -626,6 +626,8 @@ class TestDialog:
             "Old/helloworld",
             "gpstest",
             "gpstest2",
+            "../osu_testing/run_tx",
+            "../osu_testing/run_rx",
         ]
 
         # Selected bUEs and their configurations
