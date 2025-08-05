@@ -88,7 +88,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 136.0]
+    coordinate: [336, 176.0]
     rotation: 0
     state: true
 - name: audio_sink_0

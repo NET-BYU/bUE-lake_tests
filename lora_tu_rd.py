@@ -7,19 +7,19 @@ import os
 import sys
 import argparse
 
-with open('auto_config.yaml', 'r') as f:
+with open("auto_config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-parameter_sets = config['parameter_sets']
+parameter_sets = config["parameter_sets"]
 
-#with open('auto_config_indiv.yaml', 'r') as f:
+# with open("auto_config_indiv.yaml", "r") as f:
 #    individual_config = yaml.safe_load(f)
-
-#parameter_sets.extend(individual_config['parameter_sets'])
+#
+# parameter_sets.extend(individual_config["parameter_sets"])
 
 parser = argparse.ArgumentParser()
-parser.add_argument('s', type=float)
-parser.add_argument('d', type=float)
+parser.add_argument("s", type=float)
+parser.add_argument("d", type=float)
 args = parser.parse_args()
 hydrophone_separation = args.s
 distance = args.d
@@ -31,10 +31,11 @@ GPIO.setup(26, GPIO.OUT)
 GPIO.output(26, GPIO.HIGH)
 time.sleep(0.5)
 
-output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'rd_wav_recordings'))
+output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rd_wav_recordings"))
 os.makedirs(output_dir, exist_ok=True)
 
 created_wav_files = []
+
 
 def cleanup_and_exit(signum=None, frame=None):
     print("\nCtrl+C detected. Cleaning up WAV files...")
@@ -49,6 +50,7 @@ def cleanup_and_exit(signum=None, frame=None):
     print("GPIO cleaned up. Exiting.")
     sys.exit(1)
 
+
 signal.signal(signal.SIGINT, cleanup_and_exit)
 signal.signal(signal.SIGTERM, cleanup_and_exit)
 
@@ -60,27 +62,27 @@ for idx, params in enumerate(parameter_sets):
     print(f"Saving WAV to: {wav_path}")
 
     tb = tup_rdo(
-        message_str=params.get('message_str', 'TEST'),
-        mult_amp=params.get('mult_amp', 0.5),
-        tx_rx_mix_freq=params.get('tx_mix_freq', 1000),  # Use the correct YAML key
-        tx_cr=params.get('tx_cr', 1),
-        tx_rx_bw=params.get('tx_rx_bw', 8000),
-        tx_rx_sf=params.get('tx_rx_sf', 7),
-        tx_rx_sync_word=params.get('tx_rx_sync_word', [18]),
-        wav_file_path=wav_path
+        message_str=params.get("message_str", "TEST"),
+        mult_amp=params.get("mult_amp", 0.5),
+        tx_rx_mix_freq=params.get("tx_mix_freq", 1000),  # Use the correct YAML key
+        tx_cr=params.get("tx_cr", 1),
+        tx_rx_bw=params.get("tx_rx_bw", 8000),
+        tx_rx_sf=params.get("tx_rx_sf", 7),
+        tx_rx_sync_word=params.get("tx_rx_sync_word", [18]),
+        wav_file_path=wav_path,
     )
 
     created_wav_files.append(wav_path)
 
     tb.start()
 
-    timeout = 18 # seconds
+    timeout = 18  # seconds
     start_time = time.time()
     try:
-        print(f'Running for up to {timeout} seconds. Press Ctrl+C to quit early.')
+        print(f"Running for up to {timeout} seconds. Press Ctrl+C to quit early.")
         while True:
             if time.time() - start_time > timeout:
-                print('Timeout reached, stopping...')
+                print("Timeout reached, stopping...")
                 break
             time.sleep(0.1)
     except KeyboardInterrupt:

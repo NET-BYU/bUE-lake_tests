@@ -48,9 +48,9 @@ PINGR:
     Response: None
 TEST:
     Direction: base -> bUE
-    Meaning: The base station sends a UTW test configuration, a role, and a start time in unix epoch time (all ints).
+    Meaning: The base station sends a UTW test configuration, a file, a start time, and parameters.
     Body: <configuration>.<role>.<starttime>
-    Example: (bue_main.py) self.ota.send_ota_message(5, "TESTC:0.1.1745004290")
+    Example: (bue_main.py) self.ota.send_ota_message(5, TEST,<file>,<start_time>,<parameters>)
     Response: The bUE will respond with a TESTR, confirming that it has received the test 
 
 FAIL: 

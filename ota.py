@@ -9,6 +9,8 @@ Documentation can be found in the NET Lab Notion at the page "bUE Python Code Gu
 import serial
 import threading
 import time
+import queue
+import crc8
 
 
 class Ota:
@@ -25,19 +27,18 @@ class Ota:
 
         self.id = id
 
+        # Initialize CRC8 calculator
+        self.crc8_calculator = crc8.crc8()
+
         # Flags
-        self.receiving_event = threading.Event()
         self.exit_event = threading.Event()
 
         # Received messages buffer
-        self.recv_msgs = []
-        self.recv_lock = threading.Lock()
+        self.recv_msgs = queue.Queue()
 
         # Reading thread
-        self.receiving_event.set()
-        self.thread = threading.Thread(target=self.read_from_port, daemon = True) # dameon true keeps this thread from 
-        self.thread.start()                                                       # keeping the program from exiting
-        
+        self.thread = threading.Thread(target=self.read_from_port, daemon=True)
+        self.thread.start()  # keeping the program from exiting
 
     def read_from_port(self):
         """
@@ -48,53 +49,109 @@ class Ota:
         Runs continuously until the program is shut down as set by the exit_event flag
 
         Allows reading from port is receiving_event is set (meaning is True)
+
+        Expected message format: +RCV=<sndr address>,<payload length>,<MESSAGE TYPE><:BODY (optional)>,<RSSI>,<SNR>
         """
         while not self.exit_event.is_set():
-            if self.receiving_event.is_set():
-                if self.ser.in_waiting > 0: #Checks to see if there is any data in the serial buffer
-                    try: 
-                        message = self.ser.readline().decode("utf-8", errors="ignore").strip()
-                        if message != "" and message != "OK":
-                            with self.recv_lock: # Mutex to prevent data race conditions between threads
-                                self.recv_msgs.append(message)
-                    except Exception as e:
-                        print(f"OTA encountered some error: {e}")
-                else:
-                    time.sleep(0.05)
-            else:
-                time.sleep(0.1)
+            try:
+                message_with_crc = self.ser.readline().decode("utf-8", errors="ignore").strip()
+                parts = message_with_crc.split(",")
 
+                if message_with_crc == "" or message_with_crc == "OK":
+                    continue
 
-    def send_ota_message(self, dest: int, message: str):
+                # print(f"Message with CRC: {message_with_crc}")
+
+                if len(parts) < 5:
+                    continue
+                    # TODO: Maybe log if we are not putting a message into the recv_msgs?
+
+                # Extract components: +RCV=origin,length,message_with_crc,rssi,snr
+                origin = parts[0][5:]
+                message_with_crc_part = ",".join(parts[2:-2])
+
+                valid_crc, original_message = self.verify_crc(message_with_crc_part)
+
+                if not valid_crc:  # Bad checksum
+                    self.send_ota_message(origin, "BAD")
+                    continue
+
+                self.recv_msgs.put(f"{origin},{original_message}")
+            except Exception as e:
+                print(f"OTA encountered some error: {e}")
+
+    def calculate_crc(self, message):
+        """Calculate CRC8 checksum for a message."""
+        calculator = crc8.crc8()
+        calculator.update(message.encode("utf-8"))
+        return format(calculator.digest()[0], "02x")
+
+    def verify_crc(self, message_with_crc):
+        """
+        Verify CRC8 checksum of a received message.
+
+        Args:
+            message_with_crc: The message content with CRC appended
+
+        Returns:
+            tuple: (is_valid, original_message)
+        """
+        if len(message_with_crc) < 2:
+            # Message too short to have CRC
+            return False, message_with_crc
+
+        # Extract the last 2 characters as CRC
+        original_message = message_with_crc[:-2]
+        received_crc = message_with_crc[-2:]
+
+        # Reconstruct the full message format that was used for CRC calculation
+        # This should match the format used in send_ota_message: "{len(message)},{message}"
+        full_message_for_crc = f"{original_message}"
+        calculated_crc = self.calculate_crc(full_message_for_crc)
+
+        is_valid = received_crc.lower() == calculated_crc.lower()
+        return is_valid, original_message
+
+    def send_ota_message(self, dest: int, message: str, include_crc: bool = True):
+        """
+        Send OTA message with optional CRC checksum.
+
+        Args:
+            dest (int): Destination address
+            message (str): Message to send
+            include_crc (bool): Whether to include CRC checksum (default: True)
+        """
         try:
-            full_message = f"AT+SEND={dest},{len(message)},{message}\r\n"
+
+            # if include_crc:
+            #     crc = self.calculate_crc(message)
+            #     message_with_crc = f"{message}{crc}"
+            # else:
+            #     message_with_crc = message
+
+            crc = self.calculate_crc(message)
+            message_with_crc = f"{message}{crc}"
+
+            full_message = f"AT+SEND={dest},{len(message_with_crc)},{message_with_crc}\r\n"
+            # print(full_message)
             self.ser.write(full_message.encode("utf-8"))
         except Exception as e:
             print(f"Failed to send OTA message: {e}")
 
     def get_new_messages(self):
         """
-        Get all new messages received by the device
-
-        Temporarily pauses the read_from_port thread, retrieves messages, and then starts read_from_port again
+        Get all new messages received by the device (raw, without CRC validation)
         """
-
-        # Start by disabling the receiver from starting up again
-        self.receiving_event.clear()
-        time.sleep(0.05)
-
-        # Mutex to prevent data race
-        with self.recv_lock:
-            messages = self.recv_msgs[:]
-            self.recv_msgs.clear()
-
-        self.receiving_event.set()
-
+        messages = []
+        try:
+            while True:
+                messages.append(self.recv_msgs.get_nowait())
+        except queue.Empty:
+            pass
         return messages
 
     def __del__(self):
         try:
-            self.receiving_event.clear()
             self.exit_event.set()
 
             if self.thread.is_alive():
@@ -103,38 +160,3 @@ class Ota:
                 self.ser.close()
         except Exception as e:
             pass
-
-if __name__ == "__main__":
-
-    import argparse
-    import logging
-
-    logging.basicConfig(level=logging.INFO)
-
-    parser = argparse.ArgumentParser(description="OTA test")
-    parser.add_argument("-p", "--port", type=int, nargs="?", default=0, help="USB port")
-    parser.add_argument(
-        "-b", "--baudrate", type=int, nargs="?", default=9600, help="Baudrate"
-    )
-    parser.add_argument("-i", "--id", type=int, nargs="?", default=0, help="Device ID")
-    parser.add_argument(
-        "-r", "--rate", type=float, nargs="?", default=1, help="Rate in seconds"
-    )
-    parser.add_argument(
-        "-d", "--dest", type=int, nargs="?", default=1, help="Destination"
-    )
-
-    args = parser.parse_args()
-
-    try:
-
-        dev = Ota(f"/dev/ttyUSB{args.port}", args.baudrate, args.id)
-
-        while True:
-            time.sleep(args.rate)
-            dev.send_ota_message(args.dest, "Hello")
-            logging.info(f"Received messages: {dev.get_new_messages()}")
-
-    except KeyboardInterrupt:
-        dev.__del__()
-        print("Exiting...")
