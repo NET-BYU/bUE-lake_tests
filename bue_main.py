@@ -358,6 +358,8 @@ class bUE_Main:
                     bufsize=1,  # Line-buffered
                     universal_newlines=True,  # Text mode, also enables line buffering
                     text=True,  # decode bytes to str
+                    encoding="utf-8",
+                    errors="replace",
                 )
 
                 logger.info(f"Started test script: {file}.py with parameters {parameters}")
