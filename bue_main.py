@@ -400,6 +400,8 @@ class bUE_Main:
                         with self.test_output_lock:
                             if "rx msg:" in clean_line:
                                 self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                            elif "CRC invalid" in clean_line:
+                                self.test_output_buffer.append(f"STDOUT: {clean_line}")
                     except queue.Empty:
                         pass
 
