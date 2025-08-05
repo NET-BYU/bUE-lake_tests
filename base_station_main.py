@@ -121,6 +121,8 @@ class Base_Station_Main:
                 self.ping_bue_queue.task_done()
             except queue.Empty:
                 time.sleep(0.01)
+            except Exception as e:
+                logger.error(f"ping_bue_queue_handler: Exception occurred: {e}")
 
     def ping_bue(self, bue_id, lat="", long=""):
         if bue_id in self.connected_bues:
