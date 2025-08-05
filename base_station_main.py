@@ -206,7 +206,7 @@ class Base_Station_Main:
                 elif message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     if not bue_id in self.testing_bues:
                         self.testing_bues.append(bue_id)
-                    header, lat, long, stdout = message_body.split(",")
+                    header, lat, long, stdout = message_body.split(",", maxsplit=3)
                     # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
                     logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
                     if lat != "" and long != "":
