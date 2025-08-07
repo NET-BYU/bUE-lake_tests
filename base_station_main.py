@@ -187,7 +187,9 @@ class Base_Station_Main:
 
                 if message_body.startswith("REQ"):
                     logger.debug("Sending a CON")
-                    self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}")
+                    current_timestamp = int(time.time())
+
+                    self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}:{current_timestamp}")
                     self.bue_timeout_tracker[bue_id] = TIMEOUT
                     if not bue_id in self.connected_bues:
                         logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}")

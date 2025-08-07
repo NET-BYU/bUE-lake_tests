@@ -138,20 +138,26 @@ class bUE_Main:
                 #  We want to extract the base station id from this message
                 if "CON:" in message:
                     base_id, message_body = message.split(",")
-                    # This checks to see if the received message matches a base station connecting
-                    # format. If it does we are now going to be in the connected state
+                    # Parse the new format: CON:<base_station_id>:<timestamp>
                     if message_body.startswith("CON:"):
-                        if base_id == message_body[4:]:
-                            self.ota_connected = True
-                            self.ota_base_station_id = int(base_id)
-                            logger.info(f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}")
-                            self.ota_timeout = TIMEOUT
-                            self.ota.send_ota_message(self.ota_base_station_id, "ACK")
-                            return
+                        parts = message_body.split(":")
+                        if len(parts) >= 3 and base_id == parts[1]:
+                            try:
+                                base_timestamp = int(parts[2])
+                                self.synchronize_time(base_timestamp)
+
+                                self.ota_connected = True
+                                self.ota_base_station_id = int(base_id)
+                                logger.info(
+                                    f"ota_connect_req: OTA device connected to base station {self.ota_base_station_id}"
+                                )
+                                self.ota_timeout = TIMEOUT
+                                self.ota.send_ota_message(self.ota_base_station_id, "ACK")
+                                return
+                            except ValueError:
+                                logger.error(f"Invalid timestamp in CON message: {parts[2]}")
                         else:
-                            logger.warning(
-                                f"ota_connect_req: received malformed message: base station id {base_id} does not match {message_body[4:]}"
-                            )
+                            logger.warning(f"ota_connect_req: received malformed CON message: {message_body}")
 
             except ValueError:
                 logger.error("ota_connect_req: Error parsing OTA message")
@@ -547,6 +553,39 @@ class bUE_Main:
             subprocess.call(["sudo", "reboot"])
         except Exception as e:
             logger.error(f"Error restarting system: {e}")
+
+    def synchronize_time(self, base_timestamp):
+        """
+        Synchronize bUE time with base station time.
+
+        Args:
+            base_timestamp: Unix timestamp from base station
+        """
+        try:
+            import subprocess
+            import os
+
+            # Calculate the time difference
+            local_time = int(time.time())
+            time_diff = base_timestamp - local_time
+
+            logger.info(f"Time sync: Base station time: {base_timestamp}, Local time: {local_time}, Diff: {time_diff}s")
+
+            # Only sync if difference is significant (> 1 second)
+            if abs(time_diff) > 1:
+                # Use date command to set system time (requires sudo privileges)
+                date_str = datetime.fromtimestamp(base_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+                result = subprocess.run(["sudo", "date", "-s", date_str], capture_output=True, text=True)
+
+                if result.returncode == 0:
+                    logger.info(f"Successfully synchronized time to: {date_str}")
+                else:
+                    logger.error(f"Failed to set system time: {result.stderr}")
+            else:
+                logger.info("Time difference is minimal, no sync needed")
+
+        except Exception as e:
+            logger.error(f"Error during time synchronization: {e}")
 
     ### STATE MACHINE METHODS ###
 
