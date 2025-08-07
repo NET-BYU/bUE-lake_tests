@@ -12,9 +12,11 @@ import time
 import queue
 import crc8
 
+from constants import bUEs
+
 
 class Ota:
-    def __init__(self, port, baudrate, id):
+    def __init__(self, port, baudrate, id, stdout_history=None):
 
         # Serial port configuration
         while True:
@@ -26,6 +28,8 @@ class Ota:
                 time.sleep(2)
 
         self.id = id
+
+        self.stdout_history = stdout_history
 
         # Initialize CRC8 calculator
         self.crc8_calculator = crc8.crc8()
@@ -74,6 +78,8 @@ class Ota:
 
                 if not valid_crc:  # Bad checksum
                     self.send_ota_message(origin, "BAD")
+                    if self.stdout_history:
+                        self.stdout_history.append(f"Got a message with a bad checksum from {bUEs(str(origin))}")
                     continue
 
                 self.recv_msgs.put(f"{origin},{original_message}")

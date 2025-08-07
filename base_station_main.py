@@ -68,10 +68,11 @@ class Base_Station_Main:
             logger.error(f"__init__: YAML file {yaml_str} no found", file=sys.stderr)
             sys.exit(1)
 
+        # Hold all UPD messages so they can be displayed in the UI
+        self.stdout_history = deque()
+
         self.ota = Ota(
-            self.yaml_data["OTA_PORT"],
-            self.yaml_data["OTA_BAUDRATE"],
-            self.yaml_data["OTA_ID"],
+            self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.yaml_data["OTA_ID"], self.stdout_history
         )
         logger.info(f"[DEBUG] OTA ID is set to: {self.ota.id}")
 
@@ -91,9 +92,6 @@ class Base_Station_Main:
 
         # Dictionary holds what each bUE's currently location is depending on last PING/UPD
         self.bue_coordinates = {}
-
-        # Hold all UPD messages so they can be displayed in the UI
-        self.stdout_history = deque()
 
         # A list that tracks what bUEs are currently in the TEST state
         self.testing_bues = []
@@ -181,7 +179,7 @@ class Base_Station_Main:
                     parts = message.split(",", 1)
                     bue_id = int(parts[0])
                     message_body = parts[1]
-                    print(f"Mesage body: {message_body}")
+                    print(f"Message body: {message_body}")
 
                 except Exception as e:
                     logger.error(f"message_listener: Failed to parse message '{message}': {e}")
@@ -219,15 +217,17 @@ class Base_Station_Main:
                     self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
 
                     if stdout != "":
-                        self.stdout_history.append(stdout)
+                        self.stdout_history.append(f"{bUEs[str(bue_id)]}: {stdout}")
 
                 elif message_body.startswith("FAIL"):
                     logger.bind(bue_id=bue_id).error(f"Received FAIL from {bue_id}")
-                    self.testing_bues.remove(bue_id)
+                    if bue_id in self.testing_bues:
+                        self.testing_bues.remove(bue_id)
 
                 elif message_body.startswith("DONE"):
                     logger.bind(bue_id=bue_id).info(f"Received DONE from {bue_id}")
-                    self.testing_bues.remove(bue_id)
+                    if bue_id in self.testing_bues:
+                        self.testing_bues.remove(bue_id)
 
                 elif message_body.startswith("PREPR"):
                     logger.bind(bue_id=bue_id).info(f"Received PREPR from {bue_id}")
@@ -235,7 +235,8 @@ class Base_Station_Main:
 
                 elif message_body.startswith("CANCD"):
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
-                    self.testing_bues.remove(bue_id)
+                    if bue_id in self.testing_bues:
+                        self.testing_bues.remove(bue_id)
                 elif message_body.startswith("BAD"):
                     logger.bind(bue_id=bue_id).info(f"Received BAD from {bue_id}")
                     self.stdout_history.append(f"Received a BAD from {bUEs[str(bue_id)]}")

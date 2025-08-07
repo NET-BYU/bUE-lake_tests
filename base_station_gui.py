@@ -23,6 +23,7 @@ import threading
 import time
 import os
 import subprocess
+import platform
 from datetime import datetime, date, timedelta
 from loguru import logger
 import math
@@ -120,8 +121,12 @@ class BaseStationGUI:
         self.bue_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         bue_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Bind right-click context menu
-        self.bue_tree.bind("<Button-3>", self.show_bue_context_menu)
+        # Bind right-click context menu (cross-platform)
+        if platform.system() == "Darwin":  # macOS
+            self.bue_tree.bind("<Button-2>", self.show_bue_context_menu)  # macOS right-click
+            self.bue_tree.bind("<Control-Button-1>", self.show_bue_context_menu)  # macOS Ctrl+click alternative
+        else:  # Linux/Windows
+            self.bue_tree.bind("<Button-3>", self.show_bue_context_menu)  # Standard right-click
 
         # Control buttons frame
         control_frame = ttk.LabelFrame(parent, text="Controls")
@@ -880,7 +885,9 @@ class TestDialog:
             # Send test commands
             for bue_id, config in self.bue_configs.items():
                 command = f"TEST,{config['file']},{unix_timestamp},{config['params']}"
-                self.base_station.ota.send_ota_message(bue_id, command)
+                for i in range(3):
+                    self.base_station.ota.send_ota_message(bue_id, command)
+                    time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 
             bue_names = [bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()]
@@ -995,7 +1002,9 @@ class CancelTestDialog:
         for bue_id, var in self.test_vars.items():
             if var.get():
                 try:
-                    self.base_station.ota.send_ota_message(bue_id, "CANC")
+                    for i in range(3):
+                        self.base_station.ota.send_ota_message(bue_id, "CANC")
+                        time.sleep(0.1)
                     canceled.append(bUEs.get(str(bue_id), str(bue_id)))
                     logger.info(f"Sent cancel command to bUE {bue_id}")
                 except Exception as e:
