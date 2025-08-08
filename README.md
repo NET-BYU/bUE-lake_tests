@@ -13,6 +13,9 @@ python3 -m venv <environment_name>
 source /path/to/venv/bin/activate
 pip install -r requirements.txt
 ```
+
+Setup the config file for the base station. Do this by copying `config.example` from the setup folder into the main directory. Rename it `config_base.yaml`. If not uses Linux, you will need to update the `PORT` option of this file to reflect what port the Rayex device is connected to.
+
 ### Running Base Station without UI
 
 ```
@@ -31,6 +34,19 @@ python3 main_ui.py
 Make sure that the keystroke handler thread is uncommented in `main_ui.py` and run the following:
 ```
 sudo -E /path/to/venv/bin/python main_ui.py
+```
+
+### Running Base Station GUI
+
+There are two options for this. If on Linux/Mac, run the following:
+```
+./launch_gui.sh
+```
+
+If on Windows, run
+
+```
+python base_station_gui.py
 ```
 
 ## If on a bUE
