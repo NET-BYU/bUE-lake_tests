@@ -88,7 +88,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 176.0]
+    coordinate: [336, 192.0]
     rotation: 0
     state: true
 - name: audio_sink_0
@@ -124,7 +124,32 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 696.0]
+    coordinate: [152, 696.0]
+    rotation: 0
+    state: enabled
+- name: band_pass_filter_0
+  id: band_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    decim: '1'
+    gain: '1'
+    high_cutoff_freq: tx_rx_mix_freq + (tx_rx_bw /2) + 1000
+    interp: '1'
+    low_cutoff_freq: tx_rx_mix_freq - (tx_rx_bw /2) - 1000
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fir_filter_ccf
+    width: '1000'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [552, 548.0]
     rotation: 0
     state: enabled
 - name: blocks_complex_to_float_0
@@ -171,7 +196,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 640.0]
+    coordinate: [736, 624.0]
     rotation: 0
     state: enabled
 - name: blocks_float_to_complex_0
@@ -187,7 +212,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 664.0]
+    coordinate: [392, 664.0]
     rotation: 0
     state: enabled
 - name: blocks_message_strobe_0
@@ -490,10 +515,11 @@ connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '0']
 - [audio_source_0, '0', blocks_float_to_complex_0, '0']
+- [band_pass_filter_0, '0', blocks_conjugate_cc_0, '0']
 - [blocks_complex_to_float_0, '0', audio_sink_0, '0']
 - [blocks_complex_to_float_0_0, '0', blocks_wavfile_sink_0, '0']
 - [blocks_conjugate_cc_0, '0', blocks_multiply_xx_0, '0']
-- [blocks_float_to_complex_0, '0', blocks_conjugate_cc_0, '0']
+- [blocks_float_to_complex_0, '0', band_pass_filter_0, '0']
 - [blocks_message_strobe_0, strobe, lora_sdr_payload_id_inc_0, msg_in]
 - [blocks_message_strobe_0, strobe, lora_tx_0, in]
 - [blocks_multiply_const_vxx_0, '0', blocks_complex_to_float_0, '0']
