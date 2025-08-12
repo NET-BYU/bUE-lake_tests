@@ -2,7 +2,7 @@
 
 bUEs = {
     "10": "Doof",
-    "20": "Candace",
+    "80": "Candace",
     "30": "Major",
     "40": "Buford",
     "50": "Carl",
@@ -11,7 +11,7 @@ bUEs = {
 
 bUEs_inverted = {
     "Doof": "10",
-    "Candace": "20",
+    "Candace": "80",
     "Major": "30",
     "Buford": "40",
     "Carl": "50",
