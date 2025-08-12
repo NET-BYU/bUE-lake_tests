@@ -61,7 +61,7 @@ class tup_rdo(gr.top_block):
             samp_rate=samp_rate,
             sf=tx_rx_sf,
          ldro_mode=2,frame_zero_padd=1280,sync_word=tx_rx_sync_word )
-        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[True,True])
+        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[False,True])
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
             wav_file_path,
             1,

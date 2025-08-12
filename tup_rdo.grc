@@ -322,7 +322,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     pay_len: '255'
-    print_rx: '[True,True]'
+    print_rx: '[False,True]'
     samp_rate: samp_rate
     sf: tx_rx_sf
     soft_decoding: 'True'
