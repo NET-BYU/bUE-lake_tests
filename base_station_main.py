@@ -208,6 +208,7 @@ class Base_Station_Main:
                 elif message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
                     if not bue_id in self.testing_bues:
                         self.testing_bues.append(bue_id)
+                        logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id} but it was not in testing_bues. Adding it now.")
                     header, lat, long, stdout = message_body.split(",", maxsplit=3)
                     # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
                     logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
@@ -239,6 +240,7 @@ class Base_Station_Main:
                     logger.bind(bue_id=bue_id).info(f"Received CANCD from {bue_id}")
                     if bue_id in self.testing_bues:
                         self.testing_bues.remove(bue_id)
+
                 elif message_body.startswith("BAD"):
                     logger.bind(bue_id=bue_id).info(f"Received BAD from {bue_id}")
                     self.stdout_history.append(f"Received a BAD from {bUEs[str(bue_id)]}")
