@@ -811,22 +811,48 @@ class TestDialog:
             file_combo.pack(side=tk.LEFT, padx=(5, 10))
 
             # Parameters
-            ttk.Label(file_frame, text="Parameters:", width=12).pack(side=tk.LEFT)
-            params_var = tk.StringVar()
-            params_entry = ttk.Entry(file_frame, textvariable=params_var, width=25)
-            params_entry.pack(side=tk.LEFT, padx=(5, 0))
+            ttk.Label(file_frame, text="Spreading Factor:", width=14).pack(side=tk.LEFT)
+            sf_var = tk.StringVar()
+            sf_entry = ttk.Entry(file_frame, textvariable=sf_var, width=5)
+            sf_entry.pack(side=tk.LEFT, padx=(0, 0))
+
+            ttk.Label(file_frame, text="Message:", width=8, padding=4).pack(side=tk.LEFT)
+            msg_var = tk.StringVar()
+            msg_entry = ttk.Entry(file_frame, textvariable=msg_var, width=15)
+            msg_entry.pack(side=tk.LEFT, padx=(0, 0))
+
+            # Add placeholder functionality
+            placeholder_text = "No spaces"
+            msg_entry.insert(0, placeholder_text)
+            msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
+
+            def on_focus_in(event):
+                if msg_var.get() == placeholder_text:
+                    msg_entry.delete(0, tk.END)
+                    msg_entry.config(foreground="black", font=("TkDefaultFont", 10, "normal"))
+
+            def on_focus_out(event):
+                if not msg_var.get():
+                    msg_entry.insert(0, placeholder_text)
+                    msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
+
+            msg_entry.bind("<FocusIn>", on_focus_in)
+            msg_entry.bind("<FocusOut>", on_focus_out)
 
             # Store the variables for this bUE
             self.config_widgets[bue_id] = {
                 "file_var": file_var,
-                "params_var": params_var,
+                "sf_var": sf_var,
                 "file_combo": file_combo,
-                "params_entry": params_entry,
+                "sf_entry": sf_entry,
+                "msg_var": msg_var,
+                "msg_entry": msg_entry,
             }
 
             # Bind changes to enable run button
             file_var.trace("w", self.check_ready_to_run)
-            params_var.trace("w", self.check_ready_to_run)
+            sf_entry.trace("w", self.check_ready_to_run)
+            msg_entry.trace("w", self.check_ready_to_run)
 
         # Enable run button if we have configurations
         self.check_ready_to_run()
@@ -869,7 +895,8 @@ class TestDialog:
                 widgets = self.config_widgets[bue_id]
                 self.bue_configs[bue_id] = {
                     "file": widgets["file_var"].get(),
-                    "params": widgets["params_var"].get(),
+                    "sf": widgets["sf_var"].get(),
+                    "msg": widgets["msg_var"].get(),
                 }
 
         # Calculate start time using delay - use CURRENT time for actual execution
@@ -884,7 +911,7 @@ class TestDialog:
 
             # Send test commands
             for bue_id, config in self.bue_configs.items():
-                command = f"TEST,{config['file']},{unix_timestamp},{config['params']}"
+                command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
                 for i in range(3):
                     self.base_station.ota.send_ota_message(bue_id, command)
                     time.sleep(0.1)
