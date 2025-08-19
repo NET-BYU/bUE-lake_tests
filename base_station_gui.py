@@ -629,7 +629,8 @@ class TestDialog:
             "grc/lora_td_ru",
             "grc/lora_tu_rd",
             "Old/helloworld",
-            "gpstest",
+            "Old/sf_msg_test",
+            "Old" "gpstest",
             "gpstest2",
             "../osu_testing/run_tx",
             "../osu_testing/run_rx",
@@ -851,8 +852,8 @@ class TestDialog:
 
             # Bind changes to enable run button
             file_var.trace("w", self.check_ready_to_run)
-            sf_entry.trace("w", self.check_ready_to_run)
-            msg_entry.trace("w", self.check_ready_to_run)
+            sf_var.trace("w", self.check_ready_to_run)
+            msg_var.trace("w", self.check_ready_to_run)
 
         # Enable run button if we have configurations
         self.check_ready_to_run()

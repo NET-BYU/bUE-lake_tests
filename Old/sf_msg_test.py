@@ -13,7 +13,7 @@ if __name__ == "__main__":
     sf = int(sys.argv[1])
     message = sys.argv[2]
     try:
-        print(f"Spreading Factor: {sf}")
+        print(f"Spreading Factor: {sf}, Message: {message}")
         print(f"Message: {message}")
 
     except KeyboardInterrupt:
