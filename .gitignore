@@ -10,3 +10,4 @@ __pycache__/
 *.nmea
 .venv
 .coverage
+.vscode/

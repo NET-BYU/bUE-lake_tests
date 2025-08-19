@@ -3,7 +3,7 @@ parameter_sets:
     mult_amp: 0.2
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
@@ -12,7 +12,7 @@ parameter_sets:
     mult_amp: 0.15
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
@@ -21,7 +21,7 @@ parameter_sets:
     mult_amp: 0.1
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 7
     tx_rx_sync_word: [18]
@@ -30,7 +30,7 @@ parameter_sets:
     mult_amp: 0.2
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 8
     tx_rx_sync_word: [18]
@@ -39,7 +39,7 @@ parameter_sets:
     mult_amp: 0.15
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 8
     tx_rx_sync_word: [18]
@@ -48,7 +48,7 @@ parameter_sets:
     mult_amp: 0.1
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 8
     tx_rx_sync_word: [18]
@@ -57,7 +57,7 @@ parameter_sets:
     mult_amp: 0.2
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 9
     tx_rx_sync_word: [18]
@@ -66,7 +66,7 @@ parameter_sets:
     mult_amp: 0.15
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 9
     tx_rx_sync_word: [18]
@@ -75,12 +75,12 @@ parameter_sets:
     mult_amp: 0.1
     rx_mix_freq: -12000
     tx_mix_freq: 12000
-    tx_rx_bw: 5000
+    tx_rx_bw: 6000
     tx_cr: 1
     tx_rx_sf: 9
     tx_rx_sync_word: [18]
 
-# BW is 5000 for all
+# BW is 6000 for all
 # CR is same for all (4/5, which corresponds to 1 in the source code)
 # sync word is same for all (default 18)
 # mix frequency is 12000 +/- for all (center freq)

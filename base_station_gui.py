@@ -912,9 +912,8 @@ class TestDialog:
             # Send test commands
             for bue_id, config in self.bue_configs.items():
                 command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
-                for i in range(3):
-                    self.base_station.ota.send_ota_message(bue_id, command)
-                    time.sleep(0.1)
+                self.base_station.ota.send_ota_message(bue_id, command)
+                time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 
             bue_names = [bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()]

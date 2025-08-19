@@ -13,8 +13,9 @@ from gnuradio import analog
 from gnuradio import audio
 from gnuradio import blocks
 import pmt
-from gnuradio import gr
+from gnuradio import filter
 from gnuradio.filter import firdes
+from gnuradio import gr
 from gnuradio.fft import window
 import sys
 import signal
@@ -60,7 +61,7 @@ class tup_rdo(gr.top_block):
             samp_rate=samp_rate,
             sf=tx_rx_sf,
          ldro_mode=2,frame_zero_padd=1280,sync_word=tx_rx_sync_word )
-        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[True,True])
+        self.lora_rx_0 = lora_sdr.lora_sdr_lora_rx( bw=tx_rx_bw, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=samp_rate, sf=tx_rx_sf, sync_word=tx_rx_sync_word, soft_decoding=True, ldro_mode=2, print_rx=[False,True])
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
             wav_file_path,
             1,
@@ -77,6 +78,16 @@ class tup_rdo(gr.top_block):
         self.blocks_conjugate_cc_0 = blocks.conjugate_cc()
         self.blocks_complex_to_float_0_0 = blocks.complex_to_float(1)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
+        self.band_pass_filter_0 = filter.fir_filter_ccf(
+            1,
+            firdes.band_pass(
+                1,
+                samp_rate,
+                (tx_rx_mix_freq - (tx_rx_bw /2) - 1000),
+                (tx_rx_mix_freq + (tx_rx_bw /2) + 1000),
+                1000,
+                window.WIN_HAMMING,
+                6.76))
         self.audio_source_0 = audio.source(samp_rate, 'hw:3,0', True)
         self.audio_sink_0 = audio.sink(samp_rate, 'hw:3,0', True)
         self.analog_sig_source_x_0_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, tx_rx_mix_freq, 1, 0, 0)
@@ -90,10 +101,11 @@ class tup_rdo(gr.top_block):
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_multiply_xx_0_0, 0))
         self.connect((self.audio_source_0, 0), (self.blocks_float_to_complex_0, 0))
+        self.connect((self.band_pass_filter_0, 0), (self.blocks_conjugate_cc_0, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.audio_sink_0, 0))
         self.connect((self.blocks_complex_to_float_0_0, 0), (self.blocks_wavfile_sink_0, 0))
         self.connect((self.blocks_conjugate_cc_0, 0), (self.blocks_multiply_xx_0, 0))
-        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_conjugate_cc_0, 0))
+        self.connect((self.blocks_float_to_complex_0, 0), (self.band_pass_filter_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_complex_to_float_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.blocks_complex_to_float_0_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.lora_rx_0, 0))
@@ -126,6 +138,7 @@ class tup_rdo(gr.top_block):
 
     def set_tx_rx_bw(self, tx_rx_bw):
         self.tx_rx_bw = tx_rx_bw
+        self.band_pass_filter_0.set_taps(firdes.band_pass(1, self.samp_rate, (self.tx_rx_mix_freq - (self.tx_rx_bw /2) - 1000), (self.tx_rx_mix_freq + (self.tx_rx_bw /2) + 1000), 1000, window.WIN_HAMMING, 6.76))
 
     def get_tx_rx_mix_freq(self):
         return self.tx_rx_mix_freq
@@ -134,6 +147,7 @@ class tup_rdo(gr.top_block):
         self.tx_rx_mix_freq = tx_rx_mix_freq
         self.analog_sig_source_x_0.set_frequency((-self.tx_rx_mix_freq))
         self.analog_sig_source_x_0_0.set_frequency(self.tx_rx_mix_freq)
+        self.band_pass_filter_0.set_taps(firdes.band_pass(1, self.samp_rate, (self.tx_rx_mix_freq - (self.tx_rx_bw /2) - 1000), (self.tx_rx_mix_freq + (self.tx_rx_bw /2) + 1000), 1000, window.WIN_HAMMING, 6.76))
 
     def get_tx_rx_sf(self):
         return self.tx_rx_sf
@@ -162,6 +176,7 @@ class tup_rdo(gr.top_block):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
+        self.band_pass_filter_0.set_taps(firdes.band_pass(1, self.samp_rate, (self.tx_rx_mix_freq - (self.tx_rx_bw /2) - 1000), (self.tx_rx_mix_freq + (self.tx_rx_bw /2) + 1000), 1000, window.WIN_HAMMING, 6.76))
 
 
 
