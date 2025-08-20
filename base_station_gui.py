@@ -32,6 +32,7 @@ import math
 try:
     import tkintermapview
     from PIL import Image, ImageDraw, ImageTk
+
     MAP_VIEW_AVAILABLE = True
     print("TkinterMapView is available - using interactive map")
 except ImportError:
@@ -56,7 +57,7 @@ class BaseStationGUI:
         # Custom markers for the map
         self.custom_markers = {}  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
         self.marker_counter = 0
-        
+
         # Map configuration
         self.use_interactive_map = MAP_VIEW_AVAILABLE
         self.map_widget = None  # Will hold TkinterMapView or canvas
@@ -74,16 +75,16 @@ class BaseStationGUI:
         """Create a custom circular marker icon similar to canvas map"""
         if not MAP_VIEW_AVAILABLE:
             return None
-            
+
         try:
             # Create image with transparent background
-            img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+            img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
             draw = ImageDraw.Draw(img)
-            
+
             # Draw outer circle (border)
             border_color = "darkblue" if color in ["blue", "green"] else "darkred"
-            draw.ellipse([0, 0, size-1, size-1], fill=color, outline=border_color, width=2)
-            
+            draw.ellipse([0, 0, size - 1, size - 1], fill=color, outline=border_color, width=2)
+
             # Convert to PhotoImage for tkinter
             return ImageTk.PhotoImage(img)
         except Exception as e:
@@ -184,27 +185,23 @@ class BaseStationGUI:
 
         ttk.Button(map_control_frame, text="Add Custom Marker", command=self.add_custom_marker).pack(fill=tk.X, pady=2)
         ttk.Button(map_control_frame, text="Manage Markers", command=self.manage_markers).pack(fill=tk.X, pady=2)
-        
+
         # Map type toggle (only show if both options are available)
         if MAP_VIEW_AVAILABLE:
-            self.map_toggle_btn = ttk.Button(
-                map_control_frame, 
-                text="Switch to Simple Map", 
-                command=self.toggle_map_type
-            )
+            self.map_toggle_btn = ttk.Button(map_control_frame, text="Switch to Simple Map", command=self.toggle_map_type)
             self.map_toggle_btn.pack(fill=tk.X, pady=2)
 
     def setup_map_view(self, parent):
         """Setup the map view with bUE locations and custom markers"""
         # Create container for map
         self.map_container = parent
-        
+
         # Set up the appropriate map type
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             self.setup_interactive_map()
         else:
             self.setup_canvas_map()
-        
+
         # Map info frame (always present)
         map_info_frame = ttk.Frame(parent)
         map_info_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -213,7 +210,7 @@ class BaseStationGUI:
         ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(side=tk.LEFT, padx=5)
         ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(side=tk.LEFT, padx=5)
         ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(side=tk.LEFT, padx=5)
-        
+
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             ttk.Label(map_info_frame, text="| Interactive Map Active", foreground="green").pack(side=tk.LEFT, padx=5)
         else:
@@ -223,23 +220,18 @@ class BaseStationGUI:
         """Setup TkinterMapView interactive map"""
         try:
             # Create the map widget
-            self.map_widget = tkintermapview.TkinterMapView(
-                self.map_container, 
-                width=600, 
-                height=400,
-                corner_radius=0
-            )
+            self.map_widget = tkintermapview.TkinterMapView(self.map_container, width=600, height=400, corner_radius=0)
             self.map_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-            
+
             # Set a default position (you can change this to your area)
             self.map_widget.set_position(40.2518, -111.6493)  # Provo, Utah
             self.map_widget.set_zoom(10)
-            
+
             # Clear any existing markers
             self.map_markers = {}
-            
+
             print("Interactive map initialized successfully")
-            
+
         except Exception as e:
             print(f"Failed to setup interactive map: {e}")
             logger.error(f"Failed to setup interactive map: {e}")
@@ -252,7 +244,7 @@ class BaseStationGUI:
         # Create canvas map (original implementation)
         self.map_widget = tk.Canvas(self.map_container, bg="lightblue", width=600, height=400)
         self.map_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
+
         # Bind canvas events
         self.map_widget.bind("<Button-1>", self.on_map_click)
         self.map_widget.bind("<Motion>", self.on_map_hover)
@@ -262,31 +254,31 @@ class BaseStationGUI:
         if not MAP_VIEW_AVAILABLE:
             messagebox.showinfo("Map Toggle", "TkinterMapView is not available. Cannot switch map types.")
             return
-            
+
         try:
             # Store current state
             old_use_interactive = self.use_interactive_map
-            
+
             # Toggle map type
             self.use_interactive_map = not self.use_interactive_map
-            
+
             # Clear the current map widget
-            if hasattr(self, 'map_widget') and self.map_widget:
+            if hasattr(self, "map_widget") and self.map_widget:
                 self.map_widget.destroy()
-            
+
             # Create new map
             if self.use_interactive_map:
                 self.setup_interactive_map()
-                if hasattr(self, 'map_toggle_btn'):
+                if hasattr(self, "map_toggle_btn"):
                     self.map_toggle_btn.config(text="Switch to Simple Map")
             else:
                 self.setup_canvas_map()
-                if hasattr(self, 'map_toggle_btn'):
+                if hasattr(self, "map_toggle_btn"):
                     self.map_toggle_btn.config(text="Switch to Interactive Map")
-            
+
             # Update the map with current data
             self.update_map()
-            
+
             # Update info text
             for widget in self.map_container.winfo_children():
                 if isinstance(widget, ttk.Frame):
@@ -296,9 +288,11 @@ class BaseStationGUI:
                                 child.config(text="| Interactive Map Active", foreground="green")
                             else:
                                 child.config(text="| Simple Map Active", foreground="orange")
-            
-            logger.info(f"Switched from {'Interactive' if old_use_interactive else 'Simple'} to {'Interactive' if self.use_interactive_map else 'Simple'} map")
-            
+
+            logger.info(
+                f"Switched from {'Interactive' if old_use_interactive else 'Simple'} to {'Interactive' if self.use_interactive_map else 'Simple'} map"
+            )
+
         except Exception as e:
             messagebox.showerror("Map Error", f"Failed to switch map type: {e}")
             logger.error(f"Failed to toggle map type: {e}")
@@ -409,9 +403,9 @@ class BaseStationGUI:
 
     def update_map(self):
         """Update the map with bUE locations and markers"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             self.update_interactive_map()
         else:
@@ -419,9 +413,9 @@ class BaseStationGUI:
 
     def update_interactive_map(self):
         """Update TkinterMapView with current data"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         try:
             # Clear existing markers
             for marker_id, marker_obj in self.map_markers.items():
@@ -430,7 +424,7 @@ class BaseStationGUI:
                 except:
                     pass
             self.map_markers.clear()
-            
+
             if not self.base_station or not self.base_station.bue_coordinates:
                 return
 
@@ -438,7 +432,7 @@ class BaseStationGUI:
             current_positions = {}
             position_changed = False
             new_bues_detected = False
-            
+
             # Calculate center point for the map
             lats = []
             lons = []
@@ -449,9 +443,9 @@ class BaseStationGUI:
                     lat, lon = float(coords[0]), float(coords[1])
                     lats.append(lat)
                     lons.append(lon)
-                    
+
                     current_positions[bue_id] = (lat, lon)
-                    
+
                     # Check for new bUEs
                     if bue_id not in self.last_bue_positions:
                         new_bues_detected = True
@@ -461,7 +455,7 @@ class BaseStationGUI:
                         distance_moved = self.calculate_distance(lat, lon, old_lat, old_lon)
                         if distance_moved > 100:  # 100 meters threshold
                             position_changed = True
-                            
+
                 except (ValueError, IndexError):
                     continue
 
@@ -472,28 +466,24 @@ class BaseStationGUI:
 
             # Only auto-center/zoom if:
             # 1. This is the first time setting up the map, OR
-            # 2. New bUEs have been detected, OR  
+            # 2. New bUEs have been detected, OR
             # 3. Existing bUEs have moved significantly
-            should_auto_position = (
-                not self.map_auto_positioned or 
-                new_bues_detected or 
-                position_changed
-            )
+            should_auto_position = not self.map_auto_positioned or new_bues_detected or position_changed
 
             if should_auto_position and lats and lons:
                 # Set map center to the average of all coordinates
                 center_lat = sum(lats) / len(lats)
                 center_lon = sum(lons) / len(lons)
                 self.map_widget.set_position(center_lat, center_lon)
-                
+
                 # Auto-zoom to fit all markers with extra context
                 lat_range = max(lats) - min(lats)
                 lon_range = max(lons) - min(lons)
                 max_range = max(lat_range, lon_range)
-                
+
                 # Add padding to ensure markers aren't at the edge (25% extra space)
                 padded_range = max_range * 1.25
-                
+
                 # Determine zoom level based on coordinate range (less aggressive zooming)
                 if padded_range > 1:
                     zoom = 7  # Reduced from 8 - very wide area view
@@ -505,10 +495,10 @@ class BaseStationGUI:
                     zoom = 14  # New level - street level with good context
                 else:
                     zoom = 15  # Reduced from 17 - close but not too tight
-                    
+
                 self.map_widget.set_zoom(zoom)
                 self.map_auto_positioned = True
-                
+
                 if new_bues_detected:
                     logger.info("Auto-centered map due to new bUEs")
                 elif position_changed:
@@ -534,27 +524,24 @@ class BaseStationGUI:
 
                     # Choose marker color based on proximity
                     marker_color = "green" if is_close else "blue"
-                    
+
                     # Create custom circle icon matching canvas map style
                     circle_icon = self.create_circle_marker_icon(marker_color)
-                    
+
                     # Create marker with custom circular icon
                     if circle_icon:
                         marker = self.map_widget.set_marker(
-                            lat, lon, 
-                            text=bue_name,
-                            icon=circle_icon,
-                            font=("Arial", 10, "bold"),
-                            text_color="white"
+                            lat, lon, text=bue_name, icon=circle_icon, font=("Arial", 10, "bold"), text_color="white"
                         )
                     else:
                         # Fallback to default marker if icon creation failed
                         marker = self.map_widget.set_marker(
-                            lat, lon, 
+                            lat,
+                            lon,
                             text=bue_name,
                             marker_color_circle=marker_color,
                             marker_color_outside="darkblue",
-                            font=("Arial", 10, "bold")
+                            font=("Arial", 10, "bold"),
                         )
                     self.map_markers[f"bue_{bue_id}"] = marker
 
@@ -566,24 +553,26 @@ class BaseStationGUI:
                 try:
                     # Create custom circle icon for custom markers
                     circle_icon = self.create_circle_marker_icon("red")
-                    
+
                     # Create custom marker with circular icon
                     if circle_icon:
                         marker = self.map_widget.set_marker(
-                            marker_data["lat"], marker_data["lon"],
+                            marker_data["lat"],
+                            marker_data["lon"],
                             text=marker_data["name"],
                             icon=circle_icon,
                             font=("Arial", 10, "bold"),
-                            text_color="white"
+                            text_color="white",
                         )
                     else:
                         # Fallback to default marker if icon creation failed
                         marker = self.map_widget.set_marker(
-                            marker_data["lat"], marker_data["lon"],
+                            marker_data["lat"],
+                            marker_data["lon"],
                             text=marker_data["name"],
                             marker_color_circle="red",
                             marker_color_outside="darkred",
-                            font=("Arial", 10, "bold")
+                            font=("Arial", 10, "bold"),
                         )
                     self.map_markers[f"custom_{marker_id}"] = marker
                 except Exception as e:
@@ -594,9 +583,9 @@ class BaseStationGUI:
 
     def update_canvas_map(self):
         """Update canvas-based map (original implementation)"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         # Clear canvas
         self.map_widget.delete("all")
 
@@ -1135,10 +1124,12 @@ class TestDialog:
             )
             file_combo.pack(side=tk.LEFT, padx=(5, 10))
 
+            sf = [6, 7, 8, 9]
+
             # Parameters
             ttk.Label(file_frame, text="Spreading Factor:", width=14).pack(side=tk.LEFT)
-            sf_var = tk.StringVar()
-            sf_entry = ttk.Entry(file_frame, textvariable=sf_var, width=5)
+            sf_var = tk.IntVar(value=8)
+            sf_entry = ttk.Combobox(file_frame, textvariable=sf_var, values=sf, state="readonly", width=5)
             sf_entry.pack(side=tk.LEFT, padx=(0, 0))
 
             ttk.Label(file_frame, text="Message:", width=8, padding=4).pack(side=tk.LEFT)
