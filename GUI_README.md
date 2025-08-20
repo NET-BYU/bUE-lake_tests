@@ -1,11 +1,30 @@
-# Real Base Station GUI
+# Base Station GUI with Interactive Maps
 
-This script provides a GUI interface for controlling the base station with actual bUEs.
+This script provides a GUI interface for controlling the base station with actual bUEs, featuring both interactive and simple map displays.
 
-## Files Created
+## New Map Features
 
-- `real_base_station_gui.py` - Main GUI script for real base station operations
-- `launch_gui.sh` - Launcher script with environment setup and error checking
+### Interactive Map (Default)
+- **TkinterMapView Integration** - Uses real satellite/street map tiles
+- **Auto-centering** - Map automatically centers on bUE locations
+- **Auto-zoom** - Intelligent zoom based on coordinate spread
+- **Real-time Updates** - Map updates as bUEs move
+- **Map Toggle** - Switch between interactive and simple map modes
+
+### Installation
+
+#### Option 1: Automatic Installation (Recommended)
+```bash
+python3 install_map_view.py
+```
+
+#### Option 2: Manual Installation
+```bash
+pip install tkintermapview
+```
+
+#### Option 3: No Installation Required
+The GUI automatically falls back to a simple canvas map if TkinterMapView is not available.
 
 ## Usage
 
@@ -17,13 +36,19 @@ This script provides a GUI interface for controlling the base station with actua
 
 ### Option 2: Direct Python execution
 ```bash
-python3 real_base_station_gui.py                    # Uses config_base.yaml  
-python3 real_base_station_gui.py my_config.yaml     # Uses custom config file
+python3 base_station_gui.py                    # Uses config_base.yaml  
+python3 base_station_gui.py my_config.yaml     # Uses custom config file
 ```
 
 ## Features
 
-The real GUI includes all the features from the test GUI but works with actual bUEs:
+### Map Display (Enhanced)
+- **Interactive Map** - Real satellite/street map view (default when available)
+- **Simple Canvas Map** - Fallback coordinate plot view
+- **Map Toggle Button** - Switch between map types on the fly
+- **Auto-positioning** - Map centers automatically on bUE locations
+- **Smart Zoom** - Zoom level adjusts based on coordinate spread
+- **Status Indicators** - Shows which map type is currently active
 
 ### Connection Management
 - **Start/Stop Listening** - Control whether the base station accepts new connections
@@ -92,6 +117,23 @@ The real GUI includes all the features from the test GUI but works with actual b
 - bUEs must send GPS coordinates to appear on map
 - Check that bUEs have valid GPS fixes
 - Verify coordinate format matches expected format (latitude, longitude as strings/floats)
+
+### Interactive Map Issues
+- **Installation**: Run `python3 install_map_view.py` to install TkinterMapView
+- **Internet Connection**: Interactive map requires internet for map tiles
+- **Fallback Available**: GUI automatically uses simple map if interactive map fails
+- **Toggle Maps**: Use "Switch to Simple Map" button if interactive map has issues
+
+### Map Toggle Not Working
+- Ensure TkinterMapView is properly installed
+- Check console output for error messages
+- Try restarting the application
+- Use the simple map as fallback if needed
+
+### Performance Issues
+- Interactive map may be slower on older systems
+- Switch to simple map for better performance
+- Check internet connection speed for map tile loading
 
 ### Logs Not Opening
 - Ensure `logs/` directory exists
