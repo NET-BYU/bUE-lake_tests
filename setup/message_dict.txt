@@ -21,7 +21,8 @@ REQ:
 
 CON:
     Direction: base -> bUE
-    Meaning: The base station is confirming that the bUE has joined the OTA network while transmitting its own .
+    Meaning: The base station is confirming that the bUE has joined the OTA network while transmitting its own.
+             The base station also sends its current time so the bUE can correct its own clock if needed (will correct if > 1 second difference)
     Body: base station id
     Example: (base_station_main.py) self.ota.send_ota_message(5, "CON:10")
     Response: The bUE will respond with a ACK message
