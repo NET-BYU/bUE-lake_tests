@@ -98,3 +98,17 @@ DONE:
     Example: (bue_main.py) self.ota.send_ota_message(10, "DONE")
     Response: None
 
+RELOAD:
+    Direction: base -> bUE
+    Meaning: The base station tells the bUE to restart its bue.service
+    Body: None
+    Example: (base_station_main.py) self.ota.send_ota_message(10, "RELOAD")
+    Response: None
+
+RESTART: 
+    Direction: base -> bUE
+    Meaning: The base station tells the bUE to completely restart (sudo reboot)
+    Body: None
+    Example: (base_station_main.py) self.ota.send_ota_message(10, "RESTART")
+    Reponse: None
+
