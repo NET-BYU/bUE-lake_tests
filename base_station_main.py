@@ -181,8 +181,6 @@ class Base_Station_Main:
                     current_timestamp = int(time.time())
                     bue_name = message_body[4:]
 
-                    self.create_bue_log_file(bue_id)
-
                     self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}:{current_timestamp}")
                     self.bue_timeout_tracker[bue_name] = TIMEOUT
                     if not bue_id in self.connected_bues:
@@ -190,6 +188,8 @@ class Base_Station_Main:
                         self.connected_bues[bue_id] = bue_name
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
+
+                    self.create_bue_log_file(bue_id)
 
                 elif message_body.startswith("ACK"):
                     logger.bind(bue_id=bue_id).info(f"Received ACK from {self.connected_bues[bue_id]}")
@@ -254,11 +254,11 @@ class Base_Station_Main:
 
             # Validate that coordinates are lists/tuples with 2 elements
             if not isinstance(c1, (list, tuple)) or len(c1) != 2:
-                logger.error(f"Invalid coordinates for bUE {bue_1}: {c1}")
+                logger.error(f"Invalid coordinates for bUE {self.connected_bues[bue_1]}: {c1}")
                 return None
 
             if not isinstance(c2, (list, tuple)) or len(c2) != 2:
-                logger.error(f"Invalid coordinates for bUE {bue_2}: {c2}")
+                logger.error(f"Invalid coordinates for bUE {self.connected_bues[bue_2]}: {c2}")
                 return None
 
             # Validate that coordinates are numeric and within valid ranges
@@ -266,23 +266,27 @@ class Base_Station_Main:
                 lat1, lon1 = float(c1[0]), float(c1[1])
                 lat2, lon2 = float(c2[0]), float(c2[1])
             except (ValueError, TypeError):
-                logger.error(f"Non-numeric coordinates: bUE {bue_1}: {c1}, bUE {bue_2}: {c2}")
+                logger.error(
+                    f"Non-numeric coordinates: bUE {self.connected_bues[bue_1]}: {c1}, bUE {self.connected_bues[bue_2]}: {c2}"
+                )
                 return None
 
             # Check if coordinates are within valid ranges
             if not (-90 <= lat1 <= 90) or not (-180 <= lon1 <= 180):
-                logger.error(f"Invalid latitude/longitude for bUE {bue_1}: lat={lat1}, lon={lon1}")
+                logger.error(f"Invalid latitude/longitude for bUE {self.connected_bues[bue_1]}: lat={lat1}, lon={lon1}")
                 return None
 
             if not (-90 <= lat2 <= 90) or not (-180 <= lon2 <= 180):
-                logger.error(f"Invalid latitude/longitude for bUE {bue_2}: lat={lat2}, lon={lon2}")
+                logger.error(f"Invalid latitude/longitude for bUE {self.connected_bues[bue_2]}: lat={lat2}, lon={lon2}")
                 return None
 
             # Check if coordinates are not empty/zero (optional - depends on your use case)
             if (lat1 == 0 and lon1 == 0) or (lat2 == 0 and lon2 == 0):
-                logger.warning(f"Zero coordinates detected: bUE {bue_1}: {c1}, bUE {bue_2}: {c2}")
+                logger.warning(f"Zero coordinates detected: bUE {self.connected_bues[bue_1]}: {c1}, bUE {bue_2}: {c2}")
 
-            logger.info(f"Calculating distance between bUE {bue_1} at ({lat1}, {lon1}) and bUE {bue_2} at ({lat2}, {lon2})")
+            logger.info(
+                f"Calculating distance between bUE {self.connected_bues[bue_1]} at ({lat1}, {lon1}) and bUE {self.connected_bues[bue_2]} at ({lat2}, {lon2})"
+            )
 
             return distance.great_circle((lat1, lon1), (lat2, lon2)).meters
 
@@ -306,10 +310,10 @@ class Base_Station_Main:
                 filter=lambda record, bue_id=bue_id: record["extra"].get("bue_id") == bue_id,
             )
 
-            logger.info(f"Created/resumed log file for bUE {bue_id}: {path}")
+            logger.info(f"Created/resumed log file for bUE {self.connected_bues[bue_id]}: {path}")
 
         except Exception as e:
-            logger.error(f"Failed to create log file for bUE {bue_id}: {e}")
+            logger.error(f"Failed to create log file for bUE {self.connected_bues[bue_id]}: {e}")
 
     def base_station_tick(self, loop_dur=0.01):
 
