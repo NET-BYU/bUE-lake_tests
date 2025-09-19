@@ -197,7 +197,7 @@ class bUE_Main:
                     self.flag_ota_cancel_test.set()
 
                 elif msg_type == "RELOAD":
-                    self.flat_ota_reload.set()
+                    self.flag_ota_reload.set()
 
                 elif msg_type == "RESTART":
                     self.flag_ota_restart.set()
@@ -236,11 +236,11 @@ class bUE_Main:
             logger.info(f"ota_connect_req: OTA device is connected to network with base station {self.ota_base_station_id}")
 
             # Send the ACK
-            self.ota.send_ota_message(self.ota_base_station_id, "ACK")
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "ACK"))
             return
         
         # If flag not set, send another REQ message
-        self.ota.send_ota_message(BROADCAST_OTA_ID, "REQ")
+        self.ota_outgoing_queue.put((BROADCAST_OTA_ID, "REQ"))
             
     
     def ota_idle_ping(self):
@@ -250,7 +250,7 @@ class bUE_Main:
 
         lat, long = self.gps_handler()
 
-        self.ota.send_ota_message(self.ota_base_station_id, f"PING,{lat},{long}")  # test ping for now
+        self.ota_outgoing_queue.put((self.ota_base_station_id, f"PING,{lat},{long}"))  # test ping for now
         logger.info(f"Sent a PING with position lat: {lat} lon: {long}")
 
         # Check to see if we are getting ping responses
@@ -268,19 +268,18 @@ class bUE_Main:
 
     def ota_send_update(self):
         lat, long = self.gps_handler()
-        # self.ota.send_ota_message(self.ota_base_station_id, f"UPD:{lat},{long}")
         logger.info(f"Sent UPD to {self.ota_base_station_id}")
 
         with self.test_output_lock:
             if self.test_output_buffer:
                 for line in self.test_output_buffer:
-                    self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
+                    self.ota_outgoing_queue.put((self.ota_base_station_id, f"UPD:,{lat},{long},{line}"))
                     logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
                     time.sleep(0.4)  # Sleep so UART does not get overwhelmed
                 self.test_output_buffer.clear()
 
             else:  # If there is no message send it blank
-                self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
+                self.ota_outgoing_queue.put((self.ota_base_station_id, f"UPD:,{lat},{long},"))
                 logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output")
 
     def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
@@ -328,7 +327,7 @@ class bUE_Main:
         return "", ""
 
 
-    def check_for_cancel(self):
+    def check_for_test_interrupt(self):
         """
         Check periodically to see if the test if CANCELLED, if the service needs to RELOAD, 
         or if the system needs to RESTART
@@ -444,28 +443,51 @@ class bUE_Main:
             if self.cur_st == State.INIT:
                 # Setup should all be complete, immediately move to the CONNECT_OTA state
                 counter_connect_ota = 0
+
+                # Reset the flags that are used in the connect state
+                self.flag_ota_connected.clear()
+
                 self.nxt_st = State.CONNECT_OTA
             #
             elif self.cur_st == State.CONNECT_OTA:
                 # Wait until the OTA device is connected to the OTA network
                 if self.status_ota_connected:
                     counter_idle_ping = 0
+
+                    # Reset the flags used in idle
+                    self.flag_ota_pingr.clear()
+                    self.flag_ota_start_testing.clear()
+
                     self.nxt_st = State.IDLE
             #
             elif self.cur_st == State.IDLE:
                 # If we lost connection we will go back to the connecting state
                 if not self.status_ota_connected:
                     counter_connect_ota = 0
+
+                    # Reset the flags that are used in the connect state
+                    self.flag_ota_connected.clear()
+
                     self.nxt_st = State.CONNECT_OTA
                 # If we receivied a TEST message from the base station, we switch to UTW_TEST state
                 elif self.is_testing:
                     counter_idle_ping = 0
+
+                    # Reset the flags used in testing
+                    self.flag_ota_cancel_test.clear()
+                    self.flag_ota_reload.clear()
+                    self.flag_ota_restart.clear()
+                    
                     self.nxt_st = State.UTW_TEST
             #
             elif self.cur_st == State.UTW_TEST:
                 # If we lost connection we will go straight to the connecting state
                 if not self.status_ota_connected:
                     counter_connect_ota = 0
+
+                    # Reset the flags that are used in the connect state
+                    self.flag_ota_connected.clear()
+
                     self.nxt_st = State.CONNECT_OTA
                     # TODO: end the test in this instance
                 # Once test is complete/terminated, return to the IDLE state
@@ -502,7 +524,7 @@ class bUE_Main:
                 # Do necessary tasks while running a test every UTW_UPD_OTA_INTERVAL seconds
                 if counter_uta_update % interval_uta_update == 0:
                     self.ota_task_queue.put(self.ota_send_update)
-                    self.ota_task_queue.put(self.check_for_cancel)
+                    self.ota_task_queue.put(self.check_for_test_interrupt)
             #
             else:
                 logger.error(f"tick: Invalid state action {self.cur_st.name}")
