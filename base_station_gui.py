@@ -947,6 +947,7 @@ class TestDialog:
             "gpstest2",
             "../osu_testing/run_tx",
             "../osu_testing/run_rx",
+            "../osu_testing/rx_12_20",
         ]
 
         # Selected bUEs and their configurations
@@ -1109,9 +1110,9 @@ class TestDialog:
             bue_frame = ttk.LabelFrame(self.scrollable_frame, text=f"Configure {bue_name}", padding="10")
             bue_frame.pack(fill=tk.X, padx=5, pady=5)
 
-            # Test file selection
+            # Test file selection row
             file_frame = ttk.Frame(bue_frame)
-            file_frame.pack(fill=tk.X, pady=5)
+            file_frame.pack(fill=tk.X, pady=(0, 5))
 
             ttk.Label(file_frame, text="Test File:", width=12).pack(side=tk.LEFT)
             file_var = tk.StringVar(value=self.test_files[0])
@@ -1120,37 +1121,87 @@ class TestDialog:
                 textvariable=file_var,
                 values=self.test_files,
                 state="readonly",
-                width=15,
+                width=20,
             )
-            file_combo.pack(side=tk.LEFT, padx=(5, 10))
+            file_combo.pack(side=tk.LEFT, padx=(5, 0))
 
-            sf = [6, 7, 8, 9]
+            # Message field (always visible)
+            msg_frame = ttk.Frame(bue_frame)
+            msg_frame.pack(fill=tk.X, pady=(0, 5))
 
-            # Parameters
-            ttk.Label(file_frame, text="Spreading Factor:", width=14).pack(side=tk.LEFT)
-            sf_var = tk.IntVar(value=8)
-            sf_entry = ttk.Combobox(file_frame, textvariable=sf_var, values=sf, state="readonly", width=5)
-            sf_entry.pack(side=tk.LEFT, padx=(0, 0))
-
-            ttk.Label(file_frame, text="Message:", width=8, padding=4).pack(side=tk.LEFT)
+            ttk.Label(msg_frame, text="Message:", width=12).pack(side=tk.LEFT)
             msg_var = tk.StringVar()
-            msg_entry = ttk.Entry(file_frame, textvariable=msg_var, width=15)
-            msg_entry.pack(side=tk.LEFT, padx=(0, 0))
+            msg_entry = ttk.Entry(msg_frame, textvariable=msg_var, width=20)
+            msg_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Conditional parameters frame for run_tx/run_rx only
+            params_frame = ttk.Frame(bue_frame)
+
+            sf = [5, 6, 7, 8, 9, 10, 11, 12]
+
+            # Create all the conditional widgets but don't pack them yet
+            sf_var = tk.IntVar(value=8)
+            bw_var = tk.StringVar(value="6000")  # Default bandwidth
+            freq_var = tk.StringVar(value="12000")  # Default center frequency
+            period_var = tk.StringVar(value="3000")  # Default period
+
+            # Row 1: Spreading Factor and Bandwidth
+            row1_frame = ttk.Frame(params_frame)
+            ttk.Label(row1_frame, text="Spreading Factor:", width=16).pack(side=tk.LEFT)
+            sf_entry = ttk.Combobox(row1_frame, textvariable=sf_var, values=sf, state="readonly", width=8)
+            sf_entry.pack(side=tk.LEFT, padx=(5, 15))
+
+            ttk.Label(row1_frame, text="Bandwidth:", width=12).pack(side=tk.LEFT)
+            bw_entry = ttk.Entry(row1_frame, textvariable=bw_var, width=10)
+            bw_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Row 2: Center Frequency and Period
+            row2_frame = ttk.Frame(params_frame)
+            ttk.Label(row2_frame, text="Center Frequency:", width=16).pack(side=tk.LEFT)
+            freq_entry = ttk.Entry(row2_frame, textvariable=freq_var, width=12)
+            freq_entry.pack(side=tk.LEFT, padx=(5, 15))
+
+            ttk.Label(row2_frame, text="Period:", width=12).pack(side=tk.LEFT)
+            period_entry = ttk.Entry(row2_frame, textvariable=period_var, width=10)
+            period_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Validation function for integer-only fields
+            def validate_integer(char):
+                return char.isdigit()
+
+            vcmd = (self.dialog.register(validate_integer), "%S")
+            bw_entry.config(validate="key", validatecommand=vcmd)
+            freq_entry.config(validate="key", validatecommand=vcmd)
+            period_entry.config(validate="key", validatecommand=vcmd)
+
+            def update_params_visibility(*args, fvar=file_var, pframe=params_frame, r1frame=row1_frame, r2frame=row2_frame):
+                selected_file = fvar.get()
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    pframe.pack(fill=tk.X, pady=(5, 0))
+                    r1frame.pack(fill=tk.X, pady=(0, 5))
+                    r2frame.pack(fill=tk.X, pady=(0, 5))
+                else:
+                    pframe.pack_forget()
+
+            # Bind file selection changes to update visibility
+            file_var.trace("w", update_params_visibility)
+            # Initial visibility check
+            update_params_visibility()
 
             # Add placeholder functionality
             placeholder_text = "No spaces"
             msg_entry.insert(0, placeholder_text)
             msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
 
-            def on_focus_in(event):
-                if msg_var.get() == placeholder_text:
-                    msg_entry.delete(0, tk.END)
-                    msg_entry.config(foreground="black", font=("TkDefaultFont", 10, "normal"))
+            def on_focus_in(event, entry=msg_entry, var=msg_var, placeholder=placeholder_text):
+                if var.get() == placeholder:
+                    entry.delete(0, tk.END)
+                    entry.config(foreground="black", font=("TkDefaultFont", 10, "normal"))
 
-            def on_focus_out(event):
-                if not msg_var.get():
-                    msg_entry.insert(0, placeholder_text)
-                    msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
+            def on_focus_out(event, entry=msg_entry, var=msg_var, placeholder=placeholder_text):
+                if not var.get():
+                    entry.insert(0, placeholder)
+                    entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
 
             msg_entry.bind("<FocusIn>", on_focus_in)
             msg_entry.bind("<FocusOut>", on_focus_out)
@@ -1159,17 +1210,25 @@ class TestDialog:
             self.config_widgets[bue_id] = {
                 "file_var": file_var,
                 "sf_var": sf_var,
+                "bw_var": bw_var,
+                "freq_var": freq_var,
+                "period_var": period_var,
+                "msg_var": msg_var,
                 "file_combo": file_combo,
                 "sf_entry": sf_entry,
-                "msg_var": msg_var,
+                "bw_entry": bw_entry,
+                "freq_entry": freq_entry,
+                "period_entry": period_entry,
                 "msg_entry": msg_entry,
             }
 
             # Bind changes to enable run button
             file_var.trace("w", self.check_ready_to_run)
             sf_var.trace("w", self.check_ready_to_run)
+            bw_var.trace("w", self.check_ready_to_run)
+            freq_var.trace("w", self.check_ready_to_run)
+            period_var.trace("w", self.check_ready_to_run)
             msg_var.trace("w", self.check_ready_to_run)
-
         # Enable run button if we have configurations
         self.check_ready_to_run()
 
@@ -1209,11 +1268,24 @@ class TestDialog:
         for bue_id in self.selected_bues:
             if bue_id in self.config_widgets:
                 widgets = self.config_widgets[bue_id]
-                self.bue_configs[bue_id] = {
+                config = {
                     "file": widgets["file_var"].get(),
-                    "sf": widgets["sf_var"].get(),
                     "msg": widgets["msg_var"].get(),
                 }
+
+                # Add run_tx/run_rx specific parameters if applicable
+                selected_file = widgets["file_var"].get()
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    config.update(
+                        {
+                            "sf": widgets["sf_var"].get(),
+                            "bw": widgets["bw_var"].get(),
+                            "freq": widgets["freq_var"].get(),
+                            "period": widgets["period_var"].get(),
+                        }
+                    )
+
+                self.bue_configs[bue_id] = config
 
         # Calculate start time using delay - use CURRENT time for actual execution
         try:
@@ -1227,7 +1299,10 @@ class TestDialog:
 
             # Send test commands
             for bue_id, config in self.bue_configs.items():
-                command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    command = f"TEST,{config['file']},{unix_timestamp},-s {config['sf']} -m {config["msg"]} -c {config['freq']} -b {config["bw"]} -p {config["period"]}"
+                else:
+                    command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
                 self.base_station.ota.send_ota_message(bue_id, command)
                 time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
