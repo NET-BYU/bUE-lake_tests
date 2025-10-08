@@ -947,7 +947,7 @@ class TestDialog:
             "gpstest2",
             "../osu_testing/run_tx",
             "../osu_testing/run_rx",
-            "../osu_testing/rx_12_20",
+            "../osu_testing/run_rx_12_20",
         ]
 
         # Selected bUEs and their configurations
