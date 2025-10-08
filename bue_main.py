@@ -331,6 +331,9 @@ class bUE_Main:
                 start_time = int(parts[2])
                 parameters = parts[3].split(" ")
 
+                if parameters == [""]:
+                    parameters = None
+
                 self.is_testing = True
                 self.cancel_test = False
                 self.test_output_buffer = []
