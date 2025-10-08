@@ -331,9 +331,6 @@ class bUE_Main:
                 start_time = int(parts[2])
                 parameters = parts[3].split(" ")
 
-                if parameters == [""]:
-                    parameters = None
-
                 self.is_testing = True
                 self.cancel_test = False
                 self.test_output_buffer = []
@@ -359,17 +356,33 @@ class bUE_Main:
 
                 print(["python3", f"{file}.py"] + parameters)
 
-                process = subprocess.Popen(
-                    ["python3", f"{file}.py"] + parameters,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    stdin=subprocess.PIPE,  # Needed to send keystrokes
-                    bufsize=1,  # Line-buffered
-                    universal_newlines=True,  # Text mode, also enables line buffering
-                    text=True,  # decode bytes to str
-                    encoding="utf-8",
-                    errors="replace",
-                )
+                if parameters == [""]:
+                    parameters = None
+
+                if parameters:
+                    process = subprocess.Popen(
+                        ["python3", f"{file}.py"] + parameters,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        stdin=subprocess.PIPE,  # Needed to send keystrokes
+                        bufsize=1,  # Line-buffered
+                        universal_newlines=True,  # Text mode, also enables line buffering
+                        text=True,  # decode bytes to str
+                        encoding="utf-8",
+                        errors="replace",
+                    )
+                else:
+                    process = subprocess.Popen(
+                        ["python3", f"{file}.py"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        stdin=subprocess.PIPE,  # Needed to send keystrokes
+                        bufsize=1,  # Line-buffered
+                        universal_newlines=True,  # Text mode, also enables line buffering
+                        text=True,  # decode bytes to str
+                        encoding="utf-8",
+                        errors="replace",
+                    )
 
                 logger.info(f"Started test script: {file}.py with parameters {parameters}")
 
