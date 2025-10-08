@@ -1302,7 +1302,7 @@ class TestDialog:
                 if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
                     command = f"TEST,{config['file']},{unix_timestamp},-s {config['sf']} -m {config["msg"]} -c {config['freq']} -b {config["bw"]} -p {config["period"]}"
                 else:
-                    command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
+                    command = f"TEST,{config['file']},{unix_timestamp},"
                 self.base_station.ota.send_ota_message(bue_id, command)
                 time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
