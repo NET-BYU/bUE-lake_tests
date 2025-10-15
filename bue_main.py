@@ -420,10 +420,10 @@ class bUE_Main:
                         clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
                         logger.info(clean_line)
                         with self.test_output_lock:
-                            if "rx msg:" in clean_line:
+                            if " rx_" in clean_line:
                                 self.test_output_buffer.append(f"STDOUT: {clean_line}")
-                            elif "CRC invalid" in clean_line:
-                                self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                            # elif "CRC invalid" in clean_line:
+                            #     self.test_output_buffer.append(f"STDOUT: {clean_line}")
                     except queue.Empty:
                         pass
 
