@@ -86,7 +86,7 @@ if MODULES_AVAILABLE:
                 time.sleep(2)
 
                 # Should now be connected and in IDLE state
-                assert bue.ota_connected
+                assert bue.status_ota_connected
                 assert bue.ota_base_station_id == DeviceIds.BASE_STATION
                 assert bue.cur_st == State.IDLE
 
@@ -114,7 +114,7 @@ if MODULES_AVAILABLE:
                 mock_ota.add_incoming_message(con_message)
                 time.sleep(2)
 
-                assert bue.ota_connected
+                assert bue.status_ota_connected
                 initial_timeout = bue.ota_timeout
 
                 # Send PING but don't respond with PINGR (simulate timeout)
@@ -134,7 +134,7 @@ if MODULES_AVAILABLE:
                 time.sleep(11)
 
                 # Should transition back to CONNECT_OTA
-                assert not bue.ota_connected
+                assert not bue.status_ota_connected
                 assert bue.cur_st == State.CONNECT_OTA
 
                 bue.__del__()
@@ -397,7 +397,7 @@ if MODULES_AVAILABLE:
                 bue.tick_enabled = True
 
                 # Setup connected state
-                bue.ota_connected = True
+                bue.status_ota_connected = True
                 bue.ota_base_station_id = DeviceIds.BASE_STATION
                 bue.cur_st = State.IDLE
 
