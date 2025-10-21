@@ -576,7 +576,7 @@ if __name__ == "__main__":
     logger.info(f"This marks the start of the bUE service at {start_time}")
 
     try:
-        bue = bUE_Main(yaml_str="config.yaml")
+        bue = bUE_Main(yaml_str="bue_config.yaml")
 
         # Any other setup code can go here
         time.sleep(2) # Allow some time for threads to initialize
