@@ -1,4 +1,5 @@
 # Standard library imports
+import os
 import queue
 import sys
 import select
@@ -54,13 +55,20 @@ class bUE_Main:
             try:
                 self.ota = Ota(
                     self.yaml_data["OTA_PORT"],
-                    self.yaml_data["OTA_BAUDRATE"],
-                    self.yaml_data["OTA_ID"],
+                    self.yaml_data["OTA_BAUDRATE"]
                 )
                 break
             except Exception as e:
                 logger.error(f"Failed to initialize OTA module: {e}")
                 time.sleep(2)
+
+        # Fetch the Reyax ID from the OTA module
+        time.sleep(0.1)
+        self.reyax_id = self.ota.fetch_id()
+        logger.info(f"__init__: OTA module initialized with Reyax ID {self.reyax_id}")
+
+        # Fetch the device hostname
+        self.hostname = os.uname().nodename
 
         # Build the state machine - states
         self.cur_st, self.nxt_st = State.INIT, State.INIT
@@ -240,7 +248,7 @@ class bUE_Main:
             return
         
         # If flag not set, send another REQ message
-        self.ota_outgoing_queue.put((BROADCAST_OTA_ID, "REQ"))
+        self.ota_outgoing_queue.put((BROADCAST_OTA_ID, f"REQ:{self.hostname},{self.reyax_id}"))
             
     
     def ota_idle_ping(self):
