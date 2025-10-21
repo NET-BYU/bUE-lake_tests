@@ -38,7 +38,7 @@ logger.add("logs/base_station.log", rotation="10 MB")
 # The system will recommend disconnecting after missing TIMEOUT PINGs.
 # Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
 """
-from constants import TIMEOUT, bUEs
+from constants import TIMEOUT
 
 
 # Internal imports
@@ -63,9 +63,14 @@ class Base_Station_Main:
         self.stdout_history = deque()
 
         self.ota = Ota(
-            self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.yaml_data["OTA_ID"], self.stdout_history
+            self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.stdout_history
         )
-        logger.info(f"[DEBUG] OTA ID is set to: {self.ota.id}")
+
+        # Fetch the Reyax ID from the OTA module
+        time.sleep(0.1)
+        self.reyax_id = self.ota.fetch_id()
+
+        logger.info(f"[DEBUG] OTA ID is set to: {self.reyax_id}")
 
         self.EXIT = False
 
@@ -179,12 +184,17 @@ class Base_Station_Main:
                 if message_body.startswith("REQ"):
                     logger.debug("Sending a CON")
                     current_timestamp = int(time.time())
-                    bue_name = message_body[4:]
+                    _, payload = message_body.split(":", 1)  # Split on first colon
+                    bue_name, bue_id_check = payload.split(",", 1)  # Split hostname and bUE_id
 
-                    self.ota.send_ota_message(bue_id, f"CON:{self.ota.id}:{current_timestamp}")
+                    if int(bue_id_check) != bue_id:
+                        logger.error(f"message_listener: Mismatched bUE ID in REQ message. Expected {bue_id}, got {bue_id_check}")
+                        continue  # Skip to the next message
+
+                    self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}:{current_timestamp}")
                     self.bue_timeout_tracker[bue_name] = TIMEOUT
                     if not bue_id in self.connected_bues:
-                        logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}")
+                        logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}:{bue_name}")
                         self.connected_bues[bue_id] = bue_name
                     else:
                         logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")

@@ -16,7 +16,7 @@ from constants import bUEs
 
 
 class Ota:
-    def __init__(self, port, baudrate, id, stdout_history=None):
+    def __init__(self, port, baudrate, stdout_history=None):
 
         # Serial port configuration
         while True:
@@ -26,8 +26,6 @@ class Ota:
             except serial.SerialException as e:
                 print(f"Failed to open serial port: {e}")
                 time.sleep(2)
-
-        self.id = id
 
         self.stdout_history = stdout_history
 
@@ -155,6 +153,24 @@ class Ota:
         except queue.Empty:
             pass
         return messages
+    
+    def fetch_id(self):
+        """
+        Fetch the device ID from the Reyax module.
+        """
+        try:
+            self.ser.write(b'AT+ADDRESS=?\r\n')
+            time.sleep(0.1)  # Wait for response
+            response = self.ser.readlines()
+            for line in response:
+                decoded_line = line.decode('utf-8').strip()
+                if decoded_line.startswith('+ADDRESS='):
+                    addr = decoded_line.split('=')[1]
+                    self.id = int(addr)
+                    return self.id
+        except Exception as e:
+            print(f"Failed to fetch ID: {e}")
+        return None
 
     def __del__(self):
         try:
