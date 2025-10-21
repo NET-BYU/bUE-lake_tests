@@ -14,9 +14,9 @@ In the example for each of the messages, assume the bUE has an OTA id of 5, and 
 
 REQ:
     Direction: bUE -> base
-    Meaning: The bUE is requesting that it join the OTA network and shares its name. It is broadcast over the ota, so it sends to address 0
+    Meaning: The bUE is requesting that it join the OTA network and shares its hostname and Reyax Id. It is broadcast over the ota, so it sends to address 0
     Body: None
-    Example: (bue_main.py) self.ota.send_ota_message(0, "REQ:Perry")
+    Example: (bue_main.py) self.ota.send_ota_message(0, "REQ:<hostname>,<bUE_id>")
     Response: The base station will respond with a CON message
 
 CON:
