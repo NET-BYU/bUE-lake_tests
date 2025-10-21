@@ -326,6 +326,242 @@ class bUE_Main:
 
         return "", ""
 
+    # This function handles operations that happen while a bUE is in the TESTING state
+    def test_handler(self, input):  # Input Format: TEST,<file>,<wait_time>,<parameters>
+        if not ";" in input:  ## TODO: Perform other checks
+            try:
+                self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
+
+                parts = input.split(",", maxsplit=3)
+                print(parts)
+                if len(parts) < 4:
+                    raise ValueError(f"Invalid input format: {input}")
+                file = parts[1]
+                start_time = int(parts[2])
+                parameters = parts[3].split(" ")
+
+                self.is_testing = True
+                self.cancel_test = False
+                self.test_output_buffer = []
+
+                current_time = int(time.time())
+                if start_time > current_time:
+                    wait_duration = start_time - current_time
+                    logger.info(f"Waiting {wait_duration} seconds until start time {start_time}")
+
+                    # Wait in small increments to allow for cancellation
+                    while int(time.time()) < start_time and not self.cancel_test:
+                        time.sleep(0.001)
+
+                    if self.cancel_test:
+                        logger.info("Test cancelled during wait period")
+                        self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
+                        return
+
+                logger.info(f"Starting test at scheduled time: {start_time}")
+
+                with self.test_output_lock:
+                    self.test_output_buffer.clear()
+
+                print(["python3", f"{file}.py"] + parameters)
+
+                if parameters == [""]:
+                    parameters = None
+
+                if parameters:
+                    process = subprocess.Popen(
+                        ["python3", f"{file}.py"] + parameters,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        stdin=subprocess.PIPE,  # Needed to send keystrokes
+                        bufsize=1,  # Line-buffered
+                        universal_newlines=True,  # Text mode, also enables line buffering
+                        text=True,  # decode bytes to str
+                        encoding="utf-8",
+                        errors="replace",
+                    )
+                else:
+                    process = subprocess.Popen(
+                        ["python3", f"{file}.py"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        stdin=subprocess.PIPE,  # Needed to send keystrokes
+                        bufsize=1,  # Line-buffered
+                        universal_newlines=True,  # Text mode, also enables line buffering
+                        text=True,  # decode bytes to str
+                        encoding="utf-8",
+                        errors="replace",
+                    )
+
+                logger.info(f"Started test script: {file}.py with parameters {parameters}")
+
+                def reader_thread(pipe, output_queue):
+                    for line in iter(pipe.readline, ""):
+                        output_queue.put(line)
+                    pipe.close()
+
+                stdout_queue = queue.Queue()
+                stderr_queue = queue.Queue()
+
+                # Threads that will be looking in the stdout and stderr termainals for messages while
+                # the TEST process runs
+                threading.Thread(
+                    target=reader_thread,
+                    args=(process.stdout, stdout_queue),
+                    daemon=True,
+                ).start()
+                threading.Thread(
+                    target=reader_thread,
+                    args=(process.stderr, stderr_queue),
+                    daemon=True,
+                ).start()
+
+                """
+                # Process will go to completion unless unless the system receives a CANC message from the base station.
+                # The CANC message is received and processed by the utw thread
+
+                # We also collect all the terminal outputs from the script so we can send them back to the base station
+                """
+                while process.poll() is None:  # poll() returns None if process hasn't terminated
+                    # Get all normal terminal outputs
+                    try:
+                        stdout_line = stdout_queue.get_nowait()
+                        clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
+                        logger.info(clean_line)
+                        with self.test_output_lock:
+                            if " rx_" in clean_line:
+                                self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                            # elif "CRC invalid" in clean_line:
+                            #     self.test_output_buffer.append(f"STDOUT: {clean_line}")
+                    except queue.Empty:
+                        pass
+
+                    try:
+                        stderr_line = stderr_queue.get_nowait()
+                        clean_line = f"[{file}.py STDERR] {stderr_line.strip()}"
+                        logger.error(clean_line)
+                        with self.test_output_lock:
+                            self.test_output_buffer.append(f"STDERR: {clean_line}")
+                    except queue.Empty:
+                        pass
+
+                    if self.cancel_test:
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        print("TRYING TO CANCEL")
+                        logger.info(f"Sending termination to: {file}.py")
+                        try:
+                            process.send_signal(signal.SIGINT)
+                        except Exception as e:
+                            logger.error(f"Failed to terminate: {e}")
+                        break
+                    time.sleep(0.1)
+
+                """
+                Leave this code in! If we want all the output messages from the bUE uncomment it. Otherwise,
+                we will only get the output messages before it ends/receives a CANC
+                """
+                # while not stdout_queue.empty():
+                #     line = stdout_queue.get()
+                #     clean_line = f"[{file}.py STDOUT] {line.strip()}"
+                #     logger.info(clean_line)
+                #     with self.test_output_lock:
+                #         if "rx msg:" in clean_line:
+                #             self.test_output_buffer.append(f"STDOUT: {clean_line}")
+
+                while not stderr_queue.empty():
+                    line = stderr_queue.get()
+                    clean_line = f"[{file}.py STDERR] {line.strip()}"
+                    logger.error(clean_line)
+                    with self.test_output_lock:
+                        self.test_output_buffer.append(f"STDERR: {clean_line}")
+
+                try:
+                    exit_code = process.wait()
+                except Exception as e:
+                    logger.error(f"Error waiting for subprocess {file}.py: {e}")
+                    exit_code = -1
+
+                # If a test is canceled, a CANCD message is sent in responses letting the base station know we have successfully termianted the test
+                if self.cancel_test:
+                    self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
+                elif exit_code == 0:
+                    # Any extra messages that have not already been sent to the base station are sent
+                    with self.test_output_lock:
+                        self.ota_send_upd()
+
+                    logger.info(f"{file}.py completed successfully.")
+                    self.ota.send_ota_message(self.ota_base_station_id, "DONE")
+                else:
+                    logger.error(f"{file}.py exited with code {exit_code}")
+                    self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
+
+            except Exception as e:
+                logger.info(f"TEST could not be run: {e}")
+                self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
+            finally:
+                self.is_testing = False
+                self.cancel_test = False
+
+    ### UTW MODULE METHODS ###
+
+    def utw_task_queue_handler(self):
+        while not self.EXIT:
+            try:
+                task = self.utw_task_queue.get(timeout=0.1)  # Get a task
+                task()  # Execute the function
+                self.utw_task_queue.task_done()
+            except queue.Empty:
+                pass
+
+    # Instead of PINGs, bUEs send UPDs while in UTW_TEST state so the base still knows there is a connection
+    def ota_send_upd(self):
+        lat, long = self.gps_handler()
+        # self.ota.send_ota_message(self.ota_base_station_id, f"UPD:{lat},{long}")
+        logger.info(f"Sent UPD to {self.ota_base_station_id}")
+
+        with self.test_output_lock:
+            if self.test_output_buffer:
+                for line in self.test_output_buffer:
+                    self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
+                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
+                    time.sleep(0.4)  # Sleep so UART does not get overwhelmed
+                self.test_output_buffer.clear()
+
+            else:  # If there is no message send it blank
+                self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
+                logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output")
+
+    """
+    # This function checks for incoming messages while in the system is the UTW_TEST state.
+    # The messages received in this state should only be CANC. 
+    """
+
+    def check_for_cancel(self):
+        try:
+            new_messages = self.ota.get_new_messages()
+        except Exception as e:
+            logger.error(f"Failed to get OTA messages: {e}")
+            return
+
+        for message in new_messages:
+            parts = message.split(",")
+
+            if parts[1].startswith("CANC"):
+                logger.info(f"Received a CANC message")
+                self.cancel_test = True
+            elif parts[1].startswith("RELOAD"):
+                logger.info(f"Received a RELOAD message")
+                self.reload_service()
+            elif parts[1].startswith("RESTART"):
+                logger.info(f"Received a RESTART message")
+                self.restart_system()
+            else:
+                logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
+
+    """
+    Restarts the service entirely
+    """
 
     def check_for_test_interrupt(self):
         """

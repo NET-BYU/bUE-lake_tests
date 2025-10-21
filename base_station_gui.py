@@ -32,6 +32,7 @@ import math
 try:
     import tkintermapview
     from PIL import Image, ImageDraw, ImageTk
+
     MAP_VIEW_AVAILABLE = True
     print("TkinterMapView is available - using interactive map")
 except ImportError:
@@ -56,7 +57,7 @@ class BaseStationGUI:
         # Custom markers for the map
         self.custom_markers = {}  # {marker_id: {'name': str, 'lat': float, 'lon': float, 'paired_bue': int}}
         self.marker_counter = 0
-        
+
         # Map configuration
         self.use_interactive_map = MAP_VIEW_AVAILABLE
         self.map_widget = None  # Will hold TkinterMapView or canvas
@@ -74,16 +75,16 @@ class BaseStationGUI:
         """Create a custom circular marker icon similar to canvas map"""
         if not MAP_VIEW_AVAILABLE:
             return None
-            
+
         try:
             # Create image with transparent background
-            img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+            img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
             draw = ImageDraw.Draw(img)
-            
+
             # Draw outer circle (border)
             border_color = "darkblue" if color in ["blue", "green"] else "darkred"
-            draw.ellipse([0, 0, size-1, size-1], fill=color, outline=border_color, width=2)
-            
+            draw.ellipse([0, 0, size - 1, size - 1], fill=color, outline=border_color, width=2)
+
             # Convert to PhotoImage for tkinter
             return ImageTk.PhotoImage(img)
         except Exception as e:
@@ -184,27 +185,23 @@ class BaseStationGUI:
 
         ttk.Button(map_control_frame, text="Add Custom Marker", command=self.add_custom_marker).pack(fill=tk.X, pady=2)
         ttk.Button(map_control_frame, text="Manage Markers", command=self.manage_markers).pack(fill=tk.X, pady=2)
-        
+
         # Map type toggle (only show if both options are available)
         if MAP_VIEW_AVAILABLE:
-            self.map_toggle_btn = ttk.Button(
-                map_control_frame, 
-                text="Switch to Simple Map", 
-                command=self.toggle_map_type
-            )
+            self.map_toggle_btn = ttk.Button(map_control_frame, text="Switch to Simple Map", command=self.toggle_map_type)
             self.map_toggle_btn.pack(fill=tk.X, pady=2)
 
     def setup_map_view(self, parent):
         """Setup the map view with bUE locations and custom markers"""
         # Create container for map
         self.map_container = parent
-        
+
         # Set up the appropriate map type
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             self.setup_interactive_map()
         else:
             self.setup_canvas_map()
-        
+
         # Map info frame (always present)
         map_info_frame = ttk.Frame(parent)
         map_info_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -213,7 +210,7 @@ class BaseStationGUI:
         ttk.Label(map_info_frame, text="🔵 bUE", foreground="blue").pack(side=tk.LEFT, padx=5)
         ttk.Label(map_info_frame, text="📍 Marker", foreground="red").pack(side=tk.LEFT, padx=5)
         ttk.Label(map_info_frame, text="🟢 Close", foreground="green").pack(side=tk.LEFT, padx=5)
-        
+
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             ttk.Label(map_info_frame, text="| Interactive Map Active", foreground="green").pack(side=tk.LEFT, padx=5)
         else:
@@ -223,23 +220,18 @@ class BaseStationGUI:
         """Setup TkinterMapView interactive map"""
         try:
             # Create the map widget
-            self.map_widget = tkintermapview.TkinterMapView(
-                self.map_container, 
-                width=600, 
-                height=400,
-                corner_radius=0
-            )
+            self.map_widget = tkintermapview.TkinterMapView(self.map_container, width=600, height=400, corner_radius=0)
             self.map_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-            
+
             # Set a default position (you can change this to your area)
             self.map_widget.set_position(40.2518, -111.6493)  # Provo, Utah
             self.map_widget.set_zoom(10)
-            
+
             # Clear any existing markers
             self.map_markers = {}
-            
+
             print("Interactive map initialized successfully")
-            
+
         except Exception as e:
             print(f"Failed to setup interactive map: {e}")
             logger.error(f"Failed to setup interactive map: {e}")
@@ -252,7 +244,7 @@ class BaseStationGUI:
         # Create canvas map (original implementation)
         self.map_widget = tk.Canvas(self.map_container, bg="lightblue", width=600, height=400)
         self.map_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
+
         # Bind canvas events
         self.map_widget.bind("<Button-1>", self.on_map_click)
         self.map_widget.bind("<Motion>", self.on_map_hover)
@@ -262,31 +254,31 @@ class BaseStationGUI:
         if not MAP_VIEW_AVAILABLE:
             messagebox.showinfo("Map Toggle", "TkinterMapView is not available. Cannot switch map types.")
             return
-            
+
         try:
             # Store current state
             old_use_interactive = self.use_interactive_map
-            
+
             # Toggle map type
             self.use_interactive_map = not self.use_interactive_map
-            
+
             # Clear the current map widget
-            if hasattr(self, 'map_widget') and self.map_widget:
+            if hasattr(self, "map_widget") and self.map_widget:
                 self.map_widget.destroy()
-            
+
             # Create new map
             if self.use_interactive_map:
                 self.setup_interactive_map()
-                if hasattr(self, 'map_toggle_btn'):
+                if hasattr(self, "map_toggle_btn"):
                     self.map_toggle_btn.config(text="Switch to Simple Map")
             else:
                 self.setup_canvas_map()
-                if hasattr(self, 'map_toggle_btn'):
+                if hasattr(self, "map_toggle_btn"):
                     self.map_toggle_btn.config(text="Switch to Interactive Map")
-            
+
             # Update the map with current data
             self.update_map()
-            
+
             # Update info text
             for widget in self.map_container.winfo_children():
                 if isinstance(widget, ttk.Frame):
@@ -296,9 +288,11 @@ class BaseStationGUI:
                                 child.config(text="| Interactive Map Active", foreground="green")
                             else:
                                 child.config(text="| Simple Map Active", foreground="orange")
-            
-            logger.info(f"Switched from {'Interactive' if old_use_interactive else 'Simple'} to {'Interactive' if self.use_interactive_map else 'Simple'} map")
-            
+
+            logger.info(
+                f"Switched from {'Interactive' if old_use_interactive else 'Simple'} to {'Interactive' if self.use_interactive_map else 'Simple'} map"
+            )
+
         except Exception as e:
             messagebox.showerror("Map Error", f"Failed to switch map type: {e}")
             logger.error(f"Failed to toggle map type: {e}")
@@ -409,9 +403,9 @@ class BaseStationGUI:
 
     def update_map(self):
         """Update the map with bUE locations and markers"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         if self.use_interactive_map and MAP_VIEW_AVAILABLE:
             self.update_interactive_map()
         else:
@@ -419,9 +413,9 @@ class BaseStationGUI:
 
     def update_interactive_map(self):
         """Update TkinterMapView with current data"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         try:
             # Clear existing markers
             for marker_id, marker_obj in self.map_markers.items():
@@ -430,7 +424,7 @@ class BaseStationGUI:
                 except:
                     pass
             self.map_markers.clear()
-            
+
             if not self.base_station or not self.base_station.bue_coordinates:
                 return
 
@@ -438,7 +432,7 @@ class BaseStationGUI:
             current_positions = {}
             position_changed = False
             new_bues_detected = False
-            
+
             # Calculate center point for the map
             lats = []
             lons = []
@@ -449,9 +443,9 @@ class BaseStationGUI:
                     lat, lon = float(coords[0]), float(coords[1])
                     lats.append(lat)
                     lons.append(lon)
-                    
+
                     current_positions[bue_id] = (lat, lon)
-                    
+
                     # Check for new bUEs
                     if bue_id not in self.last_bue_positions:
                         new_bues_detected = True
@@ -461,7 +455,7 @@ class BaseStationGUI:
                         distance_moved = self.calculate_distance(lat, lon, old_lat, old_lon)
                         if distance_moved > 100:  # 100 meters threshold
                             position_changed = True
-                            
+
                 except (ValueError, IndexError):
                     continue
 
@@ -472,28 +466,24 @@ class BaseStationGUI:
 
             # Only auto-center/zoom if:
             # 1. This is the first time setting up the map, OR
-            # 2. New bUEs have been detected, OR  
+            # 2. New bUEs have been detected, OR
             # 3. Existing bUEs have moved significantly
-            should_auto_position = (
-                not self.map_auto_positioned or 
-                new_bues_detected or 
-                position_changed
-            )
+            should_auto_position = not self.map_auto_positioned or new_bues_detected or position_changed
 
             if should_auto_position and lats and lons:
                 # Set map center to the average of all coordinates
                 center_lat = sum(lats) / len(lats)
                 center_lon = sum(lons) / len(lons)
                 self.map_widget.set_position(center_lat, center_lon)
-                
+
                 # Auto-zoom to fit all markers with extra context
                 lat_range = max(lats) - min(lats)
                 lon_range = max(lons) - min(lons)
                 max_range = max(lat_range, lon_range)
-                
+
                 # Add padding to ensure markers aren't at the edge (25% extra space)
                 padded_range = max_range * 1.25
-                
+
                 # Determine zoom level based on coordinate range (less aggressive zooming)
                 if padded_range > 1:
                     zoom = 7  # Reduced from 8 - very wide area view
@@ -505,10 +495,10 @@ class BaseStationGUI:
                     zoom = 14  # New level - street level with good context
                 else:
                     zoom = 15  # Reduced from 17 - close but not too tight
-                    
+
                 self.map_widget.set_zoom(zoom)
                 self.map_auto_positioned = True
-                
+
                 if new_bues_detected:
                     logger.info("Auto-centered map due to new bUEs")
                 elif position_changed:
@@ -534,27 +524,24 @@ class BaseStationGUI:
 
                     # Choose marker color based on proximity
                     marker_color = "green" if is_close else "blue"
-                    
+
                     # Create custom circle icon matching canvas map style
                     circle_icon = self.create_circle_marker_icon(marker_color)
-                    
+
                     # Create marker with custom circular icon
                     if circle_icon:
                         marker = self.map_widget.set_marker(
-                            lat, lon, 
-                            text=bue_name,
-                            icon=circle_icon,
-                            font=("Arial", 10, "bold"),
-                            text_color="white"
+                            lat, lon, text=bue_name, icon=circle_icon, font=("Arial", 10, "bold"), text_color="white"
                         )
                     else:
                         # Fallback to default marker if icon creation failed
                         marker = self.map_widget.set_marker(
-                            lat, lon, 
+                            lat,
+                            lon,
                             text=bue_name,
                             marker_color_circle=marker_color,
                             marker_color_outside="darkblue",
-                            font=("Arial", 10, "bold")
+                            font=("Arial", 10, "bold"),
                         )
                     self.map_markers[f"bue_{bue_id}"] = marker
 
@@ -566,24 +553,26 @@ class BaseStationGUI:
                 try:
                     # Create custom circle icon for custom markers
                     circle_icon = self.create_circle_marker_icon("red")
-                    
+
                     # Create custom marker with circular icon
                     if circle_icon:
                         marker = self.map_widget.set_marker(
-                            marker_data["lat"], marker_data["lon"],
+                            marker_data["lat"],
+                            marker_data["lon"],
                             text=marker_data["name"],
                             icon=circle_icon,
                             font=("Arial", 10, "bold"),
-                            text_color="white"
+                            text_color="white",
                         )
                     else:
                         # Fallback to default marker if icon creation failed
                         marker = self.map_widget.set_marker(
-                            marker_data["lat"], marker_data["lon"],
+                            marker_data["lat"],
+                            marker_data["lon"],
                             text=marker_data["name"],
                             marker_color_circle="red",
                             marker_color_outside="darkred",
-                            font=("Arial", 10, "bold")
+                            font=("Arial", 10, "bold"),
                         )
                     self.map_markers[f"custom_{marker_id}"] = marker
                 except Exception as e:
@@ -594,9 +583,9 @@ class BaseStationGUI:
 
     def update_canvas_map(self):
         """Update canvas-based map (original implementation)"""
-        if not hasattr(self, 'map_widget') or not self.map_widget:
+        if not hasattr(self, "map_widget") or not self.map_widget:
             return
-            
+
         # Clear canvas
         self.map_widget.delete("all")
 
@@ -958,6 +947,7 @@ class TestDialog:
             "gpstest2",
             "../osu_testing/run_tx",
             "../osu_testing/run_rx",
+            "../osu_testing/run_rx_12_20",
         ]
 
         # Selected bUEs and their configurations
@@ -1120,9 +1110,9 @@ class TestDialog:
             bue_frame = ttk.LabelFrame(self.scrollable_frame, text=f"Configure {bue_name}", padding="10")
             bue_frame.pack(fill=tk.X, padx=5, pady=5)
 
-            # Test file selection
+            # Test file selection row
             file_frame = ttk.Frame(bue_frame)
-            file_frame.pack(fill=tk.X, pady=5)
+            file_frame.pack(fill=tk.X, pady=(0, 5))
 
             ttk.Label(file_frame, text="Test File:", width=12).pack(side=tk.LEFT)
             file_var = tk.StringVar(value=self.test_files[0])
@@ -1131,35 +1121,87 @@ class TestDialog:
                 textvariable=file_var,
                 values=self.test_files,
                 state="readonly",
-                width=15,
+                width=20,
             )
-            file_combo.pack(side=tk.LEFT, padx=(5, 10))
+            file_combo.pack(side=tk.LEFT, padx=(5, 0))
 
-            # Parameters
-            ttk.Label(file_frame, text="Spreading Factor:", width=14).pack(side=tk.LEFT)
-            sf_var = tk.StringVar()
-            sf_entry = ttk.Entry(file_frame, textvariable=sf_var, width=5)
-            sf_entry.pack(side=tk.LEFT, padx=(0, 0))
+            # Message field (always visible)
+            msg_frame = ttk.Frame(bue_frame)
+            msg_frame.pack(fill=tk.X, pady=(0, 5))
 
-            ttk.Label(file_frame, text="Message:", width=8, padding=4).pack(side=tk.LEFT)
+            ttk.Label(msg_frame, text="Message:", width=12).pack(side=tk.LEFT)
             msg_var = tk.StringVar()
-            msg_entry = ttk.Entry(file_frame, textvariable=msg_var, width=15)
-            msg_entry.pack(side=tk.LEFT, padx=(0, 0))
+            msg_entry = ttk.Entry(msg_frame, textvariable=msg_var, width=20)
+            msg_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Conditional parameters frame for run_tx/run_rx only
+            params_frame = ttk.Frame(bue_frame)
+
+            sf = [5, 6, 7, 8, 9, 10, 11, 12]
+
+            # Create all the conditional widgets but don't pack them yet
+            sf_var = tk.IntVar(value=8)
+            bw_var = tk.StringVar(value="6000")  # Default bandwidth
+            freq_var = tk.StringVar(value="12000")  # Default center frequency
+            period_var = tk.StringVar(value="3000")  # Default period
+
+            # Row 1: Spreading Factor and Bandwidth
+            row1_frame = ttk.Frame(params_frame)
+            ttk.Label(row1_frame, text="Spreading Factor:", width=16).pack(side=tk.LEFT)
+            sf_entry = ttk.Combobox(row1_frame, textvariable=sf_var, values=sf, state="readonly", width=8)
+            sf_entry.pack(side=tk.LEFT, padx=(5, 15))
+
+            ttk.Label(row1_frame, text="Bandwidth:", width=12).pack(side=tk.LEFT)
+            bw_entry = ttk.Entry(row1_frame, textvariable=bw_var, width=10)
+            bw_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Row 2: Center Frequency and Period
+            row2_frame = ttk.Frame(params_frame)
+            ttk.Label(row2_frame, text="Center Frequency:", width=16).pack(side=tk.LEFT)
+            freq_entry = ttk.Entry(row2_frame, textvariable=freq_var, width=12)
+            freq_entry.pack(side=tk.LEFT, padx=(5, 15))
+
+            ttk.Label(row2_frame, text="Period:", width=12).pack(side=tk.LEFT)
+            period_entry = ttk.Entry(row2_frame, textvariable=period_var, width=10)
+            period_entry.pack(side=tk.LEFT, padx=(5, 0))
+
+            # Validation function for integer-only fields
+            def validate_integer(char):
+                return char.isdigit()
+
+            vcmd = (self.dialog.register(validate_integer), "%S")
+            bw_entry.config(validate="key", validatecommand=vcmd)
+            freq_entry.config(validate="key", validatecommand=vcmd)
+            period_entry.config(validate="key", validatecommand=vcmd)
+
+            def update_params_visibility(*args, fvar=file_var, pframe=params_frame, r1frame=row1_frame, r2frame=row2_frame):
+                selected_file = fvar.get()
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    pframe.pack(fill=tk.X, pady=(5, 0))
+                    r1frame.pack(fill=tk.X, pady=(0, 5))
+                    r2frame.pack(fill=tk.X, pady=(0, 5))
+                else:
+                    pframe.pack_forget()
+
+            # Bind file selection changes to update visibility
+            file_var.trace("w", update_params_visibility)
+            # Initial visibility check
+            update_params_visibility()
 
             # Add placeholder functionality
             placeholder_text = "No spaces"
             msg_entry.insert(0, placeholder_text)
             msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
 
-            def on_focus_in(event):
-                if msg_var.get() == placeholder_text:
-                    msg_entry.delete(0, tk.END)
-                    msg_entry.config(foreground="black", font=("TkDefaultFont", 10, "normal"))
+            def on_focus_in(event, entry=msg_entry, var=msg_var, placeholder=placeholder_text):
+                if var.get() == placeholder:
+                    entry.delete(0, tk.END)
+                    entry.config(foreground="black", font=("TkDefaultFont", 10, "normal"))
 
-            def on_focus_out(event):
-                if not msg_var.get():
-                    msg_entry.insert(0, placeholder_text)
-                    msg_entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
+            def on_focus_out(event, entry=msg_entry, var=msg_var, placeholder=placeholder_text):
+                if not var.get():
+                    entry.insert(0, placeholder)
+                    entry.config(foreground="gray", font=("TkDefaultFont", 10, "italic"))
 
             msg_entry.bind("<FocusIn>", on_focus_in)
             msg_entry.bind("<FocusOut>", on_focus_out)
@@ -1168,17 +1210,25 @@ class TestDialog:
             self.config_widgets[bue_id] = {
                 "file_var": file_var,
                 "sf_var": sf_var,
+                "bw_var": bw_var,
+                "freq_var": freq_var,
+                "period_var": period_var,
+                "msg_var": msg_var,
                 "file_combo": file_combo,
                 "sf_entry": sf_entry,
-                "msg_var": msg_var,
+                "bw_entry": bw_entry,
+                "freq_entry": freq_entry,
+                "period_entry": period_entry,
                 "msg_entry": msg_entry,
             }
 
             # Bind changes to enable run button
             file_var.trace("w", self.check_ready_to_run)
             sf_var.trace("w", self.check_ready_to_run)
+            bw_var.trace("w", self.check_ready_to_run)
+            freq_var.trace("w", self.check_ready_to_run)
+            period_var.trace("w", self.check_ready_to_run)
             msg_var.trace("w", self.check_ready_to_run)
-
         # Enable run button if we have configurations
         self.check_ready_to_run()
 
@@ -1218,11 +1268,24 @@ class TestDialog:
         for bue_id in self.selected_bues:
             if bue_id in self.config_widgets:
                 widgets = self.config_widgets[bue_id]
-                self.bue_configs[bue_id] = {
+                config = {
                     "file": widgets["file_var"].get(),
-                    "sf": widgets["sf_var"].get(),
                     "msg": widgets["msg_var"].get(),
                 }
+
+                # Add run_tx/run_rx specific parameters if applicable
+                selected_file = widgets["file_var"].get()
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    config.update(
+                        {
+                            "sf": widgets["sf_var"].get(),
+                            "bw": widgets["bw_var"].get(),
+                            "freq": widgets["freq_var"].get(),
+                            "period": widgets["period_var"].get(),
+                        }
+                    )
+
+                self.bue_configs[bue_id] = config
 
         # Calculate start time using delay - use CURRENT time for actual execution
         try:
@@ -1236,7 +1299,10 @@ class TestDialog:
 
             # Send test commands
             for bue_id, config in self.bue_configs.items():
-                command = f"TEST,{config['file']},{unix_timestamp},{config['sf']} {config["msg"]}"
+                if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
+                    command = f"TEST,{config['file']},{unix_timestamp},-s {config['sf']} -m {config["msg"]} -c {config['freq']} -b {config["bw"]} -p {config["period"]}"
+                else:
+                    command = f"TEST,{config['file']},{unix_timestamp},"
                 self.base_station.ota.send_ota_message(bue_id, command)
                 time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
