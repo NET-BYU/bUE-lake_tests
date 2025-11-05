@@ -283,7 +283,7 @@ class bUE_Main:
                 logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
                 self.status_ota_connected = False
 
-    def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
+    def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=2): # TODO: what should max_runtime be? I had it as 10 historically
         start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
@@ -432,6 +432,8 @@ class bUE_Main:
         )
 
         self.test_stdout_thread.start()
+
+        logger.info("Test process and stdout thread have started")
 
         self.status_test_running = True
 
