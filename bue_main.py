@@ -63,8 +63,10 @@ class bUE_Main:
                 time.sleep(2)
 
         # Fetch the Reyax ID from the OTA module
-        time.sleep(0.1)
-        self.reyax_id = self.ota.fetch_id()
+        self.reyax_id = None
+        while self.reyax_id is None:
+            time.sleep(0.2)
+            self.reyax_id = self.ota.fetch_id()
         logger.info(f"__init__: OTA module initialized with Reyax ID {self.reyax_id}")
 
         # Fetch the device hostname
