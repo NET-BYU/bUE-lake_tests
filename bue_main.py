@@ -194,7 +194,7 @@ class bUE_Main:
                 src_id, msg = message.split(",", 1)
 
                 if ":" in msg:
-                    msg_type, msg_body, _ = msg.split(":", maxsplit=2)
+                    msg_type, msg_body, *_ = msg.split(":", maxsplit=2)
                 else:
                     msg_type, msg_body = msg, None
 
