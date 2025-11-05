@@ -193,8 +193,8 @@ class Base_Station_Main:
 
                     self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}:{current_timestamp}")
                     # self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}")
-                    self.bue_timeout_tracker[bue_name] = TIMEOUT
-                    if not bue_id in self.connected_bues:
+                    self.bue_timeout_tracker[bue_id] = TIMEOUT
+                    if not bue_name in self.connected_bues:
                         logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}:{bue_name}")
                         self.connected_bues[bue_id] = bue_name
                     else:

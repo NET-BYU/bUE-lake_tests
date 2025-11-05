@@ -1299,10 +1299,13 @@ class TestDialog:
 
             # Send test commands
             for bue_id, config in self.bue_configs.items():
+                selected_file = config["file"]  # ← FIX: Get file from config, not from outside loop
+
                 if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
-                    command = f"TEST,{config['file']},{unix_timestamp},-s {config['sf']} -m {config["msg"]} -c {config['freq']} -b {config["bw"]} -p {config["period"]}"
+                    command = f"TEST:{config['file']},{unix_timestamp},-s {config['sf']} -m {config['msg']} -c {config['freq']} -b {config['bw']} -p {config['period']}"
                 else:
-                    command = f"TEST,{config['file']},{unix_timestamp},"
+                    command = f"TEST:{config['file']},{unix_timestamp},"
+
                 self.base_station.ota.send_ota_message(bue_id, command)
                 time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
