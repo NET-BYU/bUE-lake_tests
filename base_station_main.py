@@ -62,9 +62,7 @@ class Base_Station_Main:
         # Hold all UPD messages so they can be displayed in the UI
         self.stdout_history = deque()
 
-        self.ota = Ota(
-            self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.stdout_history
-        )
+        self.ota = Ota(self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.stdout_history)
 
         # Fetch the Reyax ID from the OTA module
         time.sleep(0.1)
@@ -188,10 +186,13 @@ class Base_Station_Main:
                     bue_name, bue_id_check = payload.split(",", 1)  # Split hostname and bUE_id
 
                     if int(bue_id_check) != bue_id:
-                        logger.error(f"message_listener: Mismatched bUE ID in REQ message. Expected {bue_id}, got {bue_id_check}")
+                        logger.error(
+                            f"message_listener: Mismatched bUE ID in REQ message. Expected {bue_id}, got {bue_id_check}"
+                        )
                         continue  # Skip to the next message
 
                     self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}:{current_timestamp}")
+                    # self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}")
                     self.bue_timeout_tracker[bue_name] = TIMEOUT
                     if not bue_id in self.connected_bues:
                         logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}:{bue_name}")

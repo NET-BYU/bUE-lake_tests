@@ -14,6 +14,7 @@ from yaml import load, Loader
 
 # For gps
 from pynmeagps import NMEAReader  # type:ignore
+
 # import gps
 
 logger.add("logs/bue.log", rotation="10 MB")  # Example: Add a file sink for all logs
@@ -193,7 +194,7 @@ class bUE_Main:
                 src_id, msg = message.split(",", 1)
 
                 if ":" in msg:
-                    msg_type, msg_body = msg.split(":", 1)
+                    msg_type, msg_body, _ = msg.split(":", 2)
                 else:
                     msg_type, msg_body = msg, None
 
