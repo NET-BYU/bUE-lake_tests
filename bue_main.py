@@ -427,14 +427,17 @@ class bUE_Main:
         # Test ended successfully
         elif exit_code == 0:
             self.test_state = Test_State.PASS
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "DONE"))
 
         # Test was terminated with a CANC. When a subprocess is terminated with a signal.SIGINT,
         # it returns -2
         elif exit_code == -2:
             self.test_state = Test_State.PASS
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "CANCD"))
 
         else:
             self.test_state = Test_State.FAIL
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "FAIL"))
 
     def clean_up_test(self):
         if self.test_stdout_thread and self.test_stdout_thread.is_alive():
@@ -578,7 +581,8 @@ class bUE_Main:
 
             loop_start = time.time()
 
-            # TRANSITIONS STATE MACHINE
+            ### TRANSITIONS STATE MACHINE ###
+
             if self.cur_st == State.INIT:
                 # Setup should all be complete, immediately move to the CONNECT_OTA state
                 counter_connect_ota = 0
@@ -635,7 +639,7 @@ class bUE_Main:
             #
             # If while waiting the bUE receives a CANC message, it will stop waiting and go straight to the
             # TEST_CLEANUP state so flags can be reset approriately
-            # """
+            #
             elif self.cur_st == State.WAIT_FOR_START:
                 current_time: int = int(time.time())
                 if self.flag_ota_cancel_test.is_set():
@@ -649,7 +653,7 @@ class bUE_Main:
                     self.nxt_st = State.UTW_TEST
                     self.create_test_process()  # TODO: Call this early and have a "start" call. See notion
                 else:
-                    logger.warning("Got to last transition in WAIT_FOR_START. Shouldn't be possible")
+                    logger.warning("Got to last transition in WAIT_FOR_START. This should not be possible")
             #
             # If the bUE ever receives a CANC while testing, it should response with a CANCD
             # message and enter the TEST_CLEANUP state
@@ -660,24 +664,17 @@ class bUE_Main:
             # Otherwise, stay in the UTW_TEST state
             #
             elif self.cur_st == State.UTW_TEST:
-
-                if self.flag_ota_cancel_test.is_set():
-                    self.ota_outgoing_queue.put((self.ota_base_station_id, "CANCD"))
-                    self.nxt_st = State.TEST_CLEANUP
-
-                elif self.test_state == Test_State.PASS:
-                    self.ota_outgoing_queue.put((self.ota_base_station_id, "DONE"))
+                if self.test_state == Test_State.PASS:
                     self.nxt_st = State.TEST_CLEANUP
 
                 elif self.test_state == Test_State.FAIL:
-                    self.ota_outgoing_queue.put((self.ota_base_station_id, "FAIL"))
                     self.nxt_st = State.TEST_CLEANUP
 
                 elif self.test_state == Test_State.RUNNING:
                     self.nxt_st = State.UTW_TEST
 
                 else:
-                    pass
+                    logger.error(f"bue_tick: bUE in unexpected test_state while in UTW_TEST: {self.test_state}")
             #
             # Once all the stdout queue messages have been sent, return to the IDLE state
             #
@@ -691,7 +688,8 @@ class bUE_Main:
                 logger.error(f"tick: Invalid state transition {self.cur_st.name}")
                 sys.exit(1)
 
-            ## ACTION STATE MACHINE
+            ### ACTION STATE MACHINE ###
+
             if self.cur_st == State.INIT:
                 pass
             #
