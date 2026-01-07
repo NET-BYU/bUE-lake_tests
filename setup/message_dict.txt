@@ -38,7 +38,7 @@ PING:
     Direction: bUE -> base
     Meaning: The bUE periodically pings the base station
     Body: None
-    Example: (bue_main.py) self.ota.send_ota_message(10, "PING:<lat>,<long>") <- NOTICE NO COLON
+    Example: (bue_main.py) self.ota.send_ota_message(10, PING:<self.cur_st.value>,<lat>,<long>) NOTE: lat, long are '' if GPS isn't working
     Response: The base station will respond with a PINGR. If too much time passes between PINGR's, the bUE knows it has become disconnected from the network.
 
 PINGR:
@@ -78,11 +78,11 @@ PREPR:
     Example: (bue_main.py) self.ota.send_ota_message(10, "TESTR:1745004290")
     Response: None
 
-UPD:
+TOUT:
     Direction: bUE -> base
-    Meaning: The bUE sends an update on the UTW test; includes current GPS coords and any message that might be in stdout
-    Body: <lat>,<long>,<line>
-    Example: (bue_main.py) self.ota.send_ota_message(10, "UPD:<stdout>")
+    Meaning: The bUE sends stdout/stderr from its UTW test
+    Body: <stdout>
+    Example: (bue_main.py) self.ota.send_ota_message(10, "TOUT:<stdout>")
     Response: None
 
 DONE:

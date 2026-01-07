@@ -145,8 +145,8 @@ class BaseStationGUI:
         # bUE Treeview
         self.bue_tree = ttk.Treeview(bue_frame, columns=("status", "ping"), show="tree headings")
         self.bue_tree.heading("#0", text="bUE ID")
-        self.bue_tree.heading("status", text="State")
-        self.bue_tree.heading("ping", text="Missed Pings")
+        self.bue_tree.heading("status", text="Status")
+        self.bue_tree.heading("ping", text="Ping Status")
 
         self.bue_tree.column("#0", width=100)
         self.bue_tree.column("status", width=100)
@@ -382,25 +382,22 @@ class BaseStationGUI:
 
         # Add connected bUEs
         for bue_id in self.base_station.connected_bues:
-            bue_name = self.base_station.bue_id_to_hostname[bue_id]
+            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
-            # # Determine status
-            # if bue_id in getattr(self.base_station, "testing_bues", []):
-            #     status = "🧪 Testing"
-            # else:
-            #     status = "💤 Idle"
-            status = self.base_station.bue_id_to_state[bue_id]
+            # Determine status
+            if bue_id in getattr(self.base_station, "testing_bues", []):
+                status = "🧪 Testing"
+            else:
+                status = "💤 Idle"
 
             # Determine ping status
-            timeout_val = self.base_station.bue_missed_ping_counter.get(bue_id, 0)
-            # if timeout_val >= TIMEOUT / 2:
-            #     ping_status = "🟢 Good"
-            # elif timeout_val > 0:
-            #     ping_status = "🟡 Warning"
-            # else:
-            #     ping_status = "🔴 Lost"
-
-            ping_status = timeout_val
+            timeout_val = self.base_station.bue_timeout_tracker.get(bue_id, 0)
+            if timeout_val >= TIMEOUT / 2:
+                ping_status = "🟢 Good"
+            elif timeout_val > 0:
+                ping_status = "🟡 Warning"
+            else:
+                ping_status = "🔴 Lost"
 
             self.bue_tree.insert("", "end", iid=bue_id, text=bue_name, values=(status, ping_status))
 
@@ -428,7 +425,7 @@ class BaseStationGUI:
                     pass
             self.map_markers.clear()
 
-            if not self.base_station or not self.base_station.bue_id_to_coords:
+            if not self.base_station or not self.base_station.bue_coordinates:
                 return
 
             # Check if bUE positions have changed significantly
@@ -441,7 +438,7 @@ class BaseStationGUI:
             lons = []
 
             # Get bUE coordinates and track changes
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
+            for bue_id, coords in self.base_station.bue_coordinates.items():
                 try:
                     lat, lon = float(coords[0]), float(coords[1])
                     lats.append(lat)
@@ -511,7 +508,7 @@ class BaseStationGUI:
             self.last_bue_positions = current_positions.copy()
 
             # Add bUE markers
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
+            for bue_id, coords in self.base_station.bue_coordinates.items():
                 try:
                     lat, lon = float(coords[0]), float(coords[1])
                     bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
@@ -592,7 +589,7 @@ class BaseStationGUI:
         # Clear canvas
         self.map_widget.delete("all")
 
-        if not self.base_station or not self.base_station.bue_id_to_coords:
+        if not self.base_station or not self.base_station.bue_coordinates:
             self.map_widget.create_text(
                 300,
                 200,
@@ -607,7 +604,7 @@ class BaseStationGUI:
         lons = []
 
         # Get bUE coordinates
-        for coords in self.base_station.bue_id_to_coords.values():
+        for coords in self.base_station.bue_coordinates.values():
             try:
                 lat, lon = float(coords[0]), float(coords[1])
                 lats.append(lat)
@@ -655,7 +652,7 @@ class BaseStationGUI:
             return ((lon - min_lon) / (max_lon - min_lon)) * canvas_width
 
         # Draw bUEs
-        for bue_id, coords in self.base_station.bue_id_to_coords.items():
+        for bue_id, coords in self.base_station.bue_coordinates.items():
             try:
                 lat, lon = float(coords[0]), float(coords[1])
                 x, y = lon_to_x(lon), lat_to_y(lat)
@@ -733,7 +730,7 @@ class BaseStationGUI:
             self.coord_tree.delete(item)
 
         if self.base_station:
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
+            for bue_id, coords in self.base_station.bue_coordinates.items():
                 bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
                 try:
                     lat, lon = coords[0], coords[1]
@@ -751,8 +748,8 @@ class BaseStationGUI:
                 for bue2 in self.base_station.connected_bues:
                     if (
                         bue1 != bue2
-                        and bue1 in self.base_station.bue_id_to_coords
-                        and bue2 in self.base_station.bue_id_to_coords
+                        and bue1 in self.base_station.bue_coordinates
+                        and bue2 in self.base_station.bue_coordinates
                         and (bue1, bue2) not in processed_pairs
                         and (bue2, bue1) not in processed_pairs
                     ):
@@ -817,12 +814,12 @@ class BaseStationGUI:
         ):
             try:
                 self.base_station.connected_bues.remove(bue_id)
-                if bue_id in self.base_station.bue_id_to_coords:
-                    del self.base_station.bue_id_to_coords[bue_id]
+                if bue_id in self.base_station.bue_coordinates:
+                    del self.base_station.bue_coordinates[bue_id]
                 if bue_id in getattr(self.base_station, "testing_bues", []):
                     self.base_station.testing_bues.remove(bue_id)
-                if bue_id in self.base_station.bue_missed_ping_counter:
-                    del self.base_station.bue_missed_ping_counter[bue_id]
+                if bue_id in self.base_station.bue_timeout_tracker:
+                    del self.base_station.bue_timeout_tracker[bue_id]
                 logger.info(f"Disconnected from bUE {bue_id}")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to disconnect: {e}")
@@ -1306,8 +1303,6 @@ class TestDialog:
 
                 if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
                     command = f"TEST:{config['file']},{unix_timestamp},-s {config['sf']} -m {config['msg']} -c {config['freq']} -b {config['bw']} -p {config['period']}"
-                elif selected_file.startswith("Old"):
-                    command = f"TEST:{config['file']},{unix_timestamp},{config['msg']}"
                 else:
                     command = f"TEST:{config['file']},{unix_timestamp},"
 

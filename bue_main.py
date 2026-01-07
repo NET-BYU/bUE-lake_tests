@@ -21,11 +21,10 @@ logger.add("logs/bue.log", rotation="10 MB")  # Example: Add a file sink for all
 
 # Internal imports
 from ota import Ota
+from constants import State
 
 # This variable manages how many PINGRs should be missed until the bUE disconnects from the base station
 # and goes back to its CONNECT_OTA state.
-# TIMEOUT rotations must pass, then the bUE will disconnect.
-# The length of the rotations is defined by IDLE_PING_OTA_INTERVAL in bue_tick()
 TIMEOUT = 6
 BROADCAST_OTA_ID = 0
 
@@ -104,6 +103,9 @@ class bUE_Main:
         # Network information
         self.ota_base_station_id = None
         self.ota_test_params = None
+
+        # Variable to hold how many PINGRs have been missed
+        self.ota_pingrs_missed: int = 0
 
         # Variables to handle test subprocess
         self.test_command = None
@@ -263,6 +265,11 @@ class bUE_Main:
     def ota_ping(self):
         lat, long = self.gps_handler()
 
+        if self.flag_ota_pingr.is_set():
+            self.flag_ota_pingr.clear()
+        else:
+            self.ota_pingrs_missed += 1
+
         self.ota_outgoing_queue.put((self.ota_base_station_id, f"PING:{self.cur_st.value},{lat},{long}"))
         logger.info(f"ota_ping: Sent ping to {self.ota_base_station_id}")
 
@@ -333,8 +340,8 @@ class bUE_Main:
             logger.error("ota_send_update: test_stdout_queue is empty")
             return
 
-        self.ota_outgoing_queue.put((self.ota_base_station_id, f"UPD:{stdout}"))  # TODO: Change UPD to TOUT
-        logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {stdout}")
+        self.ota_outgoing_queue.put((self.ota_base_station_id, f"TOUT:{stdout}"))
+        logger.info(f"Sent TOUT to {self.ota_base_station_id} with console output: {stdout}")
 
     """
     Checks to see if the ota system a valid TEST message from the base station
