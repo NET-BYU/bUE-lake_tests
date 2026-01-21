@@ -95,6 +95,7 @@ class bUE_Main:
         self.flag_ota_cancel_test = threading.Event()
         self.flag_ota_reload = threading.Event()
         self.flag_ota_restart = threading.Event()
+        self.flag_ota_tout = threading.Event()
 
         # State machine - statuses
         # These are the main internal signals used by the state machine
@@ -331,17 +332,18 @@ class bUE_Main:
                 pass
 
     # Sends the first message in the self.test_stdout_queue back to the base station
-    def ota_send_update(self):
+    def ota_send_tout(self):
         try:
             stdout = self.test_stdout_queue.get_nowait().strip()
-            if len(stdout) > 0:  # See if the message is empty
+            if len(stdout) == 0:  # See if the message is empty
                 return
         except:
-            logger.error("ota_send_update: test_stdout_queue is empty")
+            logger.error("ota_send_tout: test_stdout_queue is empty")
             return
 
         self.ota_outgoing_queue.put((self.ota_base_station_id, f"TOUT:{stdout}"))
         logger.info(f"Sent TOUT to {self.ota_base_station_id} with console output: {stdout}")
+        self.flag_ota_tout.clear()
 
     """
     Checks to see if the ota system a valid TEST message from the base station
@@ -735,8 +737,9 @@ class bUE_Main:
                 self.check_on_test()
                 self.check_for_test_interrupt()
 
-                if not self.test_stdout_queue.empty():
-                    self.ota_task_queue.put(self.ota_send_update)
+                if not self.flag_ota_tout.is_set() and not self.test_stdout_queue.empty():
+                    self.flag_ota_tout.set()
+                    self.ota_task_queue.put(self.ota_send_tout)
             #
             elif self.cur_st == State.TEST_CLEANUP:
                 counter_ping += 1
@@ -746,8 +749,8 @@ class bUE_Main:
                     self.ota_task_queue.put(self.ota_ping)
                     counter_ping = 0
 
-                if not self.test_stdout_queue.empty():
-                    self.ota_task_queue.put(self.ota_send_update)
+                if not self.flag_ota_tout.is_set() and not self.test_stdout_queue.empty():
+                    self.ota_task_queue.put(self.ota_send_tout)
                 else:
                     self.clean_up_test()
             #
