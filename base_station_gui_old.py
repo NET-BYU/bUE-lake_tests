@@ -40,8 +40,7 @@ except ImportError:
     print("TkinterMapView not available - using fallback canvas map")
 
 from base_station_main import Base_Station_Main
-
-# from constants import bUEs, TIMEOUT
+from constants import bUEs, TIMEOUT
 
 
 class BaseStationGUI:
@@ -146,8 +145,8 @@ class BaseStationGUI:
         # bUE Treeview
         self.bue_tree = ttk.Treeview(bue_frame, columns=("status", "ping"), show="tree headings")
         self.bue_tree.heading("#0", text="bUE ID")
-        self.bue_tree.heading("status", text="State")
-        self.bue_tree.heading("ping", text="Missed Pings")
+        self.bue_tree.heading("status", text="Status")
+        self.bue_tree.heading("ping", text="Ping Status")
 
         self.bue_tree.column("#0", width=100)
         self.bue_tree.column("status", width=100)
@@ -383,25 +382,22 @@ class BaseStationGUI:
 
         # Add connected bUEs
         for bue_id in self.base_station.connected_bues:
-            bue_name = self.base_station.bue_id_to_hostname[bue_id]
+            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
-            # # Determine status
-            # if bue_id in getattr(self.base_station, "testing_bues", []):
-            #     status = "🧪 Testing"
-            # else:
-            #     status = "💤 Idle"
-            status = self.base_station.bue_id_to_state[bue_id]
+            # Determine status
+            if bue_id in getattr(self.base_station, "testing_bues", []):
+                status = "🧪 Testing"
+            else:
+                status = "💤 Idle"
 
             # Determine ping status
-            timeout_val = self.base_station.bue_missed_ping_counter.get(bue_id, 0)
-            # if timeout_val >= TIMEOUT / 2:
-            #     ping_status = "🟢 Good"
-            # elif timeout_val > 0:
-            #     ping_status = "🟡 Warning"
-            # else:
-            #     ping_status = "🔴 Lost"
-
-            ping_status = timeout_val
+            timeout_val = self.base_station.bue_timeout_tracker.get(bue_id, 0)
+            if timeout_val >= TIMEOUT / 2:
+                ping_status = "🟢 Good"
+            elif timeout_val > 0:
+                ping_status = "🟡 Warning"
+            else:
+                ping_status = "🔴 Lost"
 
             self.bue_tree.insert("", "end", iid=bue_id, text=bue_name, values=(status, ping_status))
 
@@ -429,7 +425,7 @@ class BaseStationGUI:
                     pass
             self.map_markers.clear()
 
-            if not self.base_station or not self.base_station.bue_id_to_coords:
+            if not self.base_station or not self.base_station.bue_coordinates:
                 return
 
             # Check if bUE positions have changed significantly
@@ -442,7 +438,7 @@ class BaseStationGUI:
             lons = []
 
             # Get bUE coordinates and track changes
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
+            for bue_id, coords in self.base_station.bue_coordinates.items():
                 try:
                     lat, lon = float(coords[0]), float(coords[1])
                     lats.append(lat)
@@ -512,10 +508,10 @@ class BaseStationGUI:
             self.last_bue_positions = current_positions.copy()
 
             # Add bUE markers
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
+            for bue_id, coords in self.base_station.bue_coordinates.items():
                 try:
                     lat, lon = float(coords[0]), float(coords[1])
-                    bue_name = 55555
+                    bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
                     # Check proximity to custom markers
                     is_close = False
@@ -593,7 +589,7 @@ class BaseStationGUI:
         # Clear canvas
         self.map_widget.delete("all")
 
-        if not self.base_station or not self.base_station.bue_id_to_coords:
+        if not self.base_station or not self.base_station.bue_coordinates:
             self.map_widget.create_text(
                 300,
                 200,
@@ -608,7 +604,7 @@ class BaseStationGUI:
         lons = []
 
         # Get bUE coordinates
-        for coords in self.base_station.bue_id_to_coords.values():
+        for coords in self.base_station.bue_coordinates.values():
             try:
                 lat, lon = float(coords[0]), float(coords[1])
                 lats.append(lat)
@@ -656,7 +652,7 @@ class BaseStationGUI:
             return ((lon - min_lon) / (max_lon - min_lon)) * canvas_width
 
         # Draw bUEs
-        for bue_id, coords in self.base_station.bue_id_to_coords.items():
+        for bue_id, coords in self.base_station.bue_coordinates.items():
             try:
                 lat, lon = float(coords[0]), float(coords[1])
                 x, y = lon_to_x(lon), lat_to_y(lat)
@@ -687,8 +683,7 @@ class BaseStationGUI:
                 )
 
                 # Label
-                # bue_name = bUEs5.get(str(bue_id), f"bUE {bue_id}")
-                bue_name = self.base_station.bue_id_to_hostname(int(bue_id))
+                bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
                 self.map_widget.create_text(
                     x,
                     y - 15,
@@ -735,9 +730,8 @@ class BaseStationGUI:
             self.coord_tree.delete(item)
 
         if self.base_station:
-            for bue_id, coords in self.base_station.bue_id_to_coords.items():
-                # bue_name = bUEs5.get(str(bue_id), f"bUE {bue_id}")
-                bue_name = self.base_station.bue_id_to_hostname(int(bue_id))
+            for bue_id, coords in self.base_station.bue_coordinates.items():
+                bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
                 try:
                     lat, lon = coords[0], coords[1]
                     self.coord_tree.insert("", "end", text=bue_name, values=(lat, lon))
@@ -754,16 +748,15 @@ class BaseStationGUI:
                 for bue2 in self.base_station.connected_bues:
                     if (
                         bue1 != bue2
-                        and bue1 in self.base_station.bue_id_to_coords
-                        and bue2 in self.base_station.bue_id_to_coords
+                        and bue1 in self.base_station.bue_coordinates
+                        and bue2 in self.base_station.bue_coordinates
                         and (bue1, bue2) not in processed_pairs
                         and (bue2, bue1) not in processed_pairs
                     ):
 
                         distance = self.base_station.get_distance(bue1, bue2)
                         if distance is not None:
-                            # pair_name = f"{bUEs5.get(str(bue1), str(bue1))} ↔ {bUEs5.get(str(bue2), str(bue2))}"
-                            pair_name = f"{self.base_station.bue_id_to_hostname(int(bue1))} ↔ {self.base_station.bue_id_to_hostname(int(bue1))}"
+                            pair_name = f"{bUEs.get(str(bue1), str(bue1))} ↔ {bUEs.get(str(bue2), str(bue2))}"
                             self.dist_tree.insert("", "end", text=pair_name, values=(f"{distance:.2f}"))
 
                         processed_pairs.add((bue1, bue2))
@@ -817,24 +810,23 @@ class BaseStationGUI:
         """Disconnect a specific bUE"""
         if messagebox.askyesno(
             "Confirm Disconnect",
-            # f"Disconnect from {bUEs5.get(str(bue_id), str(bue_id))}?",
-            f"Disconnect from {self.base_station.bue_id_to_hostname(int(bue_id))}?",
+            f"Disconnect from {bUEs.get(str(bue_id), str(bue_id))}?",
         ):
             try:
                 self.base_station.connected_bues.remove(bue_id)
-                if bue_id in self.base_station.bue_id_to_coords:
-                    del self.base_station.bue_id_to_coords[bue_id]
+                if bue_id in self.base_station.bue_coordinates:
+                    del self.base_station.bue_coordinates[bue_id]
                 if bue_id in getattr(self.base_station, "testing_bues", []):
                     self.base_station.testing_bues.remove(bue_id)
-                if bue_id in self.base_station.bue_missed_ping_counter:
-                    del self.base_station.bue_missed_ping_counter[bue_id]
+                if bue_id in self.base_station.bue_timeout_tracker:
+                    del self.base_station.bue_timeout_tracker[bue_id]
                 logger.info(f"Disconnected from bUE {bue_id}")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to disconnect: {e}")
 
     def reload_bue(self, bue_id):
         """Reload a specific bUE"""
-        if messagebox.askyesno("Confirm Reload", f"Reload {self.base_station.bue_id_to_hostname(int(bue_id))}?"):
+        if messagebox.askyesno("Confirm Reload", f"Reload {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 self.base_station.ota.send_ota_message(bue_id, "RELOAD")
                 self.disconnect_bue(bue_id)
@@ -844,7 +836,7 @@ class BaseStationGUI:
 
     def restart_bue(self, bue_id):
         """Restart a specific bUE"""
-        if messagebox.askyesno("Confirm Restart", f"Restart {self.base_station.bue_id_to_hostname(int(bue_id))}?"):
+        if messagebox.askyesno("Confirm Restart", f"Restart {bUEs.get(str(bue_id), str(bue_id))}?"):
             try:
                 self.base_station.ota.send_ota_message(bue_id, "RESTART")
                 self.disconnect_bue(bue_id)
@@ -855,7 +847,7 @@ class BaseStationGUI:
     def open_bue_log(self, bue_id):
         """Open the log file for a specific bUE"""
         log_path = f"logs/bue_{bue_id}.log"
-        bue_name = self.base_station.bue_id_to_hostname(int(bue_id))
+        bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
         LogViewerDialog(self.root, log_path, f"{bue_name} Log")
 
     def open_base_log(self):
@@ -980,7 +972,7 @@ class TestDialog:
         row = 0
         col = 0
         for i, bue_id in enumerate(self.base_station.connected_bues):
-            bue_name = self.base_station.bue_id_to_hostname[int(bue_id)]
+            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
             var = tk.BooleanVar()
             self.bue_vars[bue_id] = var
 
@@ -1065,7 +1057,7 @@ class TestDialog:
         self.selected_bues = [bue_id for bue_id, var in self.bue_vars.items() if var.get()]
 
         if self.selected_bues:
-            bue_names = [self.base_station.bue_id_to_hostname(int(bid)) for bid in self.selected_bues]
+            bue_names = [bUEs.get(str(bid), f"bUE {bid}") for bid in self.selected_bues]
             self.selection_label.config(text=f"Selected: {', '.join(bue_names)}", foreground="blue")
 
             # Show inline configuration for each selected bUE
@@ -1112,7 +1104,7 @@ class TestDialog:
         self.config_widgets = {}
 
         for i, bue_id in enumerate(self.selected_bues):
-            bue_name = self.base_station.bue_id_to_hostname(int(bue_id))
+            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
 
             # Create a frame for this bUE's configuration
             bue_frame = ttk.LabelFrame(self.scrollable_frame, text=f"Configure {bue_name}", padding="10")
@@ -1311,8 +1303,6 @@ class TestDialog:
 
                 if selected_file.endswith("run_tx") or selected_file.endswith("run_rx"):
                     command = f"TEST:{config['file']},{unix_timestamp},-s {config['sf']} -m {config['msg']} -c {config['freq']} -b {config['bw']} -p {config['period']}"
-                elif selected_file.startswith("Old"):
-                    command = f"TEST:{config['file']},{unix_timestamp},{config['msg']}"
                 else:
                     command = f"TEST:{config['file']},{unix_timestamp},"
 
@@ -1320,7 +1310,7 @@ class TestDialog:
                 time.sleep(0.1)
                 logger.info(f"Sent test command to bUE {bue_id}: {command}")
 
-            bue_names = [self.base_station.bue_id_to_hostname(int(bue_id)) for bue_id in self.bue_configs.keys()]
+            bue_names = [bUEs.get(str(bue_id), str(bue_id)) for bue_id in self.bue_configs.keys()]
             messagebox.showinfo(
                 "Tests Scheduled",
                 f"Tests scheduled for: {', '.join(bue_names)}\n\n"
@@ -1346,7 +1336,7 @@ class ConfigureBueDialog:
         self.config_tree = config_tree
 
         self.dialog = tk.Toplevel(parent)
-        self.dialog.title(f"Configure {self.base_station.bue_id_to_hostname(int(bue_id))}")
+        self.dialog.title(f"Configure {bUEs.get(str(bue_id), f'bUE {bue_id}')}")
         self.dialog.geometry("400x200")
         self.dialog.grab_set()
 
@@ -1356,7 +1346,7 @@ class ConfigureBueDialog:
         """Setup the configuration dialog"""
         ttk.Label(
             self.dialog,
-            text=f"Configure test for {self.base_station.bue_id_to_hostname(int(self.bue_id))}",
+            text=f"Configure test for {bUEs.get(str(self.bue_id), f'bUE {self.bue_id}')}",
         ).pack(pady=10)
 
         # Test file selection
@@ -1384,7 +1374,7 @@ class ConfigureBueDialog:
 
     def save_config(self):
         """Save the configuration"""
-        bue_name = self.base_station.bue_id_to_hostname(int(self.bue_id))
+        bue_name = bUEs.get(str(self.bue_id), f"bUE {self.bue_id}")
         self.config_tree.insert(
             "",
             "end",
@@ -1414,7 +1404,7 @@ class CancelTestDialog:
 
         self.test_vars = {}
         for bue_id in getattr(self.base_station, "testing_bues", []):
-            bue_name = self.base_station.bue_id_to_hostname(int(bue_id))
+            bue_name = bUEs.get(str(bue_id), f"bUE {bue_id}")
             var = tk.BooleanVar()
             self.test_vars[bue_id] = var
             ttk.Checkbutton(self.dialog, text=bue_name, variable=var).pack(anchor=tk.W, padx=20)
@@ -1435,7 +1425,7 @@ class CancelTestDialog:
                     for i in range(3):
                         self.base_station.ota.send_ota_message(bue_id, "CANC")
                         time.sleep(0.1)
-                    canceled.append(self.base_station.bue_id_to_hostname(int(bue_id)))
+                    canceled.append(bUEs.get(str(bue_id), str(bue_id)))
                     logger.info(f"Sent cancel command to bUE {bue_id}")
                 except Exception as e:
                     logger.error(f"Failed to cancel test for bUE {bue_id}: {e}")
@@ -1480,7 +1470,7 @@ class AddMarkerDialog:
         ttk.Label(self.dialog, text="Pair with bUE (optional):").pack(anchor=tk.W, padx=20, pady=(10, 5))
         try:
             bue_options = ["None"] + [
-                self.base_station.bue_id_to_hostname(int(bue_id)) for bue_id in self.main_gui.base_station.connected_bues
+                bUEs.get(str(bue_id), f"bUE {bue_id}") for bue_id in self.main_gui.base_station.connected_bues
             ]
             self.bue_var = tk.StringVar(value="None")
             ttk.Combobox(
@@ -1524,7 +1514,7 @@ class AddMarkerDialog:
             bue_selection = self.bue_var.get()
             if bue_selection != "None":
                 for bue_id in self.main_gui.base_station.connected_bues:
-                    if self.base_station.bue_id_to_hostname(int(bue_id)) == bue_selection:
+                    if bUEs.get(str(bue_id), f"bUE {bue_id}") == bue_selection:
                         paired_bue = bue_id
                         break
 
@@ -1593,7 +1583,7 @@ class ManageMarkersDialog:
         for marker_id, marker in self.main_gui.custom_markers.items():
             paired_bue_name = "None"
             if marker.get("paired_bue"):
-                paired_bue_name = self.base_station.bue_id_to_hostname(int(paired_bue_name))
+                paired_bue_name = bUEs.get(str(marker["paired_bue"]), f"bUE {marker['paired_bue']}")
 
             self.markers_tree.insert(
                 "",

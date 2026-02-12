@@ -10,39 +10,23 @@ The main goal in this file is to make a station that can handle multiple bUEs as
 defined in bue_main.py
 """
 
-# Standard library imports
 import queue
-import os
 import sys
-import threading
-import time
-from loguru import logger
 from yaml import load, Loader
+import time
+import threading
+from datetime import datetime
+import traceback
 
-# For getting the distance between two bUE coordinates
-from geopy import distance  # type:ignore
+from loguru import logger
 
-from collections import deque
+from ota import Ota
+from constants import State
 
 logger.remove()  # Remove default sink
 
 # Main log for everything
 logger.add("logs/base_station.log", rotation="10 MB")
-
-"""
-# This variable defines how long it will take for a connected bUE to be thought of as "disconnected"
-# Unlike the TIMEOUT in bue_main.py, once this variable expires, it will not automatically disconnect the base
-# station from the bUE. Instead, it will prompt the user that they might want to. This will allow the bUE to be able
-# to reconnect once it is in range
-
-# The system will recommend disconnecting after missing TIMEOUT PINGs.
-# Exact timing depends on CHECK_FOR_TIMEOUTS_INTERVAL variable in base_station_tick()
-"""
-from constants import TIMEOUT
-
-
-# Internal imports
-from ota import Ota
 
 
 class Base_Station_Main:
@@ -59,12 +43,7 @@ class Base_Station_Main:
             logger.error(f"__init__: YAML file {yaml_str} no found", file=sys.stderr)
             sys.exit(1)
 
-        # Hold all UPD messages so they can be displayed in the UI
-        self.stdout_history = deque()
-
-        self.ota = Ota(
-            self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"], self.stdout_history
-        )
+        self.ota = Ota(self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"])
 
         # Fetch the Reyax ID from the OTA module
         time.sleep(0.1)
@@ -73,305 +52,215 @@ class Base_Station_Main:
         logger.info(f"[DEBUG] OTA ID is set to: {self.reyax_id}")
 
         self.EXIT = False
+        self.PING_TIMEOUT_SECONDS = 15  # Number of seconds waiting for a PING to come before its considered missed
+        self.PING_MAX_MISSES = 5  # Number of missed PINGs received before connected considered lost
 
-        # A list of the bUEs currently connected to the base station
-        self.connected_bues = {}
+        self.bue_id_to_hostname: dict[int, str] = {}  # Dictionary that pairs rayex ids to bue name. (ex: 20 -> Perry)
 
+        self.connected_bues: list[int] = []  # List to hold rayex ids of each connected bue.
+        self.bue_missed_ping_counter: dict[int, int] = {}  # Dictionary to hold how many PINGs have been missed
+        self.bue_tout: list[str] = []  # List to hold messages that come with TOUT messages
+        self.bue_id_to_state: dict[int, str] = {}  # Dictionary to hold what state each bUE is currently in
+        self.bue_id_to_coords: dict[int, (int, int)] = {}  # Dictionary to hold the coords of each bUE
+        self.bue_id_to_last_ping_time: dict[int, int] = {}  # Dictionary to hold when a bUE got its last PING
+
+        # Set up the ota threads
+        self.ota_incoming_queue = queue.Queue()
+        self.ota_outgoing_queue = queue.Queue()
+        self.ota_trx_thread = threading.Thread(target=self.ota_message_trx)
+        self.ota_trx_thread.start()
+
+        # Set up the ping handler thread
+        self.ping_timeout_handler_thread = threading.Thread(target=self.ping_timeout_handler)
+        self.ping_timeout_handler_thread.start()
+
+    ## OTA Message Handling Thread and Functions ##
+    def ota_message_trx(self):
         """
-        # A dictionary that will track how often a bUE is getting ticks
-        # A bUE's id is the key. 
-        # If the bUE has a value of TIMEOUT or TIMEOUT + 1, it has received a PING recently
-        # If a bUE has missed a PING, this value will be decremented by one
-        # until too many PINGs have been missed
+        A thread to handle message transmission and reception on the OTA device.
         """
-        self.bue_timeout_tracker = {}
-
-        # Dictionary holds what each bUE's currently location is depending on last PING/UPD
-        self.bue_coordinates = {}
-
-        # A list that tracks what bUEs are currently in the TEST state
-        self.testing_bues = []
-
-        # Ping thread
-        self.ping_bue_queue = queue.Queue()
-        self.ping_bue_thread = threading.Thread(target=self.ping_bue_queue_handler)
-        self.ping_bue_thread.start()
-
-        # Listen for requests thread. Also handles PINGs.
-        self.message_queue = queue.Queue()
-        self.message_queue_thread = threading.Thread(target=self.req_queue_handler)
-        self.message_queue_thread.start()
-
-        # Tick thread for state machine
-        self.tick_enabled = False
-        self.state_machine_thread = threading.Thread(target=self.base_station_tick)
-        self.state_machine_thread.start()
-
-    def ping_bue_queue_handler(self):
         while not self.EXIT:
+            # Grab any messages from the OTA and store them in the incoming queue
             try:
-                task = self.ping_bue_queue.get(timeout=0.1)
-                task()
-                self.ping_bue_queue.task_done()
-            except queue.Empty:
-                time.sleep(0.01)
+                new_messages = self.ota.get_new_messages()
+
+                for message in new_messages:
+                    self.ota_incoming_queue.put(message)
             except Exception as e:
-                logger.error(f"ping_bue_queue_handler: Exception occurred: {e}")
+                logger.error(f"Failed to get OTA messages: {e}")
 
-    def ping_bue(self, bue_id, lat="", long=""):
-        if bue_id in self.connected_bues:
-            try:
-                logger.bind(bue_id=bue_id).info(
-                    f"Received PING from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}"
-                )
-                self.ota.send_ota_message(bue_id, "PINGR")
+            # Push any new messages from the outgoing queue to the OTA
+            while not self.ota_outgoing_queue.empty():
+                (recipient_id, message) = self.ota_outgoing_queue.get()
+                self.ota.send_ota_message(recipient_id, message)
+                self.ota_outgoing_queue.task_done()
 
-                if bue_id in self.testing_bues:
-                    self.testing_bues.remove(bue_id)
+            if not self.ota_incoming_queue.empty():
+                self.ota_message_handler()
 
-                if lat != "" and long != "":
-                    self.bue_coordinates[bue_id] = [lat, long]
+            # Sleep for a short duration to avoid busy waiting
+            time.sleep(0.1)
 
-                self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
-            except Exception as e:
-                logger.bind(bue_id=bue_id).error(f"ping_bue: Error while handling PING from {bue_id}: {e}")
-
-    def check_bue_timeout(self):
+    def ota_message_handler(self):
         """
-        This function will cycle through each bUE the base station should be connected to and make sure that
-        it has been receiving some sort of message from it.
-        The messages it checks for our PINGs and UPDs
-        If we went a rotation without receiving a message, we might have lost connection with the bUE
+        When messages are received, they are interpretted here.
         """
-        for bue_id in self.connected_bues:
-            if self.bue_timeout_tracker[bue_id] == TIMEOUT + 1:
-                # If this is true we know we are getting PINGs from this bue. No need to fear
-                self.bue_timeout_tracker[bue_id] = TIMEOUT
-                continue
-            if self.bue_timeout_tracker[bue_id] > 0:
-                logger.bind(bue_id=bue_id).error(f"We missed a PING from {bue_id}")
-                self.bue_timeout_tracker[bue_id] -= 1
-            else:
-                logger.error(f"We haven't heard from {bue_id} in awhile. Maybe disconnected?")
-
-    def req_queue_handler(self):
-        while not self.EXIT:
+        while not self.ota_incoming_queue.empty():
             try:
-                task = self.message_queue.get(timeout=0.1)
-                task()
-                self.message_queue.task_done()
-            except queue.Empty:
-                time.sleep(0.01)
+                message: str = self.ota_incoming_queue.get()
+                logger.info(f"Received OTA message: {message}")
 
-    # Listens for any incoming message from a bUE. Never called by itself. Runs if put in message_queue.
-    def message_listener(self):
+                # Process the message based on its type
+                # A message body is "<source id>,<message type><:message body (optional)>"
+                src_id, msg = message.split(",", 1)
 
-        new_messages = self.ota.get_new_messages()
+                if ":" in msg:
+                    msg_type, msg_body = msg.split(":", maxsplit=1)
+                else:
+                    msg_type, msg_body = msg, None
 
-        for message in new_messages:
-            print(message)
-            try:  # Receive messages should look like "{bue_id},{message}"
-                try:
-                    parts = message.split(",", 1)
-                    bue_id = int(parts[0])
-                    message_body = parts[1]
-                    print(f"Message body: {message_body}")
+                if msg_type == "REQ":  # Expected format: REQ:<hostname>,<bUE_id>
+                    hostname, bue_id = msg_body.split(",", 1)
 
-                except Exception as e:
-                    logger.error(f"message_listener: Failed to parse message '{message}': {e}")
-                    continue  # Skip to the next message
-
-                if message_body.startswith("REQ"):
-                    logger.debug("Sending a CON")
-                    current_timestamp = int(time.time())
-                    _, payload = message_body.split(":", 1)  # Split on first colon
-                    bue_name, bue_id_check = payload.split(",", 1)  # Split hostname and bUE_id
-
-                    if int(bue_id_check) != bue_id:
-                        logger.error(f"message_listener: Mismatched bUE ID in REQ message. Expected {bue_id}, got {bue_id_check}")
-                        continue  # Skip to the next message
-
-                    self.ota.send_ota_message(bue_id, f"CON:{self.reyax_id}:{current_timestamp}")
-                    self.bue_timeout_tracker[bue_name] = TIMEOUT
-                    if not bue_id in self.connected_bues:
-                        logger.bind(bue_id=bue_id).info(f"Received a request signal from {bue_id}:{bue_name}")
-                        self.connected_bues[bue_id] = bue_name
+                    if int(src_id) != int(bue_id):
+                        logger.warning(f"REQ message source ID {src_id} does not match body {bue_id}")
                     else:
-                        logger.error(f"Got a connection request from {bue_id} but it is already listed as connected")
+                        self.bue_id_to_hostname[int(bue_id)] = str(hostname)
+                        self.ota_outgoing_queue.put((bue_id, f"CON:{self.reyax_id}"))
+                        logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: REQ")
 
-                    self.create_bue_log_file(bue_id)
+                elif msg_type == "ACK":
+                    # If not already connected, list in connected bUEs and initialize all variables
+                    if not int(src_id) in self.connected_bues:
+                        self.connected_bues.append(int(src_id))
+                        self.bue_missed_ping_counter[int(src_id)] = 0
+                        self.bue_id_to_state[int(src_id)] = "IDLE"
+                        self.bue_id_to_last_ping_time[int(src_id)] = time.time()
+                        logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: Received an ACK")
 
-                elif message_body.startswith("ACK"):
-                    logger.bind(bue_id=bue_id).info(f"Received ACK from {self.connected_bues[bue_id]}")
-
-                elif message_body.startswith("PING"):  # Looks like <origin id>,PING,<lat>,<long>
-                    header, lat, long = message_body.split(",")
-                    print(f"header: {header}, lat: {lat}, long: {long}", flush=True)
-                    self.ping_bue(bue_id, lat, long)
-
-                elif message_body.startswith("UPD"):  # 40,55,UPD:LAT,LONG,STDOUT: [helloworld.py STDOUT] TyGoodTest,-42,8
-                    if not bue_id in self.testing_bues:
-                        self.testing_bues.append(bue_id)
-                        logger.bind(bue_id=bue_id).info(
-                            f"Received UPD from {self.connected_bues[bue_id]} but it was not in testing_bues. Adding it now."
-                        )
-                    header, lat, long, stdout = message_body.split(",", maxsplit=3)
-                    # logger.info(f"Received UPD from {bue_id}. Currently at Latitude: {lat}, Longitude: {long}. Message: {stdout}")
-                    logger.bind(bue_id=bue_id).info(f"Received UPD from {bue_id}. Message: {stdout}")
-                    if lat != "" and long != "":
-                        self.bue_coordinates[bue_id] = [lat, long]
+                elif msg_type == "PING":  # Expected format: PING:<state>,<lat>,<long>
+                    # If the bUE is connected,
+                    if int(src_id) in self.connected_bues:
+                        self.bue_missed_ping_counter[int(src_id)] = 0
+                        state, lat, long = msg_body.split(",", 2) 
+                        self.ota_ping_handler(src_id=src_id, state=state, lat=lat, long=long)
                     else:
-                        logger.bind(bue_id=bue_id).info("Lat and/or Long was empty")
-                    # Reset the timeout for getting UPDs. If we haven't recieved an update in a while there is a problem
-                    self.bue_timeout_tracker[bue_id] = TIMEOUT + 1
+                        logger.error(f"{self.bue_id_to_hostname[int(src_id)]}: PING but not listed as connected")
 
-                    if stdout != "":
-                        self.stdout_history.append(f"{self.connected_bues[bue_id]}: {stdout}")
+                elif msg_type == "TOUT":
+                    self.bue_tout.append(f"{self.bue_id_to_hostname[int(src_id)]}: {msg_body}")
+                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: TOUT")
 
-                elif message_body.startswith("FAIL"):
-                    logger.bind(bue_id=bue_id).error(f"Received FAIL from {self.connected_bues[bue_id]}")
-                    if bue_id in self.testing_bues:
-                        self.testing_bues.remove(bue_id)
+                elif msg_type == "FAIL":
+                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: FAIL")
 
-                elif message_body.startswith("DONE"):
-                    logger.bind(bue_id=bue_id).info(f"Received DONE from {self.connected_bues[bue_id]}")
-                    if bue_id in self.testing_bues:
-                        self.testing_bues.remove(bue_id)
-
-                elif message_body.startswith("PREPR"):
-                    logger.bind(bue_id=bue_id).info(f"Received PREPR from {self.connected_bues[bue_id]}")
-                    self.testing_bues.append(bue_id)
-
-                elif message_body.startswith("CANCD"):
-                    logger.bind(bue_id=bue_id).info(f"Received CANCD from {self.connected_bues[bue_id]}")
-                    if bue_id in self.testing_bues:
-                        self.testing_bues.remove(bue_id)
-
-                elif message_body.startswith("BAD"):
-                    logger.bind(bue_id=bue_id).info(f"Received BAD from {self.connected_bues[bue_id]}")
-                    self.stdout_history.append(f"Received a BAD from {self.connected_bues[bue_id]}")
+                elif msg_type == "DONE":
+                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: DONE")
 
                 else:
-                    logger.info(f"Received undefined message {message}")
+                    logger.warning(f"Unknown message type: {msg_type}")
 
-            except ValueError:
-                logger.error("message_listener: Error listening for messages")
+                self.ota_incoming_queue.task_done()
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                logger.error(f"Error processing OTA messages: {e}\nFull traceback:\n{tb_str}")
+                self.ota_incoming_queue.task_done()
 
-    def get_distance(self, bue_1, bue_2):
-        try:
-            c1 = self.bue_coordinates[bue_1]
-            c2 = self.bue_coordinates[bue_2]
-
-            # Validate that coordinates are lists/tuples with 2 elements
-            if not isinstance(c1, (list, tuple)) or len(c1) != 2:
-                logger.error(f"Invalid coordinates for bUE {self.connected_bues[bue_1]}: {c1}")
-                return None
-
-            if not isinstance(c2, (list, tuple)) or len(c2) != 2:
-                logger.error(f"Invalid coordinates for bUE {self.connected_bues[bue_2]}: {c2}")
-                return None
-
-            # Validate that coordinates are numeric and within valid ranges
-            try:
-                lat1, lon1 = float(c1[0]), float(c1[1])
-                lat2, lon2 = float(c2[0]), float(c2[1])
-            except (ValueError, TypeError):
-                logger.error(
-                    f"Non-numeric coordinates: bUE {self.connected_bues[bue_1]}: {c1}, bUE {self.connected_bues[bue_2]}: {c2}"
-                )
-                return None
-
-            # Check if coordinates are within valid ranges
-            if not (-90 <= lat1 <= 90) or not (-180 <= lon1 <= 180):
-                logger.error(f"Invalid latitude/longitude for bUE {self.connected_bues[bue_1]}: lat={lat1}, lon={lon1}")
-                return None
-
-            if not (-90 <= lat2 <= 90) or not (-180 <= lon2 <= 180):
-                logger.error(f"Invalid latitude/longitude for bUE {self.connected_bues[bue_2]}: lat={lat2}, lon={lon2}")
-                return None
-
-            # Check if coordinates are not empty/zero (optional - depends on your use case)
-            if (lat1 == 0 and lon1 == 0) or (lat2 == 0 and lon2 == 0):
-                logger.warning(f"Zero coordinates detected: bUE {self.connected_bues[bue_1]}: {c1}, bUE {bue_2}: {c2}")
-
-            logger.info(
-                f"Calculating distance between bUE {self.connected_bues[bue_1]} at ({lat1}, {lon1}) and bUE {self.connected_bues[bue_2]} at ({lat2}, {lon2})"
-            )
-
-            return distance.great_circle((lat1, lon1), (lat2, lon2)).meters
-
-        except KeyError as e:
-            logger.error(f"bUE coordinates not found: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Error calculating distance: {e}")
-            return None
-
-    def create_bue_log_file(self, bue_id):
-        """Create a log file for a specific bUE if it doesn't already exist."""
-        try:
-            path = f"logs/{self.connected_bues[bue_id]}.log"
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-
-            # This will append to existing file or create new one
-            logger.add(
-                path,
-                rotation="5 MB",
-                filter=lambda record, bue_id=bue_id: record["extra"].get("bue_id") == bue_id,
-            )
-
-            logger.info(f"Created/resumed log file for bUE {self.connected_bues[bue_id]}: {path}")
-
-        except Exception as e:
-            logger.error(f"Failed to create log file for bUE {self.connected_bues[bue_id]}: {e}")
-
-    def base_station_tick(self, loop_dur=0.01):
-
-        # The base station will read incoming messages roughly every LISTEN_FOR_MESSAGE_INTERVAL seconds
-        LISTEN_FOR_MESSAGE_INTERVAL = 1
-        listen_for_message_counter = 0
-        listen_for_message = round(LISTEN_FOR_MESSAGE_INTERVAL / loop_dur)
-
-        # The base station will check to see if a bUE has timed out every CHECK_FOR_TIMEOUTS_INTERVAL seconds
-        CHECK_FOR_TIMEOUTS_INTERVAL = 10
-        check_for_timeouts_counter = 0
-        check_for_timeouts = round(CHECK_FOR_TIMEOUTS_INTERVAL / loop_dur)
-
+    def ping_timeout_handler(self):
+        """
+        Function runs in its own thread. Repeats every second (set by time.sleep below)
+        Checks to see if each connected bue has sent a PING in the last self.PING_TIMEOUT_SECONDS
+        If not PING received in that amount of time, increments self.bue_missed_ping_counter
+        """
         while not self.EXIT:
+            try:
+                current_time = time.time()
 
-            if not self.tick_enabled:
-                time.sleep(0.1)
-                continue
+                for bue_id in self.connected_bues.copy():
+                    last_ping_time = self.bue_id_to_last_ping_time[int(bue_id)]
 
-            loop_start = time.time()
+                    if current_time - last_ping_time >= self.PING_TIMEOUT_SECONDS:
+                        self.bue_missed_ping_counter[bue_id] += 1
 
-            if listen_for_message_counter % listen_for_message == 0:
-                self.message_queue.put(self.message_listener)
-                listen_for_message_counter = 0
+                        # Need to update last_ping_time or this will occur every loop
+                        self.bue_id_to_last_ping_time[bue_id] = current_time
 
-            if check_for_timeouts_counter % check_for_timeouts == 0:
-                self.message_queue.put(self.check_bue_timeout)
-                check_for_timeouts_counter = 0
+                        if self.bue_missed_ping_counter[bue_id] >= self.PING_MAX_MISSES:
+                            logger.error(
+                                f"{self.bue_id_to_hostname[int(bue_id)]}: Has missed {self.bue_missed_ping_counter[bue_id]} PINGs"
+                            )
+                        else:
+                            logger.warning(
+                                f"{self.bue_id_to_hostname[int(bue_id)]}: Has missed {self.bue_missed_ping_counter[bue_id]} PINGs"
+                            )
 
-            listen_for_message_counter += 1
-            check_for_timeouts_counter += 1
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                logger.error(f"ping_timeout_handler: Error {e}\nFull traceback:\n{tb_str}")
 
-            elapsed = time.time() - loop_start
-            if elapsed < loop_dur:
-                time.sleep(loop_dur - elapsed)
+            time.sleep(1)
+
+    # OTA Helper Functions
+    def ota_ping_handler(self, src_id: str, state: str, lat: str, long: str):
+        """
+        Takes in the parts from a PING message. If the PING had valid coordinates, those are stored
+        and reported. Always note the time the PING was received, the state the bUE reports to be at,
+        and response to the bUE with a PINGR
+        """
+        self.bue_id_to_state[int(src_id)] = State(int(state))
+        self.bue_id_to_last_ping_time[int(src_id)] = time.time()
+
+        coords: str = ""
+        if lat != "" and long != "":
+            self.bue_id_to_coords[int(src_id)] = (int(lat), int(long))
+            coords = f"@ {lat}, {long}"
+
+        self.ota_outgoing_queue.put((src_id, "PINGR"))
+        logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: PING {coords}")
 
     def __del__(self):
         try:
             self.EXIT = True
-            if hasattr(self, "ping_bue_thread"):
-                self.ping_bue_thread.join()
-            if hasattr(self, "message_queue_thread"):
-                self.message_queue_thread.join()
-            if hasattr(self, "state_machine_thread"):
-                self.state_machine_thread.join()
+            if hasattr(self, "ota_trx_thread"):
+                self.ota_trx_thread.join()
+            if hasattr(self, "ping_timeout_handler_thread"):
+                self.ping_timeout_handler_thread.join()
             if hasattr(self, "ota"):
                 self.ota.__del__()
             if hasattr(self, "connected_bues"):
                 self.connected_bues.clear()
         except Exception as e:
             logger.warning(f"__del__: Exception during cleanup: {e}")
+
+
+if __name__ == "__main__":
+
+    # Get the current time
+    start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    # Example usage
+    logger.info(f"This marks the start of the base station service at {start_time}")
+
+    try:
+        base_station = Base_Station_Main(yaml_str="base_station.yaml")
+
+        # Any other setup code can go here
+        time.sleep(2)  # Allow some time for threads to initialize
+
+        while True:
+            time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        if base_station is not None:
+            logger.info("Exiting the base station service")
+            base_station.EXIT = True
+            time.sleep(0.5)
+            base_station.__del__()
+            sys.exit(0)
+    except Exception as e:
+        logger.error(f"Unhandled exception in main: {e}")
+        if base_station is not None:
+            base_station.EXIT = True
+            time.sleep(0.5)
+            base_station.__del__()
+        sys.exit(1)

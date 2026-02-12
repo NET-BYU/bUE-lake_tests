@@ -14,29 +14,39 @@ from yaml import load, Loader
 
 # For gps
 from pynmeagps import NMEAReader  # type:ignore
+
 import gps
 
 logger.add("logs/bue.log", rotation="10 MB")  # Example: Add a file sink for all logs
 
 # Internal imports
 from ota import Ota
+from constants import State
 
 # This variable manages how many PINGRs should be missed until the bUE disconnects from the base station
 # and goes back to its CONNECT_OTA state.
-# TIMEOUT rotations must pass, then the bUE will disconnect.
-# The length of the rotations is defined by IDLE_PING_OTA_INTERVAL in bue_tick()
 TIMEOUT = 6
 BROADCAST_OTA_ID = 0
+
 
 class State(Enum):
     INIT = auto()
     CONNECT_OTA = auto()
     IDLE = auto()
+    WAIT_FOR_START = auto()
     UTW_TEST = auto()
+    TEST_CLEANUP = auto()
+
+
+class Test_State(Enum):
+    IDLE = auto()
+    RUNNING = auto()
+    PASS = auto()
+    FAIL = auto()
 
 
 class bUE_Main:
-    def __init__(self, yaml_str = "bue_config.yaml"):
+    def __init__(self, yaml_str="bue_config.yaml"):
         self.yaml_data = {}
 
         # Load the yaml file
@@ -53,18 +63,17 @@ class bUE_Main:
         # Initialize the OTA and UTW objects
         while True:
             try:
-                self.ota = Ota(
-                    self.yaml_data["OTA_PORT"],
-                    self.yaml_data["OTA_BAUDRATE"]
-                )
+                self.ota = Ota(self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"])
                 break
             except Exception as e:
                 logger.error(f"Failed to initialize OTA module: {e}")
                 time.sleep(2)
 
         # Fetch the Reyax ID from the OTA module
-        time.sleep(0.1)
-        self.reyax_id = self.ota.fetch_id()
+        self.reyax_id = None
+        while self.reyax_id is None:
+            time.sleep(0.2)
+            self.reyax_id = self.ota.fetch_id()
         logger.info(f"__init__: OTA module initialized with Reyax ID {self.reyax_id}")
 
         # Fetch the device hostname
@@ -86,18 +95,29 @@ class bUE_Main:
         self.flag_ota_cancel_test = threading.Event()
         self.flag_ota_reload = threading.Event()
         self.flag_ota_restart = threading.Event()
+        self.flag_ota_tout = threading.Event()
 
         # State machine - statuses
         # These are the main internal signals used by the state machine
-        self.status_test_running = False
         self.status_ota_connected = False
 
         # Network information
         self.ota_base_station_id = None
         self.ota_test_params = None
-        
-        
-        
+
+        # Variable to hold how many PINGRs have been missed
+        self.ota_pingrs_missed: int = 0
+
+        # Variables to handle test subprocess
+        self.test_command = None
+        self.test_start_time = None
+        self.test_process = None
+        self.test_stdout_queue = queue.Queue()
+        self.test_stdout_thread = None
+
+        # Holds what state the test currently is in
+        self.test_state = Test_State.IDLE
+
         # Build the state machine - flags
         self.counter_ota_timeout = 0
         self.MAX_ota_timeout = TIMEOUT
@@ -107,13 +127,6 @@ class bUE_Main:
         self.start_testing = False
         self.cancel_test = False
         # TODO - delete/modify these once test functionality gets added
-
-        # Buffer to hold outputs from the UTW script (like helloworld)
-        self.test_output_buffer = []
-        self.test_output_lock = threading.RLock()
-        # TODO - modify these once test functionality gets added
-
-        
 
         # Set up the ota threads
         self.ota_incoming_queue = queue.Queue()
@@ -183,7 +196,7 @@ class bUE_Main:
                 src_id, msg = message.split(",", 1)
 
                 if ":" in msg:
-                    msg_type, msg_body = msg.split(":", 1)
+                    msg_type, msg_body, *_ = msg.split(":", maxsplit=2)
                 else:
                     msg_type, msg_body = msg, None
 
@@ -235,62 +248,35 @@ class bUE_Main:
         if self.status_ota_connected:
             logger.warning(f"connect_ota_req: OTA device is already connected to base station {self.ota_base_station_id}")
             return
-        
+
         # Start by checking the flag
         if self.flag_ota_connected.is_set():
             # Our connection request was received, set the status and send an ACK
             self.status_ota_connected = True
-            self.flag_ota_connected.clear() = False
+            self.flag_ota_connected.clear()
             logger.info(f"ota_connect_req: OTA device is connected to network with base station {self.ota_base_station_id}")
 
             # Send the ACK
             self.ota_outgoing_queue.put((self.ota_base_station_id, "ACK"))
             return
-        
+
         # If flag not set, send another REQ message
         self.ota_outgoing_queue.put((BROADCAST_OTA_ID, f"REQ:{self.hostname},{self.reyax_id}"))
-            
-    
-    def ota_idle_ping(self):
-        if not self.status_ota_connected:
-            logger.warning("ota_idle_ping: OTA device is not connected to base station")
-            return
 
+    def ota_ping(self):
         lat, long = self.gps_handler()
 
-        self.ota_outgoing_queue.put((self.ota_base_station_id, f"PING,{lat},{long}"))  # test ping for now
-        logger.info(f"Sent a PING with position lat: {lat} lon: {long}")
-
-        # Check to see if we are getting ping responses
         if self.flag_ota_pingr.is_set():
-            self.counter_ota_timeout = 0
             self.flag_ota_pingr.clear()
         else:
-            self.counter_ota_timeout += 1
-            if self.counter_ota_timeout == self.MAX_ota_timeout / 2:
-                logger.info(f"We haven't heard from {self.ota_base_station_id} in a while....")
-            elif self.counter_ota_timeout >= self.MAX_ota_timeout:
-                logger.info(f"We have not heard from {self.ota_base_station_id} in too long. Disconnecting...")
-                self.status_ota_connected = False
+            self.ota_pingrs_missed += 1
 
+        self.ota_outgoing_queue.put((self.ota_base_station_id, f"PING:{self.cur_st.value},{lat},{long}"))
+        logger.info(f"ota_ping: Sent ping to {self.ota_base_station_id}")
 
-    def ota_send_update(self):
-        lat, long = self.gps_handler()
-        logger.info(f"Sent UPD to {self.ota_base_station_id}")
-
-        with self.test_output_lock:
-            if self.test_output_buffer:
-                for line in self.test_output_buffer:
-                    self.ota_outgoing_queue.put((self.ota_base_station_id, f"UPD:,{lat},{long},{line}"))
-                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
-                    time.sleep(0.4)  # Sleep so UART does not get overwhelmed
-                self.test_output_buffer.clear()
-
-            else:  # If there is no message send it blank
-                self.ota_outgoing_queue.put((self.ota_base_station_id, f"UPD:,{lat},{long},"))
-                logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output")
-
-    def gps_handler(self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=10):
+    def gps_handler(
+        self, max_attempts=50, min_fixes=3, hdop_threshold=2.0, max_runtime=2
+    ):  # TODO: what should max_runtime be? I had it as 10 historically
         start_time = time.time()
         try:
             session = gps.gps(mode=gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
@@ -334,183 +320,6 @@ class bUE_Main:
 
         return "", ""
 
-    # This function handles operations that happen while a bUE is in the TESTING state
-    def test_handler(self, input):  # Input Format: TEST,<file>,<wait_time>,<parameters>
-        if not ";" in input:  ## TODO: Perform other checks
-            try:
-                self.ota.send_ota_message(self.ota_base_station_id, "PREPR")
-
-                parts = input.split(",", maxsplit=3)
-                print(parts)
-                if len(parts) < 4:
-                    raise ValueError(f"Invalid input format: {input}")
-                file = parts[1]
-                start_time = int(parts[2])
-                parameters = parts[3].split(" ")
-
-                self.is_testing = True
-                self.cancel_test = False
-                self.test_output_buffer = []
-
-                current_time = int(time.time())
-                if start_time > current_time:
-                    wait_duration = start_time - current_time
-                    logger.info(f"Waiting {wait_duration} seconds until start time {start_time}")
-
-                    # Wait in small increments to allow for cancellation
-                    while int(time.time()) < start_time and not self.cancel_test:
-                        time.sleep(0.001)
-
-                    if self.cancel_test:
-                        logger.info("Test cancelled during wait period")
-                        self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
-                        return
-
-                logger.info(f"Starting test at scheduled time: {start_time}")
-
-                with self.test_output_lock:
-                    self.test_output_buffer.clear()
-
-                print(["python3", f"{file}.py"] + parameters)
-
-                if parameters == [""]:
-                    parameters = None
-
-                if parameters:
-                    process = subprocess.Popen(
-                        ["python3", f"{file}.py"] + parameters,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        stdin=subprocess.PIPE,  # Needed to send keystrokes
-                        bufsize=1,  # Line-buffered
-                        universal_newlines=True,  # Text mode, also enables line buffering
-                        text=True,  # decode bytes to str
-                        encoding="utf-8",
-                        errors="replace",
-                    )
-                else:
-                    process = subprocess.Popen(
-                        ["python3", f"{file}.py"],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        stdin=subprocess.PIPE,  # Needed to send keystrokes
-                        bufsize=1,  # Line-buffered
-                        universal_newlines=True,  # Text mode, also enables line buffering
-                        text=True,  # decode bytes to str
-                        encoding="utf-8",
-                        errors="replace",
-                    )
-
-                logger.info(f"Started test script: {file}.py with parameters {parameters}")
-
-                def reader_thread(pipe, output_queue):
-                    for line in iter(pipe.readline, ""):
-                        output_queue.put(line)
-                    pipe.close()
-
-                stdout_queue = queue.Queue()
-                stderr_queue = queue.Queue()
-
-                # Threads that will be looking in the stdout and stderr termainals for messages while
-                # the TEST process runs
-                threading.Thread(
-                    target=reader_thread,
-                    args=(process.stdout, stdout_queue),
-                    daemon=True,
-                ).start()
-                threading.Thread(
-                    target=reader_thread,
-                    args=(process.stderr, stderr_queue),
-                    daemon=True,
-                ).start()
-
-                """
-                # Process will go to completion unless unless the system receives a CANC message from the base station.
-                # The CANC message is received and processed by the utw thread
-
-                # We also collect all the terminal outputs from the script so we can send them back to the base station
-                """
-                while process.poll() is None:  # poll() returns None if process hasn't terminated
-                    # Get all normal terminal outputs
-                    try:
-                        stdout_line = stdout_queue.get_nowait()
-                        clean_line = f"[{file}.py STDOUT] {stdout_line.strip()}"
-                        logger.info(clean_line)
-                        with self.test_output_lock:
-                            if " rx_" in clean_line:
-                                self.test_output_buffer.append(f"STDOUT: {clean_line}")
-                            # elif "CRC invalid" in clean_line:
-                            #     self.test_output_buffer.append(f"STDOUT: {clean_line}")
-                    except queue.Empty:
-                        pass
-
-                    try:
-                        stderr_line = stderr_queue.get_nowait()
-                        clean_line = f"[{file}.py STDERR] {stderr_line.strip()}"
-                        logger.error(clean_line)
-                        with self.test_output_lock:
-                            self.test_output_buffer.append(f"STDERR: {clean_line}")
-                    except queue.Empty:
-                        pass
-
-                    if self.cancel_test:
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        print("TRYING TO CANCEL")
-                        logger.info(f"Sending termination to: {file}.py")
-                        try:
-                            process.send_signal(signal.SIGINT)
-                        except Exception as e:
-                            logger.error(f"Failed to terminate: {e}")
-                        break
-                    time.sleep(0.1)
-
-                """
-                Leave this code in! If we want all the output messages from the bUE uncomment it. Otherwise,
-                we will only get the output messages before it ends/receives a CANC
-                """
-                # while not stdout_queue.empty():
-                #     line = stdout_queue.get()
-                #     clean_line = f"[{file}.py STDOUT] {line.strip()}"
-                #     logger.info(clean_line)
-                #     with self.test_output_lock:
-                #         if "rx msg:" in clean_line:
-                #             self.test_output_buffer.append(f"STDOUT: {clean_line}")
-
-                while not stderr_queue.empty():
-                    line = stderr_queue.get()
-                    clean_line = f"[{file}.py STDERR] {line.strip()}"
-                    logger.error(clean_line)
-                    with self.test_output_lock:
-                        self.test_output_buffer.append(f"STDERR: {clean_line}")
-
-                try:
-                    exit_code = process.wait()
-                except Exception as e:
-                    logger.error(f"Error waiting for subprocess {file}.py: {e}")
-                    exit_code = -1
-
-                # If a test is canceled, a CANCD message is sent in responses letting the base station know we have successfully termianted the test
-                if self.cancel_test:
-                    self.ota.send_ota_message(self.ota_base_station_id, "CANCD")
-                elif exit_code == 0:
-                    # Any extra messages that have not already been sent to the base station are sent
-                    with self.test_output_lock:
-                        self.ota_send_upd()
-
-                    logger.info(f"{file}.py completed successfully.")
-                    self.ota.send_ota_message(self.ota_base_station_id, "DONE")
-                else:
-                    logger.error(f"{file}.py exited with code {exit_code}")
-                    self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
-
-            except Exception as e:
-                logger.info(f"TEST could not be run: {e}")
-                self.ota.send_ota_message(self.ota_base_station_id, "FAIL")
-            finally:
-                self.is_testing = False
-                self.cancel_test = False
-
     ### UTW MODULE METHODS ###
 
     def utw_task_queue_handler(self):
@@ -522,27 +331,135 @@ class bUE_Main:
             except queue.Empty:
                 pass
 
-    # Instead of PINGs, bUEs send UPDs while in UTW_TEST state so the base still knows there is a connection
-    def ota_send_upd(self):
-        lat, long = self.gps_handler()
-        # self.ota.send_ota_message(self.ota_base_station_id, f"UPD:{lat},{long}")
-        logger.info(f"Sent UPD to {self.ota_base_station_id}")
+    # Sends the first message in the self.test_stdout_queue back to the base station
+    def ota_send_tout(self):
+        try:
+            stdout = self.test_stdout_queue.get_nowait().strip()
+            if len(stdout) == 0:  # See if the message is empty
+                return
+        except:
+            logger.error("ota_send_tout: test_stdout_queue is empty")
+            return
 
-        with self.test_output_lock:
-            if self.test_output_buffer:
-                for line in self.test_output_buffer:
-                    self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},{line}")
-                    logger.info(f"Sent UPD to {self.ota_base_station_id} with console output: {line}")
-                    time.sleep(0.4)  # Sleep so UART does not get overwhelmed
-                self.test_output_buffer.clear()
-
-            else:  # If there is no message send it blank
-                self.ota.send_ota_message(self.ota_base_station_id, f"UPD:,{lat},{long},")
-                logger.info(f"Sent UPD to {self.ota_base_station_id} with no console output")
+        self.ota_outgoing_queue.put((self.ota_base_station_id, f"TOUT:{stdout}"))
+        logger.info(f"Sent TOUT to {self.ota_base_station_id} with console output: {stdout}")
+        self.flag_ota_tout.clear()
 
     """
-    # This function checks for incoming messages while in the system is the UTW_TEST state.
-    # The messages received in this state should only be CANC. 
+    Checks to see if the ota system a valid TEST message from the base station
+    It is important that we check this before running that actual test subprocess
+    to prevent needless errors.
+
+    self.ota_test_params format: <file>,<wait_time>,<parameters>
+    parameters are separated by spaces
+    """
+
+    def test_has_valid_params(self) -> bool:
+        params_parts: list[str] = self.ota_test_params.split(",", maxsplit=2)
+
+        if len(params_parts) < 3:
+            logger.warning(f"Invalid parameters used to initalize test: {params_parts}")
+            ## TODO: Do I need to do something with a flag here?
+            return False
+
+        file: str = params_parts[0]
+        self.test_start_time = int(params_parts[1])
+        parameters: list[str] = params_parts[2].split(" ")
+
+        # If parameters is blank, it could come with an empty space in an array which we need to check for
+        parameters = [param for param in parameters if param.strip()]
+
+        self.test_command = ["python3", f"{file}.py"] + (parameters if parameters else [])
+
+        logger.info(f"Test prepared: {file}.py with parameters: {parameters if parameters else 'none'}")
+        logger.info(f"Test scheduled for: {self.test_start_time}")
+
+        return True
+
+    """
+    A helper function that will monitor the test subprocess stdout and write new complete
+    lines to the test_stdout_queue
+    """
+
+    def reader_thread(self, pipe, output_queue):
+        for line in iter(pipe.readline, ""):
+            output_queue.put(line)
+        pipe.close()
+
+    """
+    Once a utw test is ready to start, we create the subprocess and pipe all of the stdout
+    content into the test_stdout_queue to be sent out with messages.
+    """
+
+    def create_test_process(self):
+        self.test_process = subprocess.Popen(
+            self.test_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.PIPE,
+            bufsize=1,  # Line-buffered
+            universal_newlines=True,  # Text mode, also enables line buffering
+            text=True,  # decode bytes to str
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        # Thread to manage reading from stdout
+        self.test_stdout_thread = threading.Thread(
+            target=self.reader_thread,
+            args=(self.test_process.stdout, self.test_stdout_queue),
+            daemon=True,
+        )
+
+        self.test_stdout_thread.start()
+
+        logger.info("Test process and stdout thread have started")
+
+    """
+    Checks on the test subprocess to see if it is still running.
+    subprocess returns None if still running
+    subprocess return 0 if it ended successfully
+    subprocess returns -2 if it was ended by a signal.SIGINT (better none as a CANC)
+    subprocess returns something else otherwise, meaning it ended unexpectedly
+    """
+
+    def check_on_test(self):
+        if self.test_process is None:
+            logger.error("Process is none but we are trying to check on it")
+            return
+
+        exit_code = self.test_process.poll()
+
+        if exit_code is None:
+            return  # The test is still going
+
+        # Test ended successfully
+        elif exit_code == 0:
+            self.test_state = Test_State.PASS
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "DONE"))
+
+        # Test was terminated with a CANC. When a subprocess is terminated with a signal.SIGINT,
+        # it returns -2
+        elif exit_code == -2:
+            self.test_state = Test_State.PASS
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "CANCD"))
+
+        else:
+            self.test_state = Test_State.FAIL
+            self.ota_outgoing_queue.put((self.ota_base_station_id, "FAIL"))
+
+    def clean_up_test(self):
+        if self.test_stdout_thread and self.test_stdout_thread.is_alive():
+            self.test_stdout_thread.join()
+        # TODO: Need to reset flags here? Or does that occur when we switch to WAIT_FOR_START transition?
+
+        self.test_process = None
+        self.test_stdout_thread = None
+        self.test_state = Test_State.IDLE
+
+    """
+    This function checks for incoming messages while in the system is the UTW_TEST state.
+    The messages received in this state should only be CANC. 
     """
 
     def check_for_cancel(self):
@@ -568,18 +485,18 @@ class bUE_Main:
                 logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
 
     """
-    Restarts the service entirely
+    
     """
 
     def check_for_test_interrupt(self):
         """
-        Check periodically to see if the test if CANCELLED, if the service needs to RELOAD, 
+        Check periodically to see if the test if CANCELLED, if the service needs to RELOAD,
         or if the system needs to RESTART
         """
         if self.flag_ota_cancel_test.is_set():
             logger.info("check_for_cancel: Test CANCELLED by base station")
             self.flag_ota_cancel_test.clear()
-            self.status_test_running = False
+            self.test_process.send_signal(signal.SIGINT)
 
         elif self.flag_ota_reload.is_set():
             logger.info("check_for_cancel: Received a RELOAD message")
@@ -591,7 +508,6 @@ class bUE_Main:
             self.flag_ota_restart.clear()
             self.restart_system()
 
-    
     def reload_service(self):
         """
         Reloads the service without restarting the system entirely
@@ -601,7 +517,6 @@ class bUE_Main:
         except Exception as e:
             print(f"Error restarting bue.service': {e}")
 
-    
     def restart_system(self):
         """
         Restarts the entire system using sudo reboot
@@ -612,8 +527,6 @@ class bUE_Main:
         except Exception as e:
             logger.error(f"Error restarting system: {e}")
 
-    
-    
     '''def synchronize_time(self, base_timestamp):
         """
         Synchronize bUE time with base station time.
@@ -655,7 +568,6 @@ class bUE_Main:
             logger.info(f"state_change_logger: State changed from {self.prv_st.name} to {self.cur_st.name}")
             self.prv_st = self.cur_st
 
-    
     def bue_tick(self, loop_dur=0.01):
         # Interconnect flags
 
@@ -666,24 +578,20 @@ class bUE_Main:
         counter_connect_ota = 0
         interval_connect_ota = round(CONNECT_OTA_REQ_INTERVAL / loop_dur)
 
-        # How often to ping (once in idle state) IDLE_PING_OTA_INTERVAL seconds
-        IDLE_PING_OTA_INTERVAL = 10
-        counter_idle_ping = 0
-        interval_idle_ping = round(IDLE_PING_OTA_INTERVAL / loop_dur)
-
-        # How often to send UPDs UTW_UPD_OTA_INTERVAL seconds
-        UTW_UPD_OTA_INTERVAL = 10
-        counter_uta_update = 0
-        interval_uta_update = round(UTW_UPD_OTA_INTERVAL / loop_dur)
+        # How often to ping (once in idle state) PING_OTA_INTERVAL seconds
+        PING_OTA_INTERVAL = 10
+        counter_ping = 0
+        interval_ping = round(PING_OTA_INTERVAL / loop_dur)
 
         while not self.EXIT:
             if not self.tick_enabled:
-                time.sleep(loop_dur)   # avoid busy spinning when disabled
+                time.sleep(loop_dur)  # avoid busy spinning when disabled
                 continue
 
             loop_start = time.time()
 
-            # TRANSITIONS STATE MACHINE
+            ### TRANSITIONS STATE MACHINE ###
+
             if self.cur_st == State.INIT:
                 # Setup should all be complete, immediately move to the CONNECT_OTA state
                 counter_connect_ota = 0
@@ -696,14 +604,20 @@ class bUE_Main:
             elif self.cur_st == State.CONNECT_OTA:
                 # Wait until the OTA device is connected to the OTA network
                 if self.status_ota_connected:
-                    counter_idle_ping = 0
 
                     # Reset the flags used in idle
                     self.flag_ota_pingr.clear()
                     self.flag_ota_start_testing.clear()
 
+                    counter_ping = 0
                     self.nxt_st = State.IDLE
+                else:
+                    self.nxt_st = State.CONNECT_OTA
+
+            # If the bUE ever loses connected to the base station, return to CONNECTED_OTA state
             #
+            # If the bUE gets a TEST from the base station and that TEST contained valid parameters,
+            # enter the WAIT_FOR_START state
             elif self.cur_st == State.IDLE:
                 # If we lost connection we will go back to the connecting state
                 if not self.status_ota_connected:
@@ -714,66 +628,135 @@ class bUE_Main:
 
                     self.nxt_st = State.CONNECT_OTA
                 # If we receivied a TEST message from the base station, we switch to UTW_TEST state
-                elif self.is_testing:
-                    counter_idle_ping = 0
-
+                elif self.flag_ota_start_testing.is_set():
                     # Reset the flags used in testing
+                    self.flag_ota_start_testing.clear()
                     self.flag_ota_cancel_test.clear()
                     self.flag_ota_reload.clear()
                     self.flag_ota_restart.clear()
-                    
+                    self.test_state = Test_State.RUNNING
+
+                    # TODO reset other falgs?
+                    if self.test_has_valid_params():
+                        self.nxt_st = State.WAIT_FOR_START
+                    else:
+                        self.nxt_st = State.IDLE
+                        # TODO: SEND A BAD PARAMETERS MESSAGE?
+            #
+            # In the WAIT_FOR START state, the bUE is waiting for a certain time to arrive. Once it has, it
+            # will enter into the UTW_TEST state
+            #
+            # If while waiting the bUE receives a CANC message, it will stop waiting and go straight to the
+            # TEST_CLEANUP state so flags can be reset approriately
+            #
+            elif self.cur_st == State.WAIT_FOR_START:
+                current_time: int = int(time.time())
+                if self.flag_ota_cancel_test.is_set():
+                    self.ota_outgoing_queue.put((self.ota_base_station_id, "CANCD"))
+                    self.nxt_st = State.TEST_CLEANUP
+
+                elif current_time < self.test_start_time:
+                    self.nxt_st = State.WAIT_FOR_START
+
+                elif current_time >= self.test_start_time:
                     self.nxt_st = State.UTW_TEST
+                    self.create_test_process()  # TODO: Call this early and have a "start" call. See notion
+                else:
+                    logger.warning("Got to last transition in WAIT_FOR_START. This should not be possible")
+            #
+            # If the bUE ever receives a CANC while testing, it should response with a CANCD
+            # message and enter the TEST_CLEANUP state
+            #
+            # If the test subprocess is no longer running, the bUE will report how the
+            # test subprocessed ended and enter the TEST_CLEANUP state
+            #
+            # Otherwise, stay in the UTW_TEST state
             #
             elif self.cur_st == State.UTW_TEST:
-                # If we lost connection we will go straight to the connecting state
-                if not self.status_ota_connected:
-                    counter_connect_ota = 0
+                if self.test_state == Test_State.PASS:
+                    self.nxt_st = State.TEST_CLEANUP
 
-                    # Reset the flags that are used in the connect state
-                    self.flag_ota_connected.clear()
+                elif self.test_state == Test_State.FAIL:
+                    self.nxt_st = State.TEST_CLEANUP
 
-                    self.nxt_st = State.CONNECT_OTA
-                    # TODO: end the test in this instance
-                # Once test is complete/terminated, return to the IDLE state
-                elif not self.is_testing:
-                    counter_idle_ping = 0
-                    self.nxt_st = State.IDLE
+                elif self.test_state == Test_State.RUNNING:
+                    self.nxt_st = State.UTW_TEST
+
+                else:
+                    logger.error(f"bue_tick: bUE in unexpected test_state while in UTW_TEST: {self.test_state}")
             #
+            # Once all the stdout queue messages have been sent, return to the IDLE state
+            #
+            elif self.cur_st == State.TEST_CLEANUP:
+                if self.test_stdout_queue.empty():
+                    self.nxt_st = State.IDLE
+                else:
+                    self.nxt_st = State.TEST_CLEANUP
+
             else:
                 logger.error(f"tick: Invalid state transition {self.cur_st.name}")
                 sys.exit(1)
 
-            
-            ## ACTION STATE MACHINE
+            ### ACTION STATE MACHINE ###
+
             if self.cur_st == State.INIT:
                 pass
             #
             elif self.cur_st == State.CONNECT_OTA:
                 counter_connect_ota += 1
 
-                # Send out a message looking for a base station every CONNECT_OTA_REQ_INTERVAL seconds
+                # Send out a REQ every CONNECT_OTA_REQ_INTERVAL seconds
                 if counter_connect_ota % interval_connect_ota == 0:
                     self.ota_task_queue.put(self.ota_connect_req)
             #
             elif self.cur_st == State.IDLE:
-                counter_idle_ping += 1
+                counter_ping += 1
 
-                # Second out a message pinging the base station every IDLE_PING_OTA_INTERVAL seconds
-                if counter_idle_ping % interval_idle_ping == 0:
-                    self.ota_task_queue.put(self.ota_idle_ping)
+                # Send a PING every PING_OTA_INTERVAL seconds
+                if counter_ping % interval_ping == 0:
+                    self.ota_task_queue.put(self.ota_ping)
+                    counter_ping = 0
+
+            #
+            elif self.cur_st == State.WAIT_FOR_START:
+                counter_ping += 1
+
+                # Send a PING every PING_OTA_INTERVAL seconds
+                if counter_ping % interval_ping == 0:
+                    self.ota_task_queue.put(self.ota_ping)
+                    counter_ping = 0
             #
             elif self.cur_st == State.UTW_TEST:
-                counter_uta_update += 1
+                counter_ping += 1
 
-                # Do necessary tasks while running a test every UTW_UPD_OTA_INTERVAL seconds
-                if counter_uta_update % interval_uta_update == 0:
-                    self.ota_task_queue.put(self.ota_send_update)
-                    self.ota_task_queue.put(self.check_for_test_interrupt)
+                # Send a PING every PING_OTA_INTERVAL seconds
+                if counter_ping % interval_ping == 0:
+                    self.ota_task_queue.put(self.ota_ping)
+                    counter_ping = 0
+
+                self.check_on_test()
+                self.check_for_test_interrupt()
+
+                if not self.flag_ota_tout.is_set() and not self.test_stdout_queue.empty():
+                    self.flag_ota_tout.set()
+                    self.ota_task_queue.put(self.ota_send_tout)
+            #
+            elif self.cur_st == State.TEST_CLEANUP:
+                counter_ping += 1
+
+                # Send a PING every PING_OTA_INTERVAL seconds
+                if counter_ping % interval_ping == 0:
+                    self.ota_task_queue.put(self.ota_ping)
+                    counter_ping = 0
+
+                if not self.flag_ota_tout.is_set() and not self.test_stdout_queue.empty():
+                    self.ota_task_queue.put(self.ota_send_tout)
+                else:
+                    self.clean_up_test()
             #
             else:
                 logger.error(f"tick: Invalid state action {self.cur_st.name}")
                 sys.exit(1)
-
 
             # Update the current state
             self.cur_st = self.nxt_st
@@ -785,7 +768,6 @@ class bUE_Main:
             remaining = loop_dur - (time.time() - loop_start)
             if remaining > 0:
                 time.sleep(remaining)
-
 
     def __del__(self):
         try:
@@ -823,7 +805,7 @@ if __name__ == "__main__":
         bue = bUE_Main(yaml_str="bue_config.yaml")
 
         # Any other setup code can go here
-        time.sleep(2) # Allow some time for threads to initialize
+        time.sleep(2)  # Allow some time for threads to initialize
 
         bue.tick_enabled = True
 

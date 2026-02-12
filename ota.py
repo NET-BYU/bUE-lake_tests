@@ -12,9 +12,6 @@ import time
 import queue
 import crc8
 
-from constants import bUEs
-
-
 class Ota:
     def __init__(self, port, baudrate, stdout_history=None):
 
@@ -38,6 +35,9 @@ class Ota:
         # Received messages buffer
         self.recv_msgs = queue.Queue()
 
+        # Internal Reyax messages buffer
+        self.internal_msgs = queue.Queue()
+
         # Reading thread
         self.thread = threading.Thread(target=self.read_from_port, daemon=True)
         self.thread.start()  # keeping the program from exiting
@@ -56,11 +56,18 @@ class Ota:
         """
         while not self.exit_event.is_set():
             try:
-                message_with_crc = self.ser.readline().decode("utf-8", errors="ignore").strip()
-                parts = message_with_crc.split(",")
+                message = self.ser.readline().decode("utf-8", errors="ignore").strip()
 
-                if message_with_crc == "" or message_with_crc == "OK":
+                if message == "" or message == "OK":
                     continue
+
+                if not message.startswith("+RCV="):
+                    self.internal_msgs.put(message)
+                    continue
+
+                # else, we have a RVC message, needs to do reverse crc
+                message_with_crc = message
+                parts = message_with_crc.split(",")
 
                 # print(f"Message with CRC: {message_with_crc}")
 
@@ -77,7 +84,7 @@ class Ota:
                 if not valid_crc:  # Bad checksum
                     self.send_ota_message(origin, "BAD")
                     if self.stdout_history:
-                        self.stdout_history.append(f"Got a message with a bad checksum from {bUEs(str(origin))}")
+                        self.stdout_history.append(f"Got a message with a bad checksum from {origin}")
                     continue
 
                 self.recv_msgs.put(f"{origin},{original_message}")
@@ -159,15 +166,27 @@ class Ota:
         Fetch the device ID from the Reyax module.
         """
         try:
-            self.ser.write(b'AT+ADDRESS=?\r\n')
+            addr_req = f'AT+ADDRESS=?\r\n'
+            self.ser.write(addr_req.encode("utf-8"))
             time.sleep(0.1)  # Wait for response
-            response = self.ser.readlines()
-            for line in response:
-                decoded_line = line.decode('utf-8').strip()
-                if decoded_line.startswith('+ADDRESS='):
-                    addr = decoded_line.split('=')[1]
-                    self.id = int(addr)
-                    return self.id
+            try:
+                while True:
+                    response = self.internal_msgs.get_nowait()
+                    # response may be bytes or str; handle both and also handle multiple lines
+                    if isinstance(response, bytes):
+                        lines = [response.decode('utf-8', errors='ignore').strip()]
+                    else:
+                        lines = [ln.strip() for ln in str(response).splitlines() if ln.strip()]
+
+                    for line in lines:
+                        if line.startswith('+ADDRESS='):
+                            addr = line.split('=', 1)[1]
+                            self.id = int(addr)
+                            return self.id
+            except queue.Empty:
+                # No more lines in the queue
+                pass
+
         except Exception as e:
             print(f"Failed to fetch ID: {e}")
         return None

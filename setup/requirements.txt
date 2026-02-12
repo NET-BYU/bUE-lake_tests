@@ -28,3 +28,6 @@ six==1.17.0
 survey==5.4.2
 tkintermapview==1.29
 urllib3==2.5.0
+qt6-applications==6.5.0.2.3
+qt6-tools==6.5.0.1.3
+
