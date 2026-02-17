@@ -1,49 +1,40 @@
 # The basic pattern for an Under the Water (UTW) test configuration is:
 #
-# test_name: {
-#   py_exe: "/home/admin/<location>/<main_file>.py",
-#   roles: {
-#     role_1: {
-#       args: "-a rguments_for_role_1",
+# test_name: 
+#   py_exe: "/home/admin/<location>/<main_file>.py"
+#   roles: 
+#     role_1: 
+#       args: ["-a", "rguments_for_role_1"]
 #       log_forward: ["strings to match", "in the log output", "of role_1", "to forward to the base station"]
-#     },
-#
+#     
 #     ...,
 #
-#     role_n: {
-#       args: "-a rguments_for_role_n",
+#     role_n: 
+#       args: ["-a", "rguments_for_role_n"]
 #       log_forward: ["strings to match", "in the log output", "of role_n", "to forward to the base station"]
-#     }
-#   }
-# }
-#   
+#
+# If there are no roles for a given test, the "roles" field can be omitted and the "args" and "log_forward" 
+#  fields can be placed directly under the test name.
+#
+# test_name:
+#   py_exe: "/home/admin/<location>/<main_file>.py"
+#   args: ["-a", "arguments_for_test"]
+#   log_forward: ["strings to match", "in the log output", "of the test", "to forward to the base station"]
 
-# tests:
 
-#   rtt:
-#     py_exe: "/home/admin/two_agent_osu/agent_main.py"
-#     roles:
-#       init:
-#         args: "-a rtt_init"
-#         log_forward: ["RTTR from start", "  --- "]
-      
-
-#       resp:
-#         args: "-a rtt_resp"
-#         log_forward: ["  --- RTT "]
-        
-      
-    
 
 rtt:
   py_exe: "/home/admin/two_agent_osu/agent_main.py"
   roles:
     init:
-      args: "-a rtt_init"
+      args: ["-a", "rtt_init"]
       log_forward: ["RTTR from start", "  --- "]
     resp:
-      args: "-a rtt_resp"
+      args: ["-a", "rtt_resp"]
       log_forward: ["  --- RTT "]
 
 run_rx:
-  py_exe: "home/admin/"
+  py_exe: "/home/admin/osu_testing/run_rx.py"
+
+run_tx:
+  py_exe: "/home/admin/osu_testing/run_tx.py"
