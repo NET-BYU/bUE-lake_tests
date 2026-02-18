@@ -2,7 +2,8 @@ import subprocess
 from dataclasses import dataclass
 import yaml
 import threading
-from loguru import logger
+# from loguru import logger
+import queue
 
 yaml_file = 'utw_config.yaml'
 
@@ -12,13 +13,8 @@ class utw_test:
     subp_command: list[str]
     print_forwards: list[str]
 
-with open(yaml_file, 'r') as file:
-    config = yaml.safe_load(file)
 
-    i = 0
-
-
-class UTW:
+class Utw:
     def __init__(self, config_file: str = "/home/admin/lake_tests/utw_config.yaml"):
         with open(config_file, 'r') as file:
             self.config = yaml.safe_load(file)
@@ -26,6 +22,10 @@ class UTW:
         self.UTW_TEST: utw_test | None = None
 
         self.test_process: subprocess.Popen | None = None
+
+        # Create a thread to read the output of the subprocess
+        self.read_thread = threading.Thread(target=self._read_output, daemon=True)
+        self.outputs_queue = queue.Queue()
 
     def setup_test(self, test: str):
         if self.UTW_TEST is not None:
@@ -90,5 +90,67 @@ class UTW:
         return f"Test '{self.UTW_TEST.name}' set up successfully."
     
     def run_test(self):
-        pass
+        if self.UTW_TEST is None:
+            raise ValueError("No test set up. Please set up a test before running.")
+        if self.test_process is not None:
+            raise ValueError("A test process is already running. Please reset before running a new test.")
+        
+        try:
+            self.test_process = subprocess.Popen(
+                self.UTW_TEST.subp_command, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT,
+                bufsize=1,  # Line-buffered
+                universal_newlines=True,  # Text mode, also enables line buffering
+                text=True,  # decode bytes to str
+                encoding="utf-8",
+                errors="replace",
+            )
+            self.outputs_queue.put(f"Started test '{self.UTW_TEST.name}' with PID {self.test_process.pid}.")
+        except Exception as e:
+            self.outputs_queue.put(f"Failed to start test '{self.UTW_TEST.name}': {e}")
+            self.test_process = None
+            return
+        
+        self.read_thread.start()
+
+    def _read_output(self):
+        if self.test_process is None:
+            # logger.error("No test process to read from.")
+            self.outputs_queue.put("No test process to read from.")
+            return
+        
+        while self.test_process.poll() is None:  # While the process is still running
+            try:
+                for line in self.test_process.stdout:
+                    line = line.strip()
+                    if any(fwd in line for fwd in self.UTW_TEST.print_forwards):
+                        self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
+            except Exception as e:
+                self.outputs_queue.put(f"Error reading output from test '{self.UTW_TEST.name}': {e}")
+
+    def reset_test(self):
+        if self.test_process is not None:
+            self.test_process.terminate()
+            self.test_process.wait()
+            self.outputs_queue.put(f"Terminated test '{self.UTW_TEST.name}'.")
+            self.test_process = None
+            self.read_thread.join(timeout=1)  # Wait for the reading thread to finish
+        else:
+            self.outputs_queue.put("No test process to terminate.")
+        
+        self.UTW_TEST = None
+
+    def get_output(self):
+        outputs = []
+        while not self.outputs_queue.empty():
+            outputs.append(self.outputs_queue.get())
+        return outputs
+    
+    def get_test_status(self):
+        if self.test_process is None:
+            return False, f"No test process running for test '{self.UTW_TEST.name}'." \
+                if self.UTW_TEST else "No test process running."
+        if self.test_process.poll() is None:
+            return True, f"Test '{self.UTW_TEST.name}' is running."
       

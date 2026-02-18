@@ -21,6 +21,7 @@ logger.add("logs/bue.log", rotation="10 MB")  # Example: Add a file sink for all
 
 # Internal imports
 from ota import Ota
+from utw import Utw
 from constants import State
 
 # This variable manages how many PINGRs should be missed until the bUE disconnects from the base station
@@ -68,6 +69,8 @@ class bUE_Main:
             except Exception as e:
                 logger.error(f"Failed to initialize OTA module: {e}")
                 time.sleep(2)
+
+        self.utw = Utw()
 
         # Fetch the Reyax ID from the OTA module
         self.reyax_id = None
@@ -513,7 +516,8 @@ class bUE_Main:
         Reloads the service without restarting the system entirely
         """
         try:
-            subprocess.call(["sudo", "systemctl", "restart", "bue.service"])
+            # subprocess.call(["sudo", "systemctl", "restart", "bue.service"])
+            os.system("sudo systemctl restart bue.service")
         except Exception as e:
             print(f"Error restarting bue.service': {e}")
 
@@ -523,7 +527,8 @@ class bUE_Main:
         """
         try:
             logger.info("Initiating system restart...")
-            subprocess.call(["sudo", "reboot"])
+            os.system("sudo reboot")
+            # subprocess.call(["sudo", "reboot"])
         except Exception as e:
             logger.error(f"Error restarting system: {e}")
 
