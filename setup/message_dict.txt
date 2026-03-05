@@ -50,7 +50,7 @@ PINGR:
 
 TEST:
     Direction: base -> bUE
-    Meaning: The base station sends a UTW test configuration, a file, a start time, and parameters.
+    Meaning: The base station sends a UTW test configuration, a file, a start time, and parameters. The parameters should be separated with spaces
     Body: <file>,<start_time>,<parameters>
     Example: (bue_main.py) self.ota.send_ota_message(5, TEST:<file>,<start_time>,<parameters>)
     Response: The bUE will respond with a TESTR, confirming that it has received the test 
