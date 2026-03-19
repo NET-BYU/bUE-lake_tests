@@ -82,28 +82,7 @@ If you prefer, you can use the simpler `base_station.yaml` with `base_station_ma
 
 Make sure your virtual environment is active and you are in the project root.
 
-### Option A: CLI base station (interactive tests)
-
-```bash
-python main.py
-```
-
-This will:
-
-- Initialize a `Base_Station_Main` instance using `config_base.yaml`.
-- Open an interactive prompt (via `survey`) with commands like `TEST`, `DISTANCE`, `DISCONNECT`, `CANCEL`, `LIST`, and `EXIT`.
-
-Use this mode when you want a simple terminal-based interface.
-
-### Option B: Base station core only
-
-```bash
-python base_station_main.py
-```
-
-This runs only the base station service logic (no CLI, no GUI) using `base_station.yaml`. It is useful if you want to embed or monitor the service separately.
-
-### Option C: PySide6 GUI (RECOMMENDED)
+# PySide6 GUI (RECOMMENDED)
 
 Run the GUI from the project root so that logs and paths resolve correctly:
 
