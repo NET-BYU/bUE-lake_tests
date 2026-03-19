@@ -1,120 +1,277 @@
-# Lake Tests Branch
+## bUE Lake Tests
 
-The next major step for our project is to put everything in a lake and test communication. This repository will store the files needed for this task.
+This repository contains the code used for lake communication tests between a shore-side **base station** and multiple remote **bUE** nodes. Communication is handled by Reyax LoRa modules, with optional GPS integration on the bUEs and a Qt-based GUI for monitoring from the base station.
 
-Hint: to run any commands listed in this file, be sure that your terminal is active in the `lake_tests` directory.
+All paths and commands below assume your shell is in the project root directory:
 
-## If on the Base Station
-
-Setup a virtual environment and install all the needed packages.
-
-```
-python3 -m venv <environment_name>
-source /path/to/venv/bin/activate
-pip install -r requirements.txt
+```bash
+cd bUE-lake_tests
 ```
 
-Setup the config file for the base station. Do this by copying `config.example` from the setup folder into the main directory. Rename it `config_base.yaml`. If not uses Linux, you will need to update the `PORT` option of this file to reflect what port the Rayex device is connected to.
+---
 
-### Running Base Station without UI
+## Project Overview
 
-```
-python3 main.py
-```
+- **Base station (shore)**
+	- Talks to one or more bUE nodes over LoRa via a Reyax module.
+	- Tracks connection status, missed pings, and per-bUE GPS coordinates.
+	- Can be run as a simple CLI (for quick testing) or with a PySide6 GUI.
 
-### Running Base Station with UI
+- **bUE node (field device / Pi)**
+	- Connects to the base station using its own Reyax module.
+	- Periodically sends `PING` messages, state, and optional GPS coordinates.
+	- Receives commands such as `TEST`, `CANC`, `RELOAD`, and `RESTART`.
+	- Can be run manually or as a systemd service on a Raspberry Pi.
 
-Make sure that the keystroke handler thread is commented out in `main_ui.py` and run the following:
-``` 
-python3 main_ui.py
-```
+---
 
-### Running Base Station with UI and auto refresh
+## Repository Layout
 
-Make sure that the keystroke handler thread is uncommented in `main_ui.py` and run the following:
-```
-sudo -E /path/to/venv/bin/python main_ui.py
-```
+- `main.py` – CLI entry point for the base station (interactive test runner).
+- `base_station_main.py` – Base station core logic and OTA handling.
+- `bue_main.py` – Main state machine for a single bUE node.
+- `ota.py` – Low-level wrapper around the Reyax serial interface.
+- `constants.py` – Shared enums/constants (e.g., bUE state codes).
+- `config_base.yaml` – Base station config used by `main.py` and the GUI.
+- `base_station.yaml` – Alternative base station config used by `base_station_main.py` when run directly.
+- `auto_config.yaml` – Parameter sets for automated over-the-air tests.
+- `gui/` – PySide6 GUI (entry point: `gui/main.py`, UI files in `gui/ui/`).
+- `setup/` – Example configs, systemd unit template, GPS setup script, and requirements files.
+- `logs/` – Log files written by the base station and bUE code.
+- `tdo_rup.py`, `tup_rdo.py` and `*.grc` – Test / GNU Radio-related utilities.
+- `uw_env/` – Example Python virtual environment directory (may not exist or may be local-only; you can create your own instead).
 
-### Running Base Station GUI
+---
 
-There are two options for this. If on Linux/Mac, run the following:
-```
-./launch_gui.sh
-```
+## Base Station Setup (PC / Laptop)
 
-If on Windows, run
+### 1. Create and activate a virtual environment
 
-```
-python base_station_gui.py
-```
-
-## If on a bUE
-
-### Install dependencies
-
-The bUE should come with a venv. If it doesn't, create one. Install dependencies into this venv.
-
-```
-pip install -r requirements_bue.txt
-```
-
-Install `python3-gps`
-
-```
-sudo apt-get install python3-gps
+```bash
+python3 -m venv uw_env
+source uw_env/bin/activate
 ```
 
-Run `gpsd.sh` to get all the gps files configured. It is good to reboot after this
+### 2. Install Python dependencies
 
+Install the base station + GUI dependencies:
+
+```bash
+pip install -r setup/requirements.txt
 ```
+
+> Note: `setup/requirements.txt` and `gui/requirements.txt` are aligned; installing from `setup/requirements.txt` is sufficient for both CLI and GUI.
+
+### 3. Configure the base station Reyax module
+
+`config_base.yaml` (used by `main.py` and the GUI) looks like:
+
+```yaml
+OTA_PORT: "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
+OTA_ID: 1
+OTA_BAUDRATE: 9600
+```
+
+Update **`OTA_PORT`** to match the serial device for your Reyax module. On Linux this is typically under `/dev/serial/by-id/` or `/dev/ttyUSB*`.
+
+If you prefer, you can use the simpler `base_station.yaml` with `base_station_main.py` instead; the same fields apply.
+
+---
+
+## Running the Base Station
+
+Make sure your virtual environment is active and you are in the project root.
+
+### Option A: CLI base station (interactive tests)
+
+```bash
+python main.py
+```
+
+This will:
+
+- Initialize a `Base_Station_Main` instance using `config_base.yaml`.
+- Open an interactive prompt (via `survey`) with commands like `TEST`, `DISTANCE`, `DISCONNECT`, `CANCEL`, `LIST`, and `EXIT`.
+
+Use this mode when you want a simple terminal-based interface.
+
+### Option B: Base station core only
+
+```bash
+python base_station_main.py
+```
+
+This runs only the base station service logic (no CLI, no GUI) using `base_station.yaml`. It is useful if you want to embed or monitor the service separately.
+
+### Option C: PySide6 GUI (RECOMMENDED)
+
+Run the GUI from the project root so that logs and paths resolve correctly:
+
+```bash
+python -m gui.main
+# or equivalently
+python gui/main.py
+```
+
+The GUI provides:
+
+- A map view of bUE locations (via `MapManager` and `qgmap`).
+- Tables for connected bUEs, distances, and coordinates.
+- A log viewer for `logs/last_run.log`.
+- Dialogs to run and cancel tests on selected bUEs.
+
+---
+
+## bUE Node Setup (e.g., Raspberry Pi)
+
+These steps assume you are on the device that will act as a bUE.
+
+### 1. Clone or copy the repository
+
+On the bUE device:
+
+```bash
+git clone <this-repo-url> bUE-lake_tests
+cd bUE-lake_tests
+```
+
+### 2. Create a virtual environment and install dependencies
+
+```bash
+python3 -m venv uw_env
+source uw_env/bin/activate
+pip install -r setup/requirements_bue.txt
+```
+
+### 3. Install GPS-related system packages (if using GPS)
+
+On Debian/Raspberry Pi OS:
+
+```bash
+sudo apt-get update
+sudo apt-get install python3-gps gpsd gpsd-clients
+```
+
+Run the GPS setup script provided in `setup/`:
+
+```bash
+cd setup
 sudo ./gpsd.sh
+cd ..
 ```
 
-### Creating the `.service` file
+It is usually a good idea to reboot after configuring GPS:
 
-If this device is a Raspberry Pi bUE, then make sure that you have pointed systemd to start the process upon booting the Pi.
-
-```
-sudo cp bue.service.txt /etc/systemd/system/bue.service
+```bash
+sudo reboot
 ```
 
-Before activating the service, be sure to edit lines 7 and 8 in your newly created `/etc/systemd/system/bue.service` by changing the value `/path/to/uw_env/...` to whatever path it takes to get to `/uw_env/` and the other paths to your `lake_tests/` folder. There are three isntances of this, so be sure to change them all.
+### 4. Configure the bUE Reyax module
 
-### Creating the `config.yaml` file
+`bue_main.py` expects a YAML file (by default `bue_config.yaml`) in the project root. Start from the example in `setup/`:
 
-Additionally, you need to make sure that there is a `config.yaml` file that the bUE can access. An example with all the fields that you need is found in this repository as `config.example`. You can run the following command:
-
-```
-cp config.example config.yaml
+```bash
+cp setup/config.example bue_config.yaml
 ```
 
-All the fields should be correct except for `OTA_ID`. Make sure this is set to your Reyex device's address.
+Then edit `bue_config.yaml` and set at least:
 
-### Testing and running the service
+- `OTA_PORT` – Serial device for the bUE’s Reyax module.
+- `OTA_ID` – The Reyax address for this bUE (must be unique per node).
+- `OTA_BAUDRATE` – Usually `9600` unless your module is configured differently.
 
-Now that you have both the `bue.service` file and `config.yaml` file, let's make sure that they run smoothly. 
+Additional fields can be added as the code evolves; check `bue_main.py` for what is read from the YAML.
 
-To test this, run the following commands:
+### 5. Running the bUE manually
 
+From the project root on the bUE device (with the venv activated):
+
+```bash
+python bue_main.py
 ```
+
+This starts the bUE state machine, which will:
+
+- Initialize the Reyax driver via `ota.Ota`.
+- Fetch its Reyax ID.
+- Connect to the base station when requested and begin sending `PING` messages and receiving commands.
+
+---
+
+## Running the bUE as a systemd Service (Pi)
+
+On a Raspberry Pi bUE, you can have the bUE code start automatically on boot.
+
+### 1. Install the service unit
+
+From the project root on the bUE device:
+
+```bash
+sudo cp setup/bue.service.txt /etc/systemd/system/bue.service
+```
+
+### 2. Edit paths in the service file
+
+Open `/etc/systemd/system/bue.service` with your editor of choice and update:
+
+- Any `/path/to/uw_env/...` segments so they point to the actual Python executable in your venv.
+- Any `/path/to/bUE-lake_tests/...` segments so they point to this project’s directory on the bUE.
+
+There are multiple instances; make sure you update them all.
+
+### 3. Test the service
+
+```bash
+sudo systemctl daemon-reload
 sudo systemctl start bue.service
 ```
 
-You should see a new log file appear in the `bue_logs` directory. In the first few lines, you should find all the settings from the `config.yaml` file. At this point, if you need to change the yaml file, you will need to run the following command after editing it:
+You should see logs under `logs/` on the bUE (e.g., `logs/bue.log`). If configuration settings are incorrect, adjust `bue_config.yaml` and restart:
 
-```
+```bash
 sudo systemctl restart bue.service
 ```
 
-and make sure that the changes are good to go.
+### 4. Enable on boot
 
-### Enabling the bUE service to run on power cycle
-
-The last step for the bUE is to enable it to run when the device power cycles. This is done simply by running the following command:
-
-```
+```bash
 sudo systemctl enable bue.service
 ```
 
-If you also wish the service to start during this power cycle, just run the `systemctl start` command above.
+This will cause the bUE process to start automatically on each boot.
+
+---
+
+## Logs and Troubleshooting
+
+- Base station logs:
+	- `logs/base_station.log` – Rotating log of base station activity.
+	- `logs/last_run.log` – Overwritten each run; displayed in the GUI log viewer.
+- bUE logs:
+	- `logs/bue.log` – Rotating log of bUE activity (on the bUE device).
+
+If you are not seeing any traffic:
+
+- Confirm both base station and bUE are using matching LoRa parameters (address, baudrate, bandwidth, etc.).
+- Check that `OTA_PORT` paths are correct on both sides.
+- Ensure that only one process is talking to a given serial device at a time.
+
+---
+
+## Development and Testing
+
+- The project uses `pytest` and `pytest-cov` (installed via `setup/requirements.txt`).
+- From the project root (with the venv active):
+
+```bash
+pytest
+```
+
+GitHub Actions workflows under `.github/workflows/` run basic code-quality and test checks on pushes/PRs.
+
+---
+
+## Notes
+
+- This README is intentionally focused on getting a base station + one or more bUEs talking over Reyax modules for lake experiments.
+- For deeper architectural details (message formats, state diagrams, etc.), refer to comments in `bue_main.py`, `base_station_main.py`, and `ota.py`, and any accompanying lab documentation (e.g., internal Notion pages).
