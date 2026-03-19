@@ -27,7 +27,6 @@ cd bUE-lake_tests
 
 ## Repository Layout
 
-- `main.py` – CLI entry point for the base station (interactive test runner).
 - `base_station_main.py` – Base station core logic and OTA handling.
 - `bue_main.py` – Main state machine for a single bUE node.
 - `ota.py` – Low-level wrapper around the Reyax serial interface.
@@ -68,13 +67,10 @@ pip install -r setup/requirements.txt
 
 ```yaml
 OTA_PORT: "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
-OTA_ID: 1
 OTA_BAUDRATE: 9600
 ```
 
-Update **`OTA_PORT`** to match the serial device for your Reyax module. On Linux this is typically under `/dev/serial/by-id/` or `/dev/ttyUSB*`.
-
-If you prefer, you can use the simpler `base_station.yaml` with `base_station_main.py` instead; the same fields apply.
+**NOTE:** "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0" should be the same for all Linux devices. If running on a Windows or Mac you will need to configure for those ports
 
 ---
 
@@ -103,7 +99,7 @@ The GUI provides:
 
 ## bUE Node Setup (e.g., Raspberry Pi)
 
-These steps assume you are on the device that will act as a bUE.
+These steps assume you are on the device that will act as a bUE. Hopefully this was already done when the pi was setup, but if not here is how to do it manually
 
 ### 1. Clone or copy the repository
 
@@ -114,29 +110,12 @@ git clone <this-repo-url> bUE-lake_tests
 cd bUE-lake_tests
 ```
 
-### 2. Create a virtual environment and install dependencies
-
-```bash
-python3 -m venv uw_env
-source uw_env/bin/activate
-pip install -r setup/requirements_bue.txt
-```
-
-### 3. Install GPS-related system packages (if using GPS)
+### 2. Install GPS-related system packages
 
 On Debian/Raspberry Pi OS:
 
 ```bash
-sudo apt-get update
-sudo apt-get install python3-gps gpsd gpsd-clients
-```
-
-Run the GPS setup script provided in `setup/`:
-
-```bash
-cd setup
-sudo ./gpsd.sh
-cd ..
+sudo setup/gpsd.sh
 ```
 
 It is usually a good idea to reboot after configuring GPS:
@@ -144,6 +123,17 @@ It is usually a good idea to reboot after configuring GPS:
 ```bash
 sudo reboot
 ```
+
+### 3. Create a virtual environment and install dependencies
+
+The python environment needs to include system gpsd packages that we installed in the first step. By using the `--system-site-packages` flag, we tell the system to include these packages in our environment
+
+```bash
+python3 -m venv uw_env --system-site-packages
+source uw_env/bin/activate
+pip install -r setup/requirements_bue.txt
+```
+
 
 ### 4. Configure the bUE Reyax module
 
@@ -153,13 +143,12 @@ sudo reboot
 cp setup/config.example bue_config.yaml
 ```
 
-Then edit `bue_config.yaml` and set at least:
+Then edit `bue_config.yaml`. 
 
 - `OTA_PORT` – Serial device for the bUE’s Reyax module.
-- `OTA_ID` – The Reyax address for this bUE (must be unique per node).
 - `OTA_BAUDRATE` – Usually `9600` unless your module is configured differently.
 
-Additional fields can be added as the code evolves; check `bue_main.py` for what is read from the YAML.
+**NOTE:** "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0" should be the same for all Linux devices. If running on a Windows or Mac you will need to configure for those ports
 
 ### 5. Running the bUE manually
 
@@ -234,19 +223,6 @@ If you are not seeing any traffic:
 - Confirm both base station and bUE are using matching LoRa parameters (address, baudrate, bandwidth, etc.).
 - Check that `OTA_PORT` paths are correct on both sides.
 - Ensure that only one process is talking to a given serial device at a time.
-
----
-
-## Development and Testing
-
-- The project uses `pytest` and `pytest-cov` (installed via `setup/requirements.txt`).
-- From the project root (with the venv active):
-
-```bash
-pytest
-```
-
-GitHub Actions workflows under `.github/workflows/` run basic code-quality and test checks on pushes/PRs.
 
 ---
 
