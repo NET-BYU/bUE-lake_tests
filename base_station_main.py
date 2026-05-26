@@ -26,7 +26,8 @@ from constants import State
 logger.remove()  # Remove default sink
 
 # Main log for everything
-logger.add("logs/base_station.log", rotation="10 MB")
+logger.add("logs/base_station.log", rotation="10 MB", enqueue=True)
+logger.add("logs/last_run.log", mode="w", enqueue=True)
 
 
 class Base_Station_Main:
@@ -61,7 +62,7 @@ class Base_Station_Main:
         self.bue_missed_ping_counter: dict[int, int] = {}  # Dictionary to hold how many PINGs have been missed
         self.bue_tout: list[str] = []  # List to hold messages that come with TOUT messages
         self.bue_id_to_state: dict[int, str] = {}  # Dictionary to hold what state each bUE is currently in
-        self.bue_id_to_coords: dict[int, (int, int)] = {}  # Dictionary to hold the coords of each bUE
+        self.bue_id_to_coords: dict[int, (float, float)] = {}  # Dictionary to hold the coords of each bUE
         self.bue_id_to_last_ping_time: dict[int, int] = {}  # Dictionary to hold when a bUE got its last PING
 
         # Set up the ota threads
@@ -212,7 +213,7 @@ class Base_Station_Main:
 
         coords: str = ""
         if lat != "" and long != "":
-            self.bue_id_to_coords[int(src_id)] = (int(lat), int(long))
+            self.bue_id_to_coords[int(src_id)] = (float(lat), float(long))
             coords = f"@ {lat}, {long}"
 
         self.ota_outgoing_queue.put((src_id, "PINGR"))

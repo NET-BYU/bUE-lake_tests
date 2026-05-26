@@ -1,6 +1,5 @@
 from enum import Enum, auto
 
-
 class State(Enum):
     INIT = auto()
     CONNECT_OTA = auto()

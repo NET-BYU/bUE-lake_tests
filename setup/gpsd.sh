@@ -5,7 +5,7 @@ sudo apt-get update
 sudo apt-get upgrade -y
 
 # Install necessary packages
-sudo apt-get install -y gpsd gpsd-clients chrony
+sudo apt-get install -y gpsd gpsd-clients chrony python3-gps
 
 # Stop gpsd service if running
 sudo systemctl stop gpsd.socket
