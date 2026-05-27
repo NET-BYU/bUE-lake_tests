@@ -12,10 +12,14 @@ from loguru import logger
 from enum import Enum, auto
 from yaml import load, Loader
 
-# For gps
-from pynmeagps import NMEAReader  # type:ignore
+from pathlib import Path
 
-import gps
+is_pi = (
+    Path("/sys/firmware/devicetree/base/model").exists()
+    and "raspberry pi" in Path("/sys/firmware/devicetree/base/model").read_text().lower()
+)
+if is_pi:
+    import gps
 
 logger.add("logs/bue.log", rotation="10 MB")  # Example: Add a file sink for all logs
 
@@ -267,7 +271,10 @@ class bUE_Main:
         self.ota_outgoing_queue.put((BROADCAST_OTA_ID, f"REQ:{self.hostname},{self.reyax_id}"))
 
     def ota_ping(self):
-        lat, long = self.gps_handler()
+        if is_pi:
+            lat, long = self.gps_handler()
+        else:
+            lat, long = "", ""
 
         if self.flag_ota_pingr.is_set():
             self.flag_ota_pingr.clear()
