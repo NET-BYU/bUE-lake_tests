@@ -33,17 +33,22 @@ one_way:
     # UI Terms
     max_per_test: 1
     ui_args:
-      center_freq: 12000
-      bandwidth: 6000
+      msg: "test"
+      sf: 8
+      cf: 12000
+      bw: 6000
+      per: 3000
     # Python Terms
     py_exe: "/home/admin/osu_resting/run_rx.py"
   tx:
     # UI Terms
     max_per_test: 0
     ui_args:
-      center_freq: 12000
-      bandwidth: 6000
-      message: "t"
+      msg: "test"
+      sf: 8
+      cf: 12000
+      bw: 6000
+      per: 3000
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_tx.py"
 
@@ -54,14 +59,14 @@ rtt_basic:
     max_per_test: 1
     # Python Terms
     py_exe: "/home/admin/two_agent_osu/agent_main.py"
-    args: ["-a", "rtt_init"]
+    exe_args: ["-a", "rtt_init"]
     log_forward: ["RTTR from start", "  --- "]
   resp:
     # UI Terms
     max_per_test: 1
     # Python Terms
     py_exe: "/home/admin/two_agent_osu/agent_main.py"
-    args: ["-a", "rtt_resp"]
+    exe_args: ["-a", "rtt_resp"]
     log_forward: ["  --- RTT "]
 
 
@@ -71,10 +76,10 @@ fp_group:
     max_per_test: 1
     # Python Terms
     py_exe: "/home/admin/uac-networking/fleet-protocol/coordinator.py"
-    args: ["-t", "group"]
+    exe_args: ["-t", "group"]
   worker:
     # UI Terms
     max_per_test: 0
     # Python Terms
     py_exe: "/home/admin/uac-networking/fleet-protocol/worker.py"
-    args: ["-t", "group"]
+    exe_args: ["-t", "group"]

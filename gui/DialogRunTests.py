@@ -76,20 +76,20 @@ class DialogRunTests:
             for arg_name, arg_value in ui_args.items():
                 # Create a label and input field for each argument
                 arg_label = QtWidgets.QLabel(f"{arg_name}:", parent=args_frame)
-                arg_label.setGeometry(args_frame_x, 5, 100, 20)
+                arg_label.setGeometry(args_frame_x, 5, 50, 20)
                 arg_label.setStyleSheet("color: black;")
                 arg_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
                 arg_label.show()
 
                 arg_input = QtWidgets.QLineEdit(parent=args_frame)
-                arg_input.setGeometry(args_frame_x + 110, 5, 100, 20)
+                arg_input.setGeometry(args_frame_x + 60, 5, 80, 20)
                 arg_input.setStyleSheet("color: black;")
                 arg_input.setObjectName(f"{arg_name}_input")
                 if arg_value is not None:
                     arg_input.setText(str(arg_value))
                 arg_input.show()
 
-                args_frame_x += 220  # Move to the right for the next argument
+                args_frame_x += 140  # Move to the right for the next argument
 
             return args_frame
         
@@ -274,7 +274,7 @@ class DialogRunTests:
             print("Error: Please select a test before running.")
             return
         
-        execution_time = datetime.now().replace(microsecond=0) + timedelta(seconds=self.ui.spinBox_execution_time.value())
+        execution_time = datetime.now().replace(microsecond=0) + timedelta(seconds=self.ui.spinBox_delay_time.value())
         start_time = int(execution_time.timestamp())
 
         setup_frame = self.ui.scrollArea_test_setup.takeWidget()
@@ -285,7 +285,11 @@ class DialogRunTests:
                 # Make sure we have a valid bUE name before proceeding
                 if bue_name == "<bUE>":
                     continue  # Skip frames that are not associated with a specific BUE
-                rx_id = self.parent.base_station.hostname_to_bue_id.get(bue_name, None)
+                rx_id = next((
+                    bue_id for bue_id, hostname 
+                    in self.parent.base_station.bue_id_to_hostname.items() 
+                              if hostname == bue_name), None
+                            )
                 if rx_id is None:
                     print(f"Error: Could not find BUE ID for hostname '{bue_name}'")
                     continue
