@@ -93,10 +93,26 @@ class DialogRunTests:
 
             return args_frame
         
+        def build_empty_args_frame():
+            args_frame = QtWidgets.QFrame(parent=frame)
+
+            bue_label = QtWidgets.QLabel("<bUE>:", parent=args_frame)
+            bue_label.setObjectName("bue_label")
+            bue_label.setGeometry(10, 5, 100, 20)
+            bue_label.setStyleSheet("color: black;")
+            bue_label.show()
+
+            empty_label = QtWidgets.QLabel("No additional arguments for this role", parent=args_frame)
+            empty_label.setGeometry(120, 5, 300, 20)
+            empty_label.setStyleSheet("font-style: italic; color: light gray;")
+            empty_label.show() 
+
+            return args_frame
+        
         def set_args_frame(bue_name: str, args_frame: QtWidgets.QFrame):
             # Get first word in bue name
             parts = bue_name.split(maxsplit=1)
-            enable = (parts[0] == "CB" and "Select BUE" not in bue_name) or (parts[0] == "T")
+            enable = (parts[0] == "CB" and "--" not in bue_name) or (parts[0] == "T")
 
             if enable:
                 # Set the text of thebue_label in args_frame to the bue_name without the status prefix
@@ -107,7 +123,7 @@ class DialogRunTests:
                     bue_label.setText(f"{parts[1]}:")
             else:
                 args_frame.setEnabled(False)
-                args_frame.setStyleSheet("background-color: gray;")
+                args_frame.setStyleSheet("background-color: light gray;")
                 bue_label = args_frame.findChild(QtWidgets.QLabel, "bue_label")
                 if bue_label:
                     bue_label.setText("<bUE>:")
@@ -158,21 +174,29 @@ class DialogRunTests:
                         bue_combo.addItem(f"{hostname} (ID: {bue_id})", userData=bue_id)
                     bue_combo.show()
                     combo_x += 210
+                    current_y += 30
 
                     # Now, we add the args frame for this role, which will be enabled/disabled based on whether 
                     #  a BUE is selected in the combo box
                     if 'ui_args' in self.utw_test_config[test_name][role].keys():
-                        current_y += 40
-                        
                         args_frame = build_args_frame(test_name, role)
-                        args_frame.setGeometry(x_margin, current_y, 880, 40)
-                        args_frame.show()
-
-                        args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
-
-                        bue_widgets.append([bue_combo, args_frame])  # Keep track of this args frame
-                        set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
+                    # If no args, create a dummy frame to maintain consistent enabling/disabling of BUE selection
+                    else:
+                        args_frame = build_empty_args_frame()                        
                         
+                    args_frame.setGeometry(x_margin, current_y, 880, 40)
+                    args_frame.show()
+
+                    args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
+
+                    bue_widgets.append([bue_combo, args_frame])  # Keep track of this args frame
+                    set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
+
+                        # args_frame.setGeometry(x_margin, current_y, 880, 40)
+                        # args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
+                        # args_frame.show()
+                        # bue_widgets.append([bue_combo, args_frame])  # Keep track of this args frame
+                        # set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
                 current_y += 40
 
             # In the event that there is no limit, we create check boxes of all the other bUEs
@@ -194,20 +218,23 @@ class DialogRunTests:
                     bue_checkbox.setStyleSheet("color: black; background-color: gray;")
                     bue_checkbox.show()
                     check_x += 110
+                    current_y += 30
 
                     # Now, we add the args frame for this role, which will be enabled/disabled based on whether 
                     #  a BUE is selected in the combo box
                     if 'ui_args' in self.utw_test_config[test_name][role].keys():
-                        current_y += 30
-
                         args_frame = build_args_frame(test_name, role)
-                        args_frame.setGeometry(x_margin, current_y, 880, 30)
-                        args_frame.show()
+                    # If no args, create a dummy frame to maintain consistent enabling/disabling of BUE selection
+                    else:
+                        args_frame = build_empty_args_frame()                        
+                        
+                    args_frame.setGeometry(x_margin, current_y, 880, 40)
+                    args_frame.show()
 
-                        args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
+                    args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
 
-                        bue_widgets.append([bue_checkbox, args_frame])  # Keep track of this args frame
-                        set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
+                    bue_widgets.append([bue_checkbox, args_frame])  # Keep track of this args frame
+                    set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
 
                     i += 1
 
@@ -264,7 +291,7 @@ class DialogRunTests:
                     continue
 
                 # Start building the TEST message for this BUE
-                send_string = f"TEST:{start_time}:"
+                send_string = f"TEST:{start_time};"
 
                 # Add the test name
                 send_string += f"{self.ui.comboBox_select_test.currentText()};"  # Add test name to the message
