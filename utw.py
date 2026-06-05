@@ -27,45 +27,42 @@ class Utw:
         self.read_thread = threading.Thread(target=self._read_output, daemon=True)
         self.outputs_queue = queue.Queue()
 
-    def setup_test(self, test: str):
+    def setup_test(self, test: str) -> bool:
         if self.UTW_TEST is not None:
             raise ValueError("A test is already set up. Please reset before setting up a new test.")
         if self.test_process is not None:
             raise ValueError("A test process is already running. Please reset before setting up a new test.")
         
-        # Right now, we might have a role with the test string; check for the ';' symbol
-        # TODO: In the future, we might add a second ';' for additional arguments
-        if ';' in test:
-            test_name, role = test.split(';')
-        else:
-            test_name = test
-            role = None
+        try:
+            test_name, role, ui_args = test.split(';')
+        except ValueError:
+            return False
         
+        # Make sure test_name is in the config and role is in the test config
         if test_name not in self.config.keys():
             raise ValueError(f"Test '{test_name}' not found in configuration.")
-        if role is not None and not 'roles' in self.config[test_name].keys():
-            raise ValueError(f"Test '{test_name}' does not have any roles defined, but role '{role}' was specified.")
-        if role is not None and role not in self.config[test_name]['roles']:
+        if role not in self.config[test_name].keys():
             raise ValueError(f"Role '{role}' not found in test '{test_name}' configuration.")
-        if role is None and 'roles' in self.config[test_name].keys():
-            raise ValueError(f"Test '{test_name}' has roles defined, but no role was specified.")
         
-        test_config = self.config[test_name]
+        test_config = self.config[test_name][role]
 
-        # Start up the subprocess command list
-        subp_com = ["python3", test_config["py_exe"]]
+        test_command = ["python3"]
 
-        # If there are any arguments for the role, add them to the subprocess command list
-        if "args" in test_config.keys():
-            args = test_config["args"]
-            if not isinstance(args, list):
-                raise TypeError(f"Expected a list for 'args' in test '{test_name}', got {type(args).__name__}")
-            subp_com.extend(args)
-        elif role is not None and "args" in test_config["roles"][role].keys():
-            args = test_config["roles"][role]["args"]
-            if not isinstance(args, list):
-                raise TypeError(f"Expected a list for 'args' in role '{role}' of test '{test_name}', got {type(args).__name__}")
-            subp_com.extend(args)
+        test_command.append(test_config["py_exe"])
+
+        if "exe_args" in test_config.keys():
+            exe_args = test_config["exe_args"]
+            if not isinstance(exe_args, list):
+                raise TypeError(f"Expected a list for 'exe_args' in role '{role}' of test '{test_name}', got {type(exe_args).__name__}")
+            test_command.extend(exe_args)
+
+        # Now, see if ui_args are in the test config, and if so, add them to the test command
+        if ui_args != "":
+            for i, arg in enumerate(ui_args.split(",")):
+                if arg == '':
+                    continue
+                exe_arg = f"--{list(test_config['ui_args'].keys())[i]}={arg.strip()}"
+                test_command.append(exe_arg)
 
         print_fwd = None
 
@@ -83,11 +80,11 @@ class Utw:
 
         self.UTW_TEST = utw_test(
             name = f"{test_name};{role}" if role is not None else test_name,
-            subp_command = subp_com,
+            subp_command = test_command,
             print_forwards = print_fwd
         )
 
-        return f"Test '{self.UTW_TEST.name}' set up successfully."
+        return True
     
     def run_test(self):
         if self.UTW_TEST is None:

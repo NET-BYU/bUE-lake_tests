@@ -118,6 +118,7 @@ class bUE_Main:
         # Variables to handle test subprocess
         self.test_command = None
         self.test_start_time = None
+        self.test_info = None
         self.test_process = None
         self.test_stdout_queue = queue.Queue()
         self.test_stdout_thread = None
@@ -360,29 +361,26 @@ class bUE_Main:
     It is important that we check this before running that actual test subprocess
     to prevent needless errors.
 
-    self.ota_test_params format: <file>,<wait_time>,<parameters>
+    self.ota_test_params format: <start_time>;<test_info>
     parameters are separated by spaces
     """
 
     def test_has_valid_params(self) -> bool:
-        params_parts: list[str] = self.ota_test_params.split(",", maxsplit=2)
+        params_parts: list[str] = self.ota_test_params.split(";", maxsplit=1)
 
-        if len(params_parts) < 3:
+        if len(params_parts) < 2:
             logger.warning(f"Invalid parameters used to initalize test: {params_parts}")
             ## TODO: Do I need to do something with a flag here?
             return False
 
-        file: str = params_parts[0]
-        self.test_start_time = int(params_parts[1])
-        parameters: list[str] = params_parts[2].split(" ")
+        self.test_start_time = int(params_parts[0])
+        test_info = params_parts[1]
 
-        # If parameters is blank, it could come with an empty space in an array which we need to check for
-        parameters = [param for param in parameters if param.strip()]
+        if not self.utw.setup_test(test_info):
+            logger.warning(f"Failed to set up test with info: {test_info}")
+            return False
 
-        self.test_command = ["python3", f"{file}.py"] + (parameters if parameters else [])
-
-        logger.info(f"Test prepared: {file}.py with parameters: {parameters if parameters else 'none'}")
-        logger.info(f"Test scheduled for: {self.test_start_time}")
+        logger.info(f"Test prepared: Start time of: {self.test_start_time}; for: {test_info}")
 
         return True
 
