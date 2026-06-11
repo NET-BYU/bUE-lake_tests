@@ -38,6 +38,7 @@ one_way:
       bw: 6000
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_rx.py"
+    exe_args: ["-u"]
     log_forward: ['rx_']
   tx:
     # UI Terms
@@ -50,6 +51,7 @@ one_way:
       per: 3000
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_tx.py"
+    exe_args: ["-u"]
     log_forward: []
 
 
