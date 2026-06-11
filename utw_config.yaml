@@ -33,11 +33,9 @@ one_way:
     # UI Terms
     max_per_test: 1
     ui_args:
-      msg: "test"
       sf: 8
       cf: 12000
       bw: 6000
-      per: 3000
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_rx.py"
     log_forward: ['rx_']
@@ -52,6 +50,7 @@ one_way:
       per: 3000
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_tx.py"
+    log_forward: []
 
 
 rtt_basic:

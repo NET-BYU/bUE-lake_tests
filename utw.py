@@ -25,7 +25,7 @@ class Utw:
         self.test_process: subprocess.Popen | None = None
 
         # Create a thread to read the output of the subprocess
-        self.read_thread = threading.Thread(target=self._read_output, daemon=True)
+        self.read_thread = None
         self.outputs_queue = queue.Queue()
 
     def setup_test(self, test: str) -> bool:
@@ -99,14 +99,17 @@ class Utw:
                 encoding="utf-8",
                 errors="replace",
             )
+            self.read_thread = threading.Thread(target=self._read_output, daemon=True)
+            self.read_thread.start()
             self.outputs_queue.put(f"Started test '{self.UTW_TEST.name}' with PID {self.test_process.pid}.")
+            return True
         except Exception as e:
             self.outputs_queue.put(f"Failed to start test '{self.UTW_TEST.name}': {e}")
             self.test_process = None
+            if self.read_thread is not None:
+                self.read_thread.join(timeout=1)
             return False
         
-        self.read_thread.start()
-        return True
 
     def _read_output(self):
         if self.test_process is None:
@@ -126,6 +129,8 @@ class Utw:
             except Exception as e:
                 logger.error(f"Error reading output from test '{self.UTW_TEST.name}': {e}")
 
+        logger.info("Exited output reading thread.")
+
     def reset_test(self):
         if self.test_process is not None:
             self.test_process.terminate()
@@ -133,6 +138,7 @@ class Utw:
             self.read_thread.join(timeout=1)  # Wait for the reading thread to finish
             self.outputs_queue.put(f"Terminated test '{self.UTW_TEST.name}'.")
             self.test_process = None
+            self.read_thread = None
         else:
             self.outputs_queue.put("No test process to terminate.")
         

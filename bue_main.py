@@ -417,17 +417,20 @@ class bUE_Main:
         # Test ended successfully
         elif return_code == 0:
             self.test_state = Test_State.PASS
+            logger.info(f"Test ended successfully with return code {return_code}")
             self.ota_outgoing_queue.put((self.ota_base_station_id, "DONE"))
 
         # Test was terminated with a CANC. When a subprocess is terminated with a signal.SIGINT,
         # it returns -2
         elif return_code == -2:
             self.test_state = Test_State.PASS
+            logger.info(f"Test was cancelled with return code {return_code}")
             self.ota_outgoing_queue.put((self.ota_base_station_id, "CANCD"))
 
         # If anything else, the test ended unexpectedly and we will mark it as a FAIL    
         else:
             self.test_state = Test_State.FAIL
+            logger.warning(f"Test ended with unexpected return code {return_code}")
             self.ota_outgoing_queue.put((self.ota_base_station_id, "FAIL"))
 
 
@@ -683,11 +686,6 @@ class bUE_Main:
 
                 self.check_on_test()
                 self.check_for_test_interrupt()
-
-                # I get the messages during check_on_test now
-                # if not self.flag_ota_tout.is_set() and not self.test_stdout_queue.empty():
-                #     self.flag_ota_tout.set()
-                #     self.ota_task_queue.put(self.ota_send_tout)
             #
             elif self.cur_st == Bue_State.TEST_CLEANUP:
                 counter_ping += 1
