@@ -14,14 +14,15 @@ In the example for each of the messages, assume the bUE has an OTA id of 5, and 
 
 REQ:
     Direction: bUE -> base
-    Meaning: The bUE is requesting that it join the OTA network. It is broadcast over the ota, so it sends to address 0
+    Meaning: The bUE is requesting that it join the OTA network and shares its hostname and Reyax Id. It is broadcast over the ota, so it sends to address 0
     Body: None
-    Example: (bue_main.py) self.ota.send_ota_message(0, "REQ")
+    Example: (bue_main.py) self.ota.send_ota_message(0, "REQ:<hostname>,<bUE_id>")
     Response: The base station will respond with a CON message
 
 CON:
     Direction: base -> bUE
-    Meaning: The base station is confirming that the bUE has joined the OTA network while transmitting its own .
+    Meaning: The base station is confirming that the bUE has joined the OTA network while transmitting its own.
+             The base station also sends its current time so the bUE can correct its own clock if needed (will correct if > 1 second difference)
     Body: base station id
     Example: (base_station_main.py) self.ota.send_ota_message(5, "CON:10")
     Response: The bUE will respond with a ACK message
@@ -37,7 +38,7 @@ PING:
     Direction: bUE -> base
     Meaning: The bUE periodically pings the base station
     Body: None
-    Example: (bue_main.py) self.ota.send_ota_message(10, "PING")
+    Example: (bue_main.py) self.ota.send_ota_message(10, PING:<self.cur_st.value>,<lat>,<long>) NOTE: lat, long are '' if GPS isn't working
     Response: The base station will respond with a PINGR. If too much time passes between PINGR's, the bUE knows it has become disconnected from the network.
 
 PINGR:
@@ -46,11 +47,12 @@ PINGR:
     Body: None
     Example: (bue_main.py) self.ota.send_ota_message(5, "PINGR")
     Response: None
+
 TEST:
     Direction: base -> bUE
-    Meaning: The base station sends a UTW test configuration, a file, a start time, and parameters.
-    Body: <configuration>.<role>.<starttime>
-    Example: (bue_main.py) self.ota.send_ota_message(5, TEST,<file>,<start_time>,<parameters>)
+    Meaning: The base station sends a UTW test configuration, a file, a start time, and parameters. The parameters should be separated with spaces
+    Body: <file>,<start_time>,<parameters>
+    Example: (bue_main.py) self.ota.send_ota_message(5, TEST:<file>,<start_time>,<parameters>)
     Response: The bUE will respond with a TESTR, confirming that it has received the test 
 
 FAIL: 
@@ -76,18 +78,11 @@ PREPR:
     Example: (bue_main.py) self.ota.send_ota_message(10, "TESTR:1745004290")
     Response: None
 
-BEGIN:
+TOUT:
     Direction: bUE -> base
-    Meaning: The bUE lets the base station know that it has begun its UTW test
-    Body: None
-    Example: (bue_main.py) self.ota.send_ota_message(10, "BEGIN")
-    Response: None
-
-UPD:
-    Direction: bUE -> base
-    Meaning: The bUE sends an update on the UTW test; TBD (could be any time a UTW message is received, or just a periodic update)
-    Body: TBD
-    Example: (bue_main.py) self.ota.send_ota_message(10, "UPD:<body>")
+    Meaning: The bUE sends stdout/stderr from its UTW test
+    Body: <stdout>
+    Example: (bue_main.py) self.ota.send_ota_message(10, "TOUT:<stdout>")
     Response: None
 
 DONE:
@@ -96,4 +91,18 @@ DONE:
     Body: None
     Example: (bue_main.py) self.ota.send_ota_message(10, "DONE")
     Response: None
+
+RELOAD:
+    Direction: base -> bUE
+    Meaning: The base station tells the bUE to restart its bue.service
+    Body: None
+    Example: (base_station_main.py) self.ota.send_ota_message(10, "RELOAD")
+    Response: None
+
+RESTART: 
+    Direction: base -> bUE
+    Meaning: The base station tells the bUE to completely restart (sudo reboot)
+    Body: None
+    Example: (base_station_main.py) self.ota.send_ota_message(10, "RESTART")
+    Reponse: None
 
