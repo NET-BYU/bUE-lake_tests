@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-class State(Enum):
+class Bue_State(Enum):
     INIT = auto()
     CONNECT_OTA = auto()
     IDLE = auto()

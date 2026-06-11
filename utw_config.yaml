@@ -39,7 +39,8 @@ one_way:
       bw: 6000
       per: 3000
     # Python Terms
-    py_exe: "/home/admin/osu_resting/run_rx.py"
+    py_exe: "/home/admin/osu_testing/run_rx.py"
+    log_forward: ['rx_']
   tx:
     # UI Terms
     max_per_test: 0

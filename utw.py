@@ -2,8 +2,9 @@ import subprocess
 from dataclasses import dataclass
 import yaml
 import threading
-# from loguru import logger
+from loguru import logger
 import queue
+import signal
 
 yaml_file = 'utw_config.yaml'
 
@@ -72,14 +73,9 @@ class Utw:
             if not isinstance(p_fwd, list):
                 raise TypeError(f"Expected a list for 'log_forward' in test '{test_name}', got {type(p_fwd).__name__}")
             print_fwd = p_fwd
-        elif role is not None and "log_forward" in test_config["roles"][role].keys():
-            p_fwd = test_config["roles"][role]["log_forward"]
-            if not isinstance(p_fwd, list):
-                raise TypeError(f"Expected a list for 'log_forward' in role '{role}' of test '{test_name}', got {type(p_fwd).__name__}")
-            print_fwd = p_fwd
 
         self.UTW_TEST = utw_test(
-            name = f"{test_name};{role}" if role is not None else test_name,
+            name = f"{test_name};{role}",
             subp_command = test_command,
             print_forwards = print_fwd
         )
@@ -107,9 +103,10 @@ class Utw:
         except Exception as e:
             self.outputs_queue.put(f"Failed to start test '{self.UTW_TEST.name}': {e}")
             self.test_process = None
-            return
+            return False
         
         self.read_thread.start()
+        return True
 
     def _read_output(self):
         if self.test_process is None:
@@ -121,18 +118,21 @@ class Utw:
             try:
                 for line in self.test_process.stdout:
                     line = line.strip()
-                    if any(fwd in line for fwd in self.UTW_TEST.print_forwards):
-                        self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
+                    if self.UTW_TEST.print_forwards is not None:
+                        if any(fwd in line for fwd in self.UTW_TEST.print_forwards):
+                            self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
+                    # else:
+                    #     self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
             except Exception as e:
-                self.outputs_queue.put(f"Error reading output from test '{self.UTW_TEST.name}': {e}")
+                logger.error(f"Error reading output from test '{self.UTW_TEST.name}': {e}")
 
     def reset_test(self):
         if self.test_process is not None:
             self.test_process.terminate()
             self.test_process.wait()
+            self.read_thread.join(timeout=1)  # Wait for the reading thread to finish
             self.outputs_queue.put(f"Terminated test '{self.UTW_TEST.name}'.")
             self.test_process = None
-            self.read_thread.join(timeout=1)  # Wait for the reading thread to finish
         else:
             self.outputs_queue.put("No test process to terminate.")
         
@@ -146,8 +146,15 @@ class Utw:
     
     def get_test_status(self):
         if self.test_process is None:
-            return False, f"No test process running for test '{self.UTW_TEST.name}'." \
-                if self.UTW_TEST else "No test process running."
-        if self.test_process.poll() is None:
-            return True, f"Test '{self.UTW_TEST.name}' is running."
+            # self.outputs_queue.put("Error: Check on empty test process.")
+            return False, None
+        else:
+            return True, self.test_process.poll()
+
+    def cancel_test(self):
+        if self.test_process is not None:
+            self.test_process.send_signal(signal.SIGINT)  # Send SIGINT to allow graceful shutdown
+            self.outputs_queue.put(f"Sent cancel signal to test '{self.UTW_TEST.name}'.")
+        else:
+            self.outputs_queue.put("No test process to cancel.")
       
