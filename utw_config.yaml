@@ -60,14 +60,14 @@ rtt_basic:
     # Python Terms
     py_exe: "/home/admin/two_agent_osu/agent_main.py"
     exe_args: ["-a", "rtt_init"]
-    log_forward: ["RTTR from start", "  --- "]
+    log_forward: ["received"]
   resp:
     # UI Terms
     max_per_test: 1
     # Python Terms
     py_exe: "/home/admin/two_agent_osu/agent_main.py"
     exe_args: ["-a", "rtt_resp"]
-    log_forward: ["  --- RTT "]
+    log_forward: ["received"]
 
 
 fp_group:
