@@ -47,7 +47,7 @@ class Utw:
         
         test_config = self.config[test_name][role]
 
-        test_command = ["python3"]
+        test_command = ["python3", "-u"]
 
         test_command.append(test_config["py_exe"])
 
