@@ -305,7 +305,7 @@ class DialogRunTests:
                 
                 
                 # Load in the default args and see if any have changed in the UI, if so we update the send_string with the new args
-                args = self.utw_test_config[self.ui.comboBox_select_test.currentText()][child_frame.objectName().split('_args_frame_')[0]].get('default_args', {}).copy()
+                args = self.utw_test_config[self.ui.comboBox_select_test.currentText()][child_frame.objectName().split('_args_frame_')[0]].get('ui_args', {}).copy()
                 
                 for arg_input in child_frame.findChildren(QtWidgets.QLineEdit):
                     arg_name = arg_input.objectName().replace("_input", "")
