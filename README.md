@@ -230,3 +230,4 @@ If you are not seeing any traffic:
 
 - This README is intentionally focused on getting a base station + one or more bUEs talking over Reyax modules for lake experiments.
 - For deeper architectural details (message formats, state diagrams, etc.), refer to comments in `bue_main.py`, `base_station_main.py`, and `ota.py`, and any accompanying lab documentation (e.g., internal Notion pages).
+- Thank you

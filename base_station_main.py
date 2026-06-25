@@ -21,7 +21,7 @@ import traceback
 from loguru import logger
 
 from ota import Ota
-from constants import State
+from constants import Bue_State
 
 logger.remove()  # Remove default sink
 
@@ -208,7 +208,7 @@ class Base_Station_Main:
         and reported. Always note the time the PING was received, the state the bUE reports to be at,
         and response to the bUE with a PINGR
         """
-        self.bue_id_to_state[int(src_id)] = State(int(state))
+        self.bue_id_to_state[int(src_id)] = Bue_State(int(state))
         self.bue_id_to_last_ping_time[int(src_id)] = time.time()
 
         coords: str = ""

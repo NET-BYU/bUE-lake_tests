@@ -41,7 +41,7 @@ class Buetable:
 
             self.parent.tableWidget_bue.setItem(row, 0, hostname_item)
             self.parent.tableWidget_bue.setItem(
-                row, 1, QtWidgets.QTableWidgetItem(str(state)[6:])
+                row, 1, QtWidgets.QTableWidgetItem(str(state)[10:])
             )
             self.parent.tableWidget_bue.setItem(
                 row, 2, QtWidgets.QTableWidgetItem(str(missed_pings))

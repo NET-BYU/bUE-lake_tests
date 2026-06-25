@@ -1,0 +1,85 @@
+# The basic pattern for an Under the Water (UTW) test configuration is:
+#
+# test_name:  
+# - role_1: 
+#     # UI Terms:
+#     max_per_test: 0  # Required. If set, the UI will only select this many bUEs for the test. Default is 0, which means no limit.
+#     ui_args:
+#       arg1: value1  # If there is a value, it is the default. If None, the UI will require the user to input a value before running the test.
+#       ...
+#       argn: valuen
+#     # Python Terms:
+#     py_exe: "/home/admin/<location>/<role_1_file>.py"
+#     args: ["-a", "rguments_for_role_1"]
+#     log_forward: ["strings to match", "in the log output", "of role_1", "to forward to the base station"]
+#     
+#   ...
+#
+# - role_n: 
+#     # UI Terms:
+#     max_per_test: 0  # Optional. If set, the UI will only select this many bUEs for the test. Default is 0, which means no limit.
+#     ui_args:
+#       arg1: value1  # If there is a value, it is the default. If None, the UI will require the user to input a value before running the test.
+#       ...
+#       argn: valuen
+#     # Python Terms:
+#     py_exe: "/home/admin/<location>/<role_n_file>.py"
+#     args: ["-a", "rguments_for_role_n"]
+#     log_forward: ["strings to match", "in the log output", "of role_n", "to forward to the base station"]
+#
+# Every test has at least one role, even if all roles run the same executable with the same arguments. 
+one_way:
+  rx:
+    # UI Terms
+    max_per_test: 1
+    ui_args:
+      sf: 8
+      cf: 12000
+      bw: 6000
+    # Python Terms
+    py_exe: "/home/admin/osu_testing/run_rx.py"
+    log_forward: ['rx_']
+  tx:
+    # UI Terms
+    max_per_test: 0
+    ui_args:
+      msg: "test"
+      sf: 8
+      cf: 12000
+      bw: 6000
+      per: 3000
+    # Python Terms
+    py_exe: "/home/admin/osu_testing/run_tx.py"
+    log_forward: []
+
+
+rtt_basic:
+  init:
+    # UI Terms
+    max_per_test: 1
+    # Python Terms
+    py_exe: "/home/admin/two_agent_osu/agent_main.py"
+    exe_args: ["-a", "rtt_init"]
+    log_forward: ["received"]
+  resp:
+    # UI Terms
+    max_per_test: 1
+    # Python Terms
+    py_exe: "/home/admin/two_agent_osu/agent_main.py"
+    exe_args: ["-a", "rtt_resp"]
+    log_forward: ["received"]
+
+
+fp_group:
+  coordinator:
+    # UI Terms
+    max_per_test: 1
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/fleet-protocol/coordinator.py"
+    exe_args: ["-t", "group"]
+  worker:
+    # UI Terms
+    max_per_test: 0
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/fleet-protocol/worker.py"
+    exe_args: ["-t", "group"]
