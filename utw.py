@@ -123,7 +123,8 @@ class Utw:
                     line = line.strip()
                     if self.UTW_TEST.print_forwards is not None:
                         if any(fwd in line for fwd in self.UTW_TEST.print_forwards):
-                            self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
+                            line_wo_loguru = line.split(" - ", 1)[-1] if " - " in line else line
+                            self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line_wo_loguru}")
                     # else:
                     #     self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
             except Exception as e:
