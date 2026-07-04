@@ -75,13 +75,15 @@ fp_group:
     # UI Terms
     max_per_test: 1
     # Python Terms
-    py_exe: "/home/admin/uac-networking/fleet-protocol/coordinator.py"
+    py_exe: "/home/admin/uac-networking/fleet_protocol/coordinator.py"
     exe_args: ["-t", "group"]
+    log_forward: ["pkt", "req", "con", "%FAIL"]
   worker:
     # UI Terms
     max_per_test: 0
     ui_args:
       file: "short"
     # Python Terms
-    py_exe: "/home/admin/uac-networking/fleet-protocol/worker.py"
+    py_exe: "/home/admin/uac-networking/fleet_protocol/worker.py"
     exe_args: ["-t", "group"]
+    log_forward: ["pkt", "req", "con", "%FAIL"]

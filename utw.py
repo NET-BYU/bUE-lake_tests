@@ -5,6 +5,7 @@ import threading
 from loguru import logger
 import queue
 import signal
+import sys
 
 yaml_file = 'utw_config.yaml'
 
@@ -47,7 +48,7 @@ class Utw:
         
         test_config = self.config[test_name][role]
 
-        test_command = ["python3", "-u"]
+        test_command = [sys.executable, "-u"]
 
         test_command.append(test_config["py_exe"])
 
@@ -125,6 +126,8 @@ class Utw:
                         if any(fwd in line for fwd in self.UTW_TEST.print_forwards):
                             line_wo_loguru = line.split(" - ", 1)[-1] if " - " in line else line
                             self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line_wo_loguru}")
+                        elif "ERROR" in line or "FATAL" in line:
+                            logger.warning(f"Line from test '{self.UTW_TEST.name}' did not match any print forwards: {line}")
                     # else:
                     #     self.outputs_queue.put(f"[{self.UTW_TEST.name}] {line}")
             except Exception as e:
