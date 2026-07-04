@@ -81,8 +81,6 @@ fp_group:
   worker:
     # UI Terms
     max_per_test: 0
-    ui_args:
-      file: "short"
     # Python Terms
     py_exe: "/home/admin/uac-networking/fleet_protocol/worker.py"
     exe_args: ["-t", "group"]
