@@ -48,7 +48,7 @@ class Utw:
         
         test_config = self.config[test_name][role]
 
-        test_command = [sys.executable, "-u"]
+        test_command = ["/home/admin/uwenv/bin/python3", "-u"]
 
         test_command.append(test_config["py_exe"])
 
