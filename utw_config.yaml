@@ -93,12 +93,6 @@ vbf:
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/sink.py"
     log_forward: ["GPS", "rcvd"]
-  node:
-    # UI Terms
-    max_per_test: 0
-    # Python Terms
-    py_exe: "/home/admin/uac-networking/vbf/node.py"
-    log_forward: ["GPS", "CRC", "frwd"]
   source:
     # UI Terms
     max_per_test: 1
@@ -108,4 +102,10 @@ vbf:
       dest-lon: -111.4930
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/source.py"
-    log_forward: ["GPS", "Sent"]
+    log_forward: ["GPS", "message"]
+  node:
+    # UI Terms
+    max_per_test: 0
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/vbf/node.py"
+    log_forward: ["GPS", "CRC", "frwd"]
