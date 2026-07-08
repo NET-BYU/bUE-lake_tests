@@ -85,3 +85,27 @@ fp_group:
     py_exe: "/home/admin/uac-networking/fleet_protocol/worker.py"
     exe_args: ["-t", "group"]
     log_forward: ["pkt", "req", "con", "%FAIL"]
+
+vbf:
+  sink:
+    # UI Terms
+    max_per_test: 1
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/vbf/sink.py"
+    log_forward: ["GPS", "rcvd"]
+  node:
+    # UI Terms
+    max_per_test: 0
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/vbf/node.py"
+    log_forward: ["GPS", "CRC", "frwd"]
+  source:
+    # UI Terms
+    max_per_test: 1
+    ui_args:
+      radius: 20
+      dest-lat: 40.4276
+      dest-lon: -111.4930
+    # Python Terms
+    py_exe: "/home/admin/uac-networking/vbf/source.py"
+    log_forward: ["GPS", "Sent"]
