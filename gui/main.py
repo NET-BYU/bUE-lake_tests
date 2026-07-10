@@ -5,6 +5,8 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from loguru import logger
+
 from base_station_main import Base_Station_Main
 from MapManager import MapManager
 
@@ -42,6 +44,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_switch_map_type.clicked.connect(self.map_manager.swap_map_type)
         self.button_cancel_tests.clicked.connect(self.dialog_cancel_tests.open_dialog_cancel_tests)
         self.button_clear_messages.clicked.connect(lambda: self.base_station.bue_tout.clear())
+        self.button_add_log_comment.clicked.connect(self.add_log_comment)
+        self.lineEdit_log_comment.returnPressed.connect(self.add_log_comment)
 
         self.bue_table.setup_table()
 
@@ -125,6 +129,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.distance_table.populate_distance_table()
             self.coords_table.populate_coords_table()
     
+
+    def add_log_comment(self):
+        """Insert an operator comment into the base station log."""
+        comment = self.lineEdit_log_comment.text().strip()
+        if not comment:
+            return
+
+        logger.info(f"[COMMENT] {comment}")
+        self.lineEdit_log_comment.clear()
 
     def populate_messages(self):
         """Populate the text browser with messages from base_station.bue_tout."""

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.2
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,9 +17,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QGroupBox,
-    QHBoxLayout, QHeaderView, QMainWindow, QPushButton,
-    QSizePolicy, QTableWidget, QTableWidgetItem, QTextBrowser,
-    QVBoxLayout, QWidget)
+    QHBoxLayout, QHeaderView, QLineEdit, QMainWindow,
+    QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
+    QTextBrowser, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -157,23 +157,45 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_6.addWidget(self.frame_map)
 
+        self.group_log_comment = QGroupBox(self.frame_middle)
+        self.group_log_comment.setObjectName(u"group_log_comment")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.group_log_comment.sizePolicy().hasHeightForWidth())
+        self.group_log_comment.setSizePolicy(sizePolicy7)
+        self.horizontalLayout_comment = QHBoxLayout(self.group_log_comment)
+        self.horizontalLayout_comment.setObjectName(u"horizontalLayout_comment")
+        self.lineEdit_log_comment = QLineEdit(self.group_log_comment)
+        self.lineEdit_log_comment.setObjectName(u"lineEdit_log_comment")
+
+        self.horizontalLayout_comment.addWidget(self.lineEdit_log_comment)
+
+        self.button_add_log_comment = QPushButton(self.group_log_comment)
+        self.button_add_log_comment.setObjectName(u"button_add_log_comment")
+
+        self.horizontalLayout_comment.addWidget(self.button_add_log_comment)
+
+
+        self.verticalLayout_6.addWidget(self.group_log_comment)
+
         self.group_messages = QGroupBox(self.frame_middle)
         self.group_messages.setObjectName(u"group_messages")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy7.setHorizontalStretch(0)
-        sizePolicy7.setVerticalStretch(40)
-        sizePolicy7.setHeightForWidth(self.group_messages.sizePolicy().hasHeightForWidth())
-        self.group_messages.setSizePolicy(sizePolicy7)
+        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy8.setHorizontalStretch(0)
+        sizePolicy8.setVerticalStretch(40)
+        sizePolicy8.setHeightForWidth(self.group_messages.sizePolicy().hasHeightForWidth())
+        self.group_messages.setSizePolicy(sizePolicy8)
         self.group_messages.setMinimumSize(QSize(499, 0))
         self.verticalLayout_3 = QVBoxLayout(self.group_messages)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.textBrowser_messages = QTextBrowser(self.group_messages)
         self.textBrowser_messages.setObjectName(u"textBrowser_messages")
-        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy8.setHorizontalStretch(0)
-        sizePolicy8.setVerticalStretch(1)
-        sizePolicy8.setHeightForWidth(self.textBrowser_messages.sizePolicy().hasHeightForWidth())
-        self.textBrowser_messages.setSizePolicy(sizePolicy8)
+        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy9.setHorizontalStretch(0)
+        sizePolicy9.setVerticalStretch(1)
+        sizePolicy9.setHeightForWidth(self.textBrowser_messages.sizePolicy().hasHeightForWidth())
+        self.textBrowser_messages.setSizePolicy(sizePolicy9)
 
         self.verticalLayout_3.addWidget(self.textBrowser_messages)
 
@@ -192,11 +214,11 @@ class Ui_MainWindow(object):
 
         self.frame_right = QFrame(self.frame_top)
         self.frame_right.setObjectName(u"frame_right")
-        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy9.setHorizontalStretch(10)
-        sizePolicy9.setVerticalStretch(0)
-        sizePolicy9.setHeightForWidth(self.frame_right.sizePolicy().hasHeightForWidth())
-        self.frame_right.setSizePolicy(sizePolicy9)
+        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy10.setHorizontalStretch(10)
+        sizePolicy10.setVerticalStretch(0)
+        sizePolicy10.setHeightForWidth(self.frame_right.sizePolicy().hasHeightForWidth())
+        self.frame_right.setSizePolicy(sizePolicy10)
         self.frame_right.setMinimumSize(QSize(200, 0))
         self.frame_right.setFrameShape(QFrame.StyledPanel)
         self.frame_right.setFrameShadow(QFrame.Raised)
@@ -253,11 +275,11 @@ class Ui_MainWindow(object):
 
         self.frame_base_station_log = QFrame(self.centralwidget)
         self.frame_base_station_log.setObjectName(u"frame_base_station_log")
-        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy10.setHorizontalStretch(0)
-        sizePolicy10.setVerticalStretch(20)
-        sizePolicy10.setHeightForWidth(self.frame_base_station_log.sizePolicy().hasHeightForWidth())
-        self.frame_base_station_log.setSizePolicy(sizePolicy10)
+        sizePolicy11 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy11.setHorizontalStretch(0)
+        sizePolicy11.setVerticalStretch(20)
+        sizePolicy11.setHeightForWidth(self.frame_base_station_log.sizePolicy().hasHeightForWidth())
+        self.frame_base_station_log.setSizePolicy(sizePolicy11)
         self.frame_base_station_log.setMinimumSize(QSize(0, 0))
 
         self.verticalLayout_4.addWidget(self.frame_base_station_log)
@@ -276,24 +298,27 @@ class Ui_MainWindow(object):
         self.actiontest.setToolTip(QCoreApplication.translate("MainWindow", u"test", None))
 #endif // QT_CONFIG(tooltip)
         ___qtablewidgetitem = self.tableWidget_bue.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"bUE", None));
+        ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"bUE", None))
         ___qtablewidgetitem1 = self.tableWidget_bue.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"State", None));
+        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"State", None))
         ___qtablewidgetitem2 = self.tableWidget_bue.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Pings", None));
+        ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Pings", None))
         self.groupBox_controls.setTitle(QCoreApplication.translate("MainWindow", u"Controls", None))
         self.button_run_tests.setText(QCoreApplication.translate("MainWindow", u"Run Tests", None))
         self.button_cancel_tests.setText(QCoreApplication.translate("MainWindow", u"Cancel Tests", None))
         self.button_switch_map_type.setText(QCoreApplication.translate("MainWindow", u"Switch Map Type", None))
+        self.group_log_comment.setTitle(QCoreApplication.translate("MainWindow", u"Log Comment", None))
+        self.lineEdit_log_comment.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter a comment to insert into the base station log...", None))
+        self.button_add_log_comment.setText(QCoreApplication.translate("MainWindow", u"Add Comment", None))
         self.group_messages.setTitle(QCoreApplication.translate("MainWindow", u"Messages", None))
         self.button_clear_messages.setText(QCoreApplication.translate("MainWindow", u"Clear Messages", None))
         ___qtablewidgetitem3 = self.tableWidget_coords.horizontalHeaderItem(0)
-        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"bUE", None));
+        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"bUE", None))
         ___qtablewidgetitem4 = self.tableWidget_coords.horizontalHeaderItem(1)
-        ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Coords", None));
+        ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Coords", None))
         ___qtablewidgetitem5 = self.tableWidget_distances.horizontalHeaderItem(0)
-        ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"bUEs", None));
+        ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"bUEs", None))
         ___qtablewidgetitem6 = self.tableWidget_distances.horizontalHeaderItem(1)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Distances (m)", None));
+        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Distances (m)", None))
     # retranslateUi
 
