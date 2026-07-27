@@ -193,7 +193,9 @@ class bUE_Main:
         while not self.ota_incoming_queue.empty():
             try:
                 message: str = self.ota_incoming_queue.get()
-                logger.info(f"Received OTA message: {message}")
+                
+                if not ",REQ:" in message:
+                    logger.info(f"Received OTA message: {message}")
 
                 # Process the message based on its type
                 # A message body is "<source id>,<message type><:message body (optional)>"
@@ -226,6 +228,9 @@ class bUE_Main:
 
                 elif msg_type == "RESTART":
                     self.flag_ota_restart.set()
+
+                elif msg_type == "REQ":
+                    pass
 
                 else:
                     logger.warning(f"Unknown message type: {msg_type}")
