@@ -102,7 +102,18 @@ class Utw:
             )
             self.read_thread = threading.Thread(target=self._read_output, daemon=True)
             self.read_thread.start()
-            self.outputs_queue.put(f"Started test '{self.UTW_TEST.name}' with PID {self.test_process.pid}.")
+            # subp_command is [python3, -u, py_exe, *exe_args, *--key=value ui_args] --
+            # skip the first 3 (interpreter/flag/script path) to report only the
+            # actual resolved parameters, including any exp_* flags, so this is
+            # always on record (operator's live view + this bUE's own log) for
+            # every protocol/role without each role script needing its own
+            # logging. Unconditional, like the rest of this message -- not
+            # gated by log_forward, since knowing what a test actually ran with
+            # matters regardless of what that protocol chooses to relay.
+            params_str = " ".join(self.UTW_TEST.subp_command[3:]) or "(no params)"
+            self.outputs_queue.put(
+                f"Started test '{self.UTW_TEST.name}' with PID {self.test_process.pid}. Params: {params_str}"
+            )
             return True
         except Exception as e:
             self.outputs_queue.put(f"Failed to start test '{self.UTW_TEST.name}': {e}")

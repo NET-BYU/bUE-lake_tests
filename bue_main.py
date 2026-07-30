@@ -109,6 +109,12 @@ class bUE_Main:
 
         # Variable to hold how many PINGRs have been missed
         self.ota_pingrs_missed: int = 0
+        # Consecutive missed PINGRs before we conclude the base station is gone
+        # (process restarted/crashed without ever telling us) and go back to
+        # CONNECT_OTA on our own, rather than waiting forever on a status flag
+        # that nothing would otherwise ever clear. Matches the base station's
+        # own PING_MAX_MISSES.
+        self.PING_MAX_MISSES = 5
 
         # Variables to handle test subprocess
         # self.test_command = None
@@ -280,6 +286,7 @@ class bUE_Main:
 
         if self.flag_ota_pingr.is_set():
             self.flag_ota_pingr.clear()
+            self.ota_pingrs_missed = 0
         else:
             self.ota_pingrs_missed += 1
 
@@ -570,12 +577,18 @@ class bUE_Main:
             # If the bUE gets a TEST from the base station and that TEST contained valid parameters,
             # enter the WAIT_FOR_START state
             elif self.cur_st == Bue_State.IDLE:
-                # If we lost connection we will go back to the connecting state
-                if not self.status_ota_connected:
+                # If we lost connection -- either something told us directly, or
+                # we've gone PING_MAX_MISSES pings without a PINGR (the base
+                # station process restarted/crashed and never told us, which
+                # status_ota_connected alone would never detect on its own) --
+                # go back to the connecting state.
+                if not self.status_ota_connected or self.ota_pingrs_missed >= self.PING_MAX_MISSES:
                     counter_connect_ota = 0
 
-                    # Reset the flags that are used in the connect state
+                    # Reset the flags/status/counters used in the connect state
                     self.flag_ota_connected.clear()
+                    self.status_ota_connected = False
+                    self.ota_pingrs_missed = 0
 
                     self.nxt_st = Bue_State.CONNECT_OTA
                 # If we receivied a TEST message from the base station, we switch to UTW_TEST state
