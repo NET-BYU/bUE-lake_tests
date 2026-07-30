@@ -48,6 +48,10 @@ one_way:
       cf: 12000
       bw: 6000
       per: 3000
+      # exp_* args are experimental-mode toggles -- see EXPERIMENTAL_FLAGS.md.
+      # Always appended at the end so existing ui_args stay positionally stable.
+      # false = today's exact production behavior.
+      exp_guard_symbol: false
     # Python Terms
     py_exe: "/home/admin/osu_testing/run_tx.py"
     log_forward: []
@@ -100,12 +104,18 @@ vbf:
       radius: 20
       dest-lat: 40.4276
       dest-lon: -111.4930
+      # exp_* args are experimental-mode toggles -- see EXPERIMENTAL_FLAGS.md.
+      # Always appended at the end so existing ui_args stay positionally stable.
+      # false = today's exact production behavior.
+      exp_long_preamble: false
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/source.py"
     log_forward: ["GPS", "message"]
   node:
     # UI Terms
     max_per_test: 0
+    ui_args:
+      exp_long_preamble: false
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/node.py"
     log_forward: ["GPS", "CRC", "frwd"]
