@@ -60,39 +60,58 @@ class DialogRunTests:
         frame = QtWidgets.QFrame()
         frame.resize(901, 551)
 
+        # How many fields fit on one row before wrapping to the next -- tuned so
+        # 3 fields (each 130px label + 80px input + gap) comfortably fits inside
+        # the ~900px scroll viewport (scrollArea_test_setup has no working
+        # horizontal scrollbar -- setWidgetResizable(True) caps content to the
+        # viewport width -- so anything placed past it is simply unreachable,
+        # confirmed via horizontalScrollBar().maximum() == 0). Wrapping to
+        # multiple rows (using height, which IS scrollable) is the fix, not a
+        # wider single row.
+        FIELDS_PER_ROW = 3
+        FIELD_ROW_HEIGHT = 25
+
         def build_args_frame(test_name: str, role: str):
             args_frame = QtWidgets.QFrame(parent=frame)
 
             ui_args = self.utw_test_config[test_name][role]['ui_args']
-            args_frame_x = x_margin
 
             bue_label = QtWidgets.QLabel("<bUE>:", parent=args_frame)
             bue_label.setObjectName("bue_label")
-            bue_label.setGeometry(args_frame_x, 5, 100, 20)
+            bue_label.setGeometry(x_margin, 5, 100, 20)
             bue_label.setStyleSheet("color: black;")
             bue_label.show()
-            args_frame_x += 60
 
-            for arg_name, arg_value in ui_args.items():
-                # Create a label and input field for each argument
+            for i, (arg_name, arg_value) in enumerate(ui_args.items()):
+                row, col = divmod(i, FIELDS_PER_ROW)
+                # row 0 starts after the <bUE>: label; later rows start at the
+                # same left edge as the fields (no bUE label to make room for)
+                row_x_start = (x_margin + 60) if row == 0 else x_margin
+                field_x = row_x_start + col * 225
+                field_y = 5 + row * FIELD_ROW_HEIGHT
+
+                # Label width widened from the original 50px -- too narrow for
+                # names like "exp_long_preamble" (longer exp_* flag names
+                # introduced after this layout was built), which overflowed
+                # into the next field's position instead of wrapping/clipping.
                 arg_label = QtWidgets.QLabel(f"{arg_name}:", parent=args_frame)
-                arg_label.setGeometry(args_frame_x, 5, 50, 20)
+                arg_label.setGeometry(field_x, field_y, 130, 20)
                 arg_label.setStyleSheet("color: black;")
                 arg_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
                 arg_label.show()
 
                 arg_input = QtWidgets.QLineEdit(parent=args_frame)
-                arg_input.setGeometry(args_frame_x + 60, 5, 80, 20)
+                arg_input.setGeometry(field_x + 135, field_y, 80, 20)
                 arg_input.setStyleSheet("color: black;")
                 arg_input.setObjectName(f"{arg_name}_input")
                 if arg_value is not None:
                     arg_input.setText(str(arg_value))
                 arg_input.show()
 
-                args_frame_x += 140  # Move to the right for the next argument
+            n_rows = (len(ui_args) + FIELDS_PER_ROW - 1) // FIELDS_PER_ROW if ui_args else 1
+            height = max(30, n_rows * FIELD_ROW_HEIGHT + 10)
+            return args_frame, height
 
-            return args_frame
-        
         def build_empty_args_frame():
             args_frame = QtWidgets.QFrame(parent=frame)
 
@@ -105,9 +124,9 @@ class DialogRunTests:
             empty_label = QtWidgets.QLabel("No additional arguments for this role", parent=args_frame)
             empty_label.setGeometry(120, 5, 300, 20)
             empty_label.setStyleSheet("font-style: italic; color: light gray;")
-            empty_label.show() 
+            empty_label.show()
 
-            return args_frame
+            return args_frame, 30
         
         def set_args_frame(bue_name: str, args_frame: QtWidgets.QFrame):
             # Get first word in bue name
@@ -179,12 +198,12 @@ class DialogRunTests:
                     # Now, we add the args frame for this role, which will be enabled/disabled based on whether 
                     #  a BUE is selected in the combo box
                     if 'ui_args' in self.utw_test_config[test_name][role].keys():
-                        args_frame = build_args_frame(test_name, role)
+                        args_frame, args_height = build_args_frame(test_name, role)
                     # If no args, create a dummy frame to maintain consistent enabling/disabling of BUE selection
                     else:
-                        args_frame = build_empty_args_frame()                        
-                        
-                    args_frame.setGeometry(x_margin, current_y, 880, 40)
+                        args_frame, args_height = build_empty_args_frame()
+
+                    args_frame.setGeometry(x_margin, current_y, 900, args_height)  # fields wrap to rows, not columns, past viewport width
                     args_frame.show()
 
                     args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
@@ -192,12 +211,8 @@ class DialogRunTests:
                     bue_widgets.append([bue_combo, args_frame])  # Keep track of this args frame
                     set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
 
-                        # args_frame.setGeometry(x_margin, current_y, 880, 40)
-                        # args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
-                        # args_frame.show()
-                        # bue_widgets.append([bue_combo, args_frame])  # Keep track of this args frame
-                        # set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
-                current_y += 40
+                    current_y += args_height  # advance past however many rows this role's fields needed
+                current_y += 10
 
             # In the event that there is no limit, we create check boxes of all the other bUEs
             else:
@@ -220,15 +235,15 @@ class DialogRunTests:
                     check_x += 110
                     current_y += 30
 
-                    # Now, we add the args frame for this role, which will be enabled/disabled based on whether 
+                    # Now, we add the args frame for this role, which will be enabled/disabled based on whether
                     #  a BUE is selected in the combo box
                     if 'ui_args' in self.utw_test_config[test_name][role].keys():
-                        args_frame = build_args_frame(test_name, role)
+                        args_frame, args_height = build_args_frame(test_name, role)
                     # If no args, create a dummy frame to maintain consistent enabling/disabling of BUE selection
                     else:
-                        args_frame = build_empty_args_frame()                        
-                        
-                    args_frame.setGeometry(x_margin, current_y, 880, 40)
+                        args_frame, args_height = build_empty_args_frame()
+
+                    args_frame.setGeometry(x_margin, current_y, 900, args_height)  # fields wrap to rows, not columns, past viewport width
                     args_frame.show()
 
                     args_frame.setObjectName(f"{role}_args_frame_{i}")  # Set object name for later reference
@@ -236,10 +251,11 @@ class DialogRunTests:
                     bue_widgets.append([bue_checkbox, args_frame])  # Keep track of this args frame
                     set_args_frame("F init", args_frame)  # Initialize the args frame as disabled
 
+                    current_y += args_height  # advance past however many rows this bUE's fields needed
                     i += 1
 
             current_x = x_margin
-            current_y += 40
+            current_y += 10
 
             
 
@@ -253,8 +269,14 @@ class DialogRunTests:
             line.show()
             current_y += line_height + 10
 
-        # # Ensure the content widget is tall enough to show all children and enable scrolling.
-        # content.setMinimumSize(viewport_w, current_y + 10)
+        # Ensure the content widget is tall enough to show all children and enable
+        # scrolling -- previously commented out (and referenced undefined names),
+        # so scrollArea_test_setup's setWidgetResizable(True) was silently capping
+        # `frame` to the viewport's own size regardless of how far down current_y
+        # actually got, clipping any role/bUE rows past that point with no way to
+        # reach them (confirmed: node-role args_frames for the 3rd/4th bUE were
+        # created correctly but positioned below the visible-and-scrollable area).
+        frame.setMinimumSize(self.ui.scrollArea_test_setup.width(), current_y + 10)
         self.ui.scrollArea_test_setup.setWidget(frame)
 
         for item in bue_widgets:
