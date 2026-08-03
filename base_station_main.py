@@ -114,6 +114,14 @@ class Base_Station_Main:
                 # Process the message based on its type
                 # A message body is "<source id>,<message type><:message body (optional)>"
                 src_id, msg = message.split(",", 1)
+                # A bUE can keep sending PING/TOUT/etc. as if still connected
+                # after this process restarts (it only notices and re-REQs
+                # once it misses enough PINGRs, or if it's mid-test it won't
+                # notice until that ends) -- bue_id_to_hostname won't have it
+                # yet in that window. Falling back instead of a direct dict
+                # index avoids crashing (with a KeyError traceback) on every
+                # single message from a bUE we just haven't re-recognized yet.
+                hostname = self.bue_id_to_hostname.get(int(src_id), f"unknown-{src_id}")
 
                 if ":" in msg:
                     msg_type, msg_body = msg.split(":", maxsplit=1)
@@ -128,7 +136,7 @@ class Base_Station_Main:
                     else:
                         self.bue_id_to_hostname[int(bue_id)] = str(hostname)
                         self.ota_outgoing_queue.put((bue_id, f"CON:{self.reyax_id}"))
-                        logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: REQ")
+                        logger.info(f"{hostname}: REQ")
 
                 elif msg_type == "ACK":
                     # If not already connected, list in connected bUEs and initialize all variables
@@ -146,17 +154,17 @@ class Base_Station_Main:
                         state, lat, long = msg_body.split(",", 2) 
                         self.ota_ping_handler(src_id=src_id, state=state, lat=lat, long=long)
                     else:
-                        logger.error(f"{self.bue_id_to_hostname[int(src_id)]}: PING but not listed as connected")
+                        logger.warning(f"{hostname}: PING but not listed as connected (will reconnect once it notices)")
 
                 elif msg_type == "TOUT":
-                    self.bue_tout.append(f"{self.bue_id_to_hostname[int(src_id)]}: {msg_body}")
-                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: TOUT")
+                    self.bue_tout.append(f"{hostname}: {msg_body}")
+                    logger.info(f"{hostname}: TOUT")
 
                 elif msg_type == "FAIL":
-                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: FAIL")
+                    logger.info(f"{hostname}: FAIL")
 
                 elif msg_type == "DONE":
-                    logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: DONE")
+                    logger.info(f"{hostname}: DONE")
 
                 else:
                     logger.warning(f"Unknown message type: {msg_type}")
