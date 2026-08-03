@@ -78,6 +78,11 @@ fp_group:
   coordinator:
     # UI Terms
     max_per_test: 1
+    ui_args:
+      # exp_* args are experimental-mode toggles -- see EXPERIMENTAL_FLAGS.md.
+      # Always appended at the end so existing ui_args stay positionally stable.
+      # 8 = today's exact production behavior (Chirp_Engine's own default).
+      exp_sf: 8
     # Python Terms
     py_exe: "/home/admin/uac-networking/fleet_protocol/coordinator.py"
     exe_args: ["-t", "group"]
@@ -85,6 +90,8 @@ fp_group:
   worker:
     # UI Terms
     max_per_test: 0
+    ui_args:
+      exp_sf: 8
     # Python Terms
     py_exe: "/home/admin/uac-networking/fleet_protocol/worker.py"
     exe_args: ["-t", "group"]
@@ -106,8 +113,9 @@ vbf:
       dest-lon: -111.4930
       # exp_* args are experimental-mode toggles -- see EXPERIMENTAL_FLAGS.md.
       # Always appended at the end so existing ui_args stay positionally stable.
-      # false = today's exact production behavior.
+      # false/9 = today's exact production behavior.
       exp_long_preamble: false
+      exp_sf: 9
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/source.py"
     log_forward: ["GPS", "message"]
@@ -116,6 +124,7 @@ vbf:
     max_per_test: 0
     ui_args:
       exp_long_preamble: false
+      exp_sf: 9
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/node.py"
     log_forward: ["GPS", "CRC", "frwd"]
