@@ -340,6 +340,7 @@ class bUE_Main:
 
     # Sends a message from the test back to the base station
     def ota_send_tout(self, message):
+        message = "".join(c if c.isprintable() else "~" for c in message)
         self.ota_outgoing_queue.put((self.ota_base_station_id, f"TOUT:{message}"))
         logger.info(f"Sent TOUT to {self.ota_base_station_id} with console output: {message}")
         self.flag_ota_tout.clear()
