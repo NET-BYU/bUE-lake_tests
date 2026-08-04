@@ -101,6 +101,15 @@ vbf:
   sink:
     # UI Terms
     max_per_test: 1
+    ui_args:
+      # The sink had NO ui_args at all, so it always ran on Node's defaults
+      # (sf 9) regardless of what the rest of the test was set to. vbf then
+      # only decoded when the source happened to also be at sf 9, and went
+      # completely silent at sf 8 and sf 10. Must stay in the same order as
+      # node.py/source.py's trailing exp_* args -- utw.py maps these to CLI
+      # flags positionally.
+      exp_long_preamble: false
+      exp_sf: 9
     # Python Terms
     py_exe: "/home/admin/uac-networking/vbf/sink.py"
     log_forward: ["GPS", "rcvd"]
