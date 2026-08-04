@@ -64,6 +64,7 @@ class Base_Station_Main:
         self.bue_id_to_state: dict[int, str] = {}  # Dictionary to hold what state each bUE is currently in
         self.bue_id_to_coords: dict[int, (float, float)] = {}  # Dictionary to hold the coords of each bUE
         self.bue_id_to_last_ping_time: dict[int, int] = {}  # Dictionary to hold when a bUE got its last PING
+        self.bue_id_to_last_cancd_time: dict[int, float] = {}  # Dictionary to hold when a bUE last confirmed a cancel via CANCD
 
         # Set up the ota threads
         self.ota_incoming_queue = queue.Queue()
@@ -167,6 +168,7 @@ class Base_Station_Main:
                     logger.info(f"{hostname}: DONE")
 
                 elif msg_type == "CANCD":
+                    self.bue_id_to_last_cancd_time[int(src_id)] = time.time()
                     logger.info(f"{hostname}: CANCD (test cancelled)")
 
                 else:
@@ -240,26 +242,42 @@ class Base_Station_Main:
         when this fails completely, but that's a 15-minute safety net, not
         a substitute for actually cancelling promptly.)
 
-        Resends CANC, checking after each attempt whether the bUE's
-        self-reported state (from its periodic PING, tracked in
-        bue_id_to_state) has left WAIT_FOR_START/UTW_TEST -- stops as soon
-        as it has, since further CANCs would just be wasted airtime once
-        the first one has landed. Blocking -- call from a background
-        thread, not the GUI thread, so the UI doesn't freeze for however
-        long this takes.
+        Resends CANC, checking after each attempt for confirmation via
+        either of two independent signals:
+          - CANCD, sent by the bUE immediately upon actually cancelling
+            (near-instant -- this is the primary signal).
+          - self-reported state (from its periodic PING, tracked in
+            bue_id_to_state) leaving WAIT_FOR_START/UTW_TEST.
+        The state signal alone was found to produce false negatives here:
+        it only updates on the bUE's ~10s PING cycle, which is often slower
+        than this function's own retry_interval_s, so a cancel that
+        actually succeeded could still read as WAIT_FOR_START/UTW_TEST for
+        several seconds after the fact (confirmed directly against device
+        logs, 2026-08-03 -- a "NOT CONFIRMED" case where the device had
+        already cleanly cancelled a few seconds earlier). CANCD isn't
+        gated on that cycle, so checking it first resolves that.
+
+        Stops as soon as either signal confirms, since further CANCs would
+        just be wasted airtime once the first one has landed. Blocking --
+        call from a background thread, not the GUI thread, so the UI
+        doesn't freeze for however long this takes.
 
         Returns True if the bUE was confirmed to leave a testing state,
         False if it still reports one after max_retries attempts.
         """
         testing_states = (Bue_State.WAIT_FOR_START, Bue_State.UTW_TEST)
         for attempt in range(1, max_retries + 1):
+            send_time = time.time()
             self.ota.send_ota_message(bue_id, "CANC")
             logger.info(f"cancel_bue_reliable: sent CANC to {bue_id} (attempt {attempt}/{max_retries})")
 
             deadline = time.time() + retry_interval_s
             while time.time() < deadline:
+                if self.bue_id_to_last_cancd_time.get(bue_id, 0) > send_time:
+                    logger.info(f"cancel_bue_reliable: {bue_id} confirmed via CANCD")
+                    return True
                 if self.bue_id_to_state.get(bue_id) not in testing_states:
-                    logger.info(f"cancel_bue_reliable: {bue_id} confirmed out of test state")
+                    logger.info(f"cancel_bue_reliable: {bue_id} confirmed via state")
                     return True
                 time.sleep(0.2)
 

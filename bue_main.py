@@ -71,11 +71,33 @@ class bUE_Main:
 
         self.utw = Utw()
 
-        # Fetch the Reyax ID from the OTA module
+        # Fetch the Reyax ID from the OTA module. There's no known way to
+        # reset the Reyax module in software (no reset AT command, no GPIO
+        # reset line wired to it) -- confirmed in the field (2026-08-03)
+        # that a wedged module needs its physical reset button pressed, and
+        # this loop just retried silently forever with zero log output the
+        # whole time it was wedged (nearly 40 minutes before anyone
+        # noticed). Can't fix the underlying wedge from here, but silence
+        # while stuck like that is its own bug -- log loudly and
+        # periodically so this is immediately visible from a log tail or
+        # `journalctl -u bue.service` instead of looking identical to a
+        # normal, brief startup delay.
         self.reyax_id = None
+        REYAX_FETCH_WARN_EVERY_S = 10
+        wait_start = time.time()
+        last_warn = 0.0
         while self.reyax_id is None:
             time.sleep(0.2)
             self.reyax_id = self.ota.fetch_id()
+            elapsed = time.time() - wait_start
+            if self.reyax_id is None and elapsed - last_warn >= REYAX_FETCH_WARN_EVERY_S:
+                last_warn = elapsed
+                logger.warning(
+                    f"__init__: Reyax module has not responded to an ID query "
+                    f"in {elapsed:.0f}s -- if this keeps climbing, the module "
+                    f"is likely wedged and needs its physical reset button "
+                    f"pressed (a software/service restart alone will not fix it)."
+                )
         logger.info(f"__init__: OTA module initialized with Reyax ID {self.reyax_id}")
 
         # Fetch the device hostname
@@ -802,6 +824,21 @@ class bUE_Main:
 
     def __del__(self):
         try:
+            # Defense-in-depth: explicitly cancel any active test subprocess
+            # before tearing down threads. systemd's KillMode=control-group
+            # already delivers SIGTERM directly to the subprocess too (same
+            # cgroup), and each role script now has its own SIGTERM handler
+            # (see node.py/source.py/sink.py/fp_agent.py/run_tx.py/run_rx.py)
+            # that runs its own cleanup independently -- this is a second,
+            # redundant path to the same result, in case KillMode is ever
+            # changed or the subprocess ends up outside the cgroup for some
+            # other reason. Cheap and harmless if the subprocess is already
+            # stopped or was never started.
+            if hasattr(self, "utw") and self.utw.test_process is not None:
+                logger.info("__del__: active test detected, cancelling before shutdown")
+                self.utw.cancel_test()
+                self.utw.reset_test()
+
             self.EXIT = True
             self.tick_enabled = False
 
@@ -831,6 +868,18 @@ if __name__ == "__main__":
 
     # Example usage
     logger.info(f"This marks the start of the bUE service at {start_time}")
+
+    # systemd (KillMode=control-group, the default for bue.service) sends
+    # SIGTERM on `systemctl stop`/`restart`/`reboot` -- but Python only
+    # converts SIGINT into KeyboardInterrupt automatically, not SIGTERM.
+    # Without this, a remote reboot would kill this process (and, via the
+    # same cgroup-wide signal, any active test subprocess) immediately,
+    # with none of the cleanup below ever running -- no graceful test
+    # cancellation, no WAV file finalized. Route SIGTERM through the exact
+    # same, already-proven KeyboardInterrupt handling used for Ctrl-C.
+    def _sigterm_handler(signum, frame):
+        raise KeyboardInterrupt()
+    signal.signal(signal.SIGTERM, _sigterm_handler)
 
     try:
         bue = bUE_Main(yaml_str="bue_config.yaml")
