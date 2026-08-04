@@ -46,9 +46,37 @@ class Base_Station_Main:
 
         self.ota = Ota(self.yaml_data["OTA_PORT"], self.yaml_data["OTA_BAUDRATE"])
 
-        # Fetch the Reyax ID from the OTA module
-        time.sleep(0.1)
-        self.reyax_id = self.ota.fetch_id()
+        # Fetch the Reyax ID from the OTA module. Same fix as bue_main.py's
+        # Reyax-ID fetch: this was a single, unretried attempt with no
+        # visibility into failure -- confirmed in the field (2026-08-03)
+        # that under heavy simultaneous REQ traffic from many bUEs at once,
+        # the module can fail to answer a local AT command at all, leaving
+        # self.reyax_id permanently None with nothing logged to explain why
+        # (every REQ handled afterward would silently send "CON:None").
+        self.reyax_id = None
+        REYAX_FETCH_WARN_EVERY_S = 10
+        REYAX_FETCH_MAX_WAIT_S = 30
+        wait_start = time.time()
+        last_warn = 0.0
+        while self.reyax_id is None:
+            time.sleep(0.2)
+            self.reyax_id = self.ota.fetch_id()
+            elapsed = time.time() - wait_start
+            if self.reyax_id is None and elapsed - last_warn >= REYAX_FETCH_WARN_EVERY_S:
+                last_warn = elapsed
+                logger.warning(
+                    f"__init__: Reyax module has not responded to an ID query "
+                    f"in {elapsed:.0f}s -- if this keeps climbing, the module "
+                    f"may be overwhelmed by channel traffic or wedged and may "
+                    f"need its physical reset button pressed."
+                )
+            if self.reyax_id is None and elapsed >= REYAX_FETCH_MAX_WAIT_S:
+                logger.error(
+                    f"__init__: giving up on Reyax ID fetch after {elapsed:.0f}s -- "
+                    f"proceeding without one. REQ handling will misbehave until "
+                    f"this is set manually (bs.reyax_id = <known id>)."
+                )
+                break
 
         logger.info(f"[DEBUG] OTA ID is set to: {self.reyax_id}")
 
@@ -91,11 +119,19 @@ class Base_Station_Main:
             except Exception as e:
                 logger.error(f"Failed to get OTA messages: {e}")
 
-            # Push any new messages from the outgoing queue to the OTA
+            # Push any new messages from the outgoing queue to the OTA.
+            # Same fix as bue_main.py's ota_message_trx: this was
+            # unprotected, so one bad send could silently kill this entire
+            # thread (all OTA I/O, not just sending) with nothing logged --
+            # confirmed as a real risk under heavy channel load, 2026-08-03.
             while not self.ota_outgoing_queue.empty():
                 (recipient_id, message) = self.ota_outgoing_queue.get()
-                self.ota.send_ota_message(recipient_id, message)
-                self.ota_outgoing_queue.task_done()
+                try:
+                    self.ota.send_ota_message(recipient_id, message)
+                except Exception as e:
+                    logger.error(f"ota_message_trx: Failed to send {message!r} to {recipient_id}: {e}")
+                finally:
+                    self.ota_outgoing_queue.task_done()
 
             if not self.ota_incoming_queue.empty():
                 self.ota_message_handler()
