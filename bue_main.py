@@ -881,6 +881,13 @@ if __name__ == "__main__":
         raise KeyboardInterrupt()
     signal.signal(signal.SIGTERM, _sigterm_handler)
 
+    # Confirmed live (2026-08-03): a SIGTERM arriving while still stuck
+    # inside bUE_Main(...) itself (e.g. the Reyax-ID-fetch wait) interrupts
+    # that assignment before it completes, so `bue` is never actually
+    # bound -- `except KeyboardInterrupt: if bue is not None` then raised
+    # NameError instead of exiting cleanly. Pre-declare it so that case
+    # degrades to a no-op cleanup instead of a crash.
+    bue = None
     try:
         bue = bUE_Main(yaml_str="bue_config.yaml")
 
