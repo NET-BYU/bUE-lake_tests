@@ -119,6 +119,20 @@ class bUE_Main:
         # Variables to handle test subprocess
         # self.test_command = None
         self.test_start_time = None
+        # When the test subprocess actually started (UTW_TEST entered), as
+        # opposed to test_start_time above (the negotiated start time it was
+        # waiting for). Used by MAX_TEST_DURATION_S below.
+        self.test_actual_start_time = None
+        # CANC is a single unacknowledged OTA packet -- confirmed lost in the
+        # field (2026-08-03 tub test): a one_way tx test ran unattended for
+        # 10+ minutes because its CANC never arrived, with no way to recover
+        # short of manually SSHing in. This is a local backstop that doesn't
+        # depend on any message ever arriving: if a test somehow runs past
+        # this long without being cancelled, cancel it locally. Deliberately
+        # generous -- every real test protocol here is designed to run until
+        # explicitly cancelled by the operator, so this should never fire
+        # during normal operation, only as a safety net.
+        self.MAX_TEST_DURATION_S = 900
         # self.test_info = None
         # self.test_process = None
         # self.test_stdout_queue = queue.Queue()
@@ -177,11 +191,22 @@ class bUE_Main:
             except Exception as e:
                 logger.error(f"Failed to get OTA messages: {e}")
 
-            # Push any new messages from the outgoing queue to the OTA
+            # Push any new messages from the outgoing queue to the OTA.
+            # This send was previously unprotected -- confirmed in the field
+            # (2026-08-03) that this thread can go permanently silent (no
+            # more incoming OR outgoing OTA traffic, ever, until the service
+            # is restarted) with nothing logged, consistent with an
+            # unhandled exception here silently killing this entire thread.
+            # This is the single thread responsible for ALL OTA I/O, so it
+            # must never die from one bad send.
             while not self.ota_outgoing_queue.empty():
                 (recipient_id, message) = self.ota_outgoing_queue.get()
-                self.ota.send_ota_message(recipient_id, message)
-                self.ota_outgoing_queue.task_done()
+                try:
+                    self.ota.send_ota_message(recipient_id, message)
+                except Exception as e:
+                    logger.error(f"ota_message_trx: Failed to send {message!r} to {recipient_id}: {e}")
+                finally:
+                    self.ota_outgoing_queue.task_done()
 
             if not self.ota_incoming_queue.empty():
                 self.ota_message_handler()
@@ -254,10 +279,21 @@ class bUE_Main:
         while not self.EXIT:
             try:
                 task = self.ota_task_queue.get(timeout=0.1)  # Get a task
-                task()  # Execute the function
-                self.ota_task_queue.task_done()
             except queue.Empty:
-                pass  # No task, continue looping
+                continue  # No task, continue looping
+
+            # An exception here must not propagate -- an uncaught exception
+            # inside a thread's target silently kills the thread forever with
+            # no restart and no crash, which would mean this device stops
+            # sending PINGs/REQs/etc. permanently until manually noticed and
+            # the service restarted. Confirmed happening in the field
+            # (2026-08-03): a device went completely silent for 20+ minutes.
+            try:
+                task()  # Execute the function
+            except Exception as e:
+                logger.error(f"ota_task_queue_handler: Unhandled exception running {task}: {e}")
+            finally:
+                self.ota_task_queue.task_done()
 
     def ota_connect_req(self):
         if self.status_ota_connected:
@@ -345,10 +381,18 @@ class bUE_Main:
         while not self.EXIT:
             try:
                 task = self.utw_task_queue.get(timeout=0.1)  # Get a task
-                task()  # Execute the function
-                self.utw_task_queue.task_done()
             except queue.Empty:
-                pass
+                continue
+
+            # See ota_task_queue_handler for why this can't be allowed to
+            # propagate -- would silently kill test start/cancel/reset
+            # forever, with no restart and no crash.
+            try:
+                task()  # Execute the function
+            except Exception as e:
+                logger.error(f"utw_task_queue_handler: Unhandled exception running {task}: {e}")
+            finally:
+                self.utw_task_queue.task_done()
 
     # Sends a message from the test back to the base station
     def ota_send_tout(self, message):
@@ -479,6 +523,27 @@ class bUE_Main:
                 logger.error(f"Received unexpected message while in UTW_TEST state: {message}")
 
 
+    def check_local_test_timeout(self):
+        """
+        Safety net independent of the OTA CANC message ever arriving --
+        confirmed in the field (2026-08-03) that a lost CANC leaves a test
+        running unattended indefinitely. If a test somehow runs past
+        MAX_TEST_DURATION_S, cancel it locally exactly as if a CANC had
+        been received. Should never fire in normal operation since every
+        real test protocol is designed to run until explicitly cancelled.
+        """
+        if self.flag_ota_cancel_test.is_set() or self.test_actual_start_time is None:
+            return
+
+        elapsed = time.time() - self.test_actual_start_time
+        if elapsed > self.MAX_TEST_DURATION_S:
+            logger.warning(
+                f"check_local_test_timeout: test has been running for {elapsed:.0f}s, "
+                f"past MAX_TEST_DURATION_S ({self.MAX_TEST_DURATION_S}s), with no CANC "
+                f"ever received -- force-cancelling locally."
+            )
+            self.flag_ota_cancel_test.set()
+
     def check_for_test_interrupt(self):
         """
         Check periodically to see if the test if CANCELLED, if the service needs to RELOAD,
@@ -599,6 +664,7 @@ class bUE_Main:
                     self.flag_ota_reload.clear()
                     self.flag_ota_restart.clear()
                     self.test_state = Test_State.RUNNING
+                    self.test_actual_start_time = None
 
                     # TODO reset other falgs?
                     if self.test_has_valid_params():
@@ -627,6 +693,7 @@ class bUE_Main:
                 elif current_time >= self.test_start_time:
                     self.nxt_st = Bue_State.UTW_TEST
                     self.start_utw_test()
+                    self.test_actual_start_time = time.time()
                 else:
                     logger.warning("Got to last transition in WAIT_FOR_START. This should not be possible")
             #
@@ -703,6 +770,7 @@ class bUE_Main:
                     counter_ping = 0
 
                 self.check_on_test()
+                self.check_local_test_timeout()
                 self.check_for_test_interrupt()
             #
             elif self.cur_st == Bue_State.TEST_CLEANUP:

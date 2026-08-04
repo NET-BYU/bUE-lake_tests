@@ -166,6 +166,9 @@ class Base_Station_Main:
                 elif msg_type == "DONE":
                     logger.info(f"{hostname}: DONE")
 
+                elif msg_type == "CANCD":
+                    logger.info(f"{hostname}: CANCD (test cancelled)")
+
                 else:
                     logger.warning(f"Unknown message type: {msg_type}")
 
@@ -226,6 +229,46 @@ class Base_Station_Main:
 
         self.ota_outgoing_queue.put((src_id, "PINGR"))
         logger.info(f"{self.bue_id_to_hostname[int(src_id)]}: PING {coords}")
+
+    def cancel_bue_reliable(self, bue_id: int, max_retries: int = 5, retry_interval_s: float = 2.0) -> bool:
+        """
+        CANC is a single unacknowledged OTA packet, sent once and forgotten.
+        Confirmed lost in the field (2026-08-03 tub test): a bUE that never
+        receives it just keeps running its test subprocess indefinitely,
+        unattended, with no way to recover short of SSHing in manually.
+        (bue_main.py also now has a local MAX_TEST_DURATION_S backstop for
+        when this fails completely, but that's a 15-minute safety net, not
+        a substitute for actually cancelling promptly.)
+
+        Resends CANC, checking after each attempt whether the bUE's
+        self-reported state (from its periodic PING, tracked in
+        bue_id_to_state) has left WAIT_FOR_START/UTW_TEST -- stops as soon
+        as it has, since further CANCs would just be wasted airtime once
+        the first one has landed. Blocking -- call from a background
+        thread, not the GUI thread, so the UI doesn't freeze for however
+        long this takes.
+
+        Returns True if the bUE was confirmed to leave a testing state,
+        False if it still reports one after max_retries attempts.
+        """
+        testing_states = (Bue_State.WAIT_FOR_START, Bue_State.UTW_TEST)
+        for attempt in range(1, max_retries + 1):
+            self.ota.send_ota_message(bue_id, "CANC")
+            logger.info(f"cancel_bue_reliable: sent CANC to {bue_id} (attempt {attempt}/{max_retries})")
+
+            deadline = time.time() + retry_interval_s
+            while time.time() < deadline:
+                if self.bue_id_to_state.get(bue_id) not in testing_states:
+                    logger.info(f"cancel_bue_reliable: {bue_id} confirmed out of test state")
+                    return True
+                time.sleep(0.2)
+
+        logger.warning(
+            f"cancel_bue_reliable: {bue_id} still reports a testing state after "
+            f"{max_retries} CANC attempts -- it will self-cancel via its own "
+            f"MAX_TEST_DURATION_S backstop if this keeps failing."
+        )
+        return False
 
     def __del__(self):
         try:

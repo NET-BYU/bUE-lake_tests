@@ -1,4 +1,5 @@
 import os
+import threading
 from PySide6 import QtWidgets, QtGui
 from gui.ui.DialogCancelTestsUi import Ui_dialog_cancel_tests
 
@@ -68,8 +69,15 @@ class DialogCancelTests:
             if checkbox.isChecked():
                 selected_bues.append(bue_id)
 
-        # Send to selected BUEs only
-        for bue_id in selected_bues:
-            self.parent.base_station.ota.send_ota_message(bue_id, "CANC")
+        # A single CANC is an unacknowledged OTA packet that can simply be
+        # lost -- confirmed in the field (2026-08-03) leaving a bUE running
+        # its test unattended for 10+ minutes. cancel_bue_reliable() resends
+        # until each bUE's self-reported state confirms it actually
+        # cancelled. That can take a few seconds per bUE, so run it off the
+        # GUI thread rather than blocking the dialog.
+        def _do_cancels():
+            for bue_id in selected_bues:
+                self.parent.base_station.cancel_bue_reliable(bue_id)
 
-        print(f"Sent hello world to {len(selected_bues)} selected BUEs")
+        threading.Thread(target=_do_cancels, daemon=True).start()
+        print(f"Sending reliable cancel to {len(selected_bues)} selected BUEs (retrying until confirmed)")
